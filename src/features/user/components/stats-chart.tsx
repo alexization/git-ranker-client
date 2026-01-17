@@ -19,41 +19,51 @@ interface StatsChartProps {
 
 export function StatsChart({ user }: StatsChartProps) {
   const chartData = useMemo(() => [
-    { subject: 'Commits', A: user.commitCount, fullMark: 100 },
-    { subject: 'Issues', A: user.issueCount, fullMark: 100 },
-    { subject: 'Reviews', A: user.reviewCount, fullMark: 100 },
-    { subject: 'PRs', A: user.prCount, fullMark: 100 },
-    { subject: 'Merged', A: user.mergedPrCount, fullMark: 100 },
+    { subject: 'Commits', value: user.commitCount },
+    { subject: 'Issues', value: user.issueCount },
+    { subject: 'PR Merged', value: user.mergedPrCount },
+    { subject: 'PR Open', value: user.prCount - user.mergedPrCount },
+    { subject: 'Reviews', value: user.reviewCount },
   ], [user])
 
   return (
-    <Card className="col-span-1 md:col-span-2">
-      <CardHeader>
-        <CardTitle>Activity Radar</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[300px] w-full">
+    <Card className="shadow-lg border-2 rounded-3xl bg-white dark:bg-slate-900/50">
+      <CardContent className="pt-6">
+        <div className="h-[350px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
-              <PolarGrid stroke="var(--border)" />
-              <PolarAngleAxis 
-                dataKey="subject" 
-                tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} 
+            <RadarChart cx="50%" cy="50%" outerRadius="75%" data={chartData}>
+              <PolarGrid
+                stroke="hsl(var(--border))"
+                strokeWidth={1.5}
+                strokeDasharray="0"
               />
-              <PolarRadiusAxis angle={30} domain={[0, 'auto']} tick={false} axisLine={false} />
+              <PolarAngleAxis
+                dataKey="subject"
+                tick={{ fill: "hsl(var(--foreground))", fontSize: 13, fontWeight: 600 }}
+              />
+              <PolarRadiusAxis
+                angle={90}
+                domain={[0, 'auto']}
+                tick={false}
+                axisLine={false}
+              />
               <Radar
                 name={user.username}
-                dataKey="A"
-                stroke="var(--primary)"
-                fill="var(--primary)"
-                fillOpacity={0.3}
+                dataKey="value"
+                stroke="hsl(var(--primary))"
+                fill="hsl(var(--primary))"
+                fillOpacity={0.25}
+                strokeWidth={2.5}
               />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'var(--popover)', 
-                  borderColor: 'var(--border)',
-                  color: 'var(--popover-foreground)',
-                  borderRadius: 'var(--radius)'
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'hsl(var(--popover))',
+                  borderColor: 'hsl(var(--border))',
+                  color: 'hsl(var(--popover-foreground))',
+                  borderRadius: '12px',
+                  border: '2px solid',
+                  fontSize: '14px',
+                  fontWeight: 600
                 }}
               />
             </RadarChart>

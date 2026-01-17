@@ -12,7 +12,14 @@ export const apiClient = axios.create({
 });
 
 apiClient.interceptors.response.use(
-  (response) => response.data.success || response.data, // ApiResponse 래퍼 제거 편의성
+  (response) => {
+    // 백엔드 응답 구조: { result: "SUCCESS", data: {...}, error: null }
+    if (response.data?.result === 'SUCCESS' && response.data?.data) {
+      return response.data.data;
+    }
+    // Fallback: 기존 구조도 지원
+    return response.data?.success || response.data;
+  },
   async (error) => {
     // TODO: 401 에러 발생 시 리프레시 토큰 로직 구현
     // const originalRequest = error.config;

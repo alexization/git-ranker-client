@@ -10,12 +10,13 @@ export const refreshUser = async (username: string): Promise<RegisterUserRespons
   return apiClient.post<any, RegisterUserResponse>(`/users/${username}/refresh`)
 }
 
-export const useUser = (username: string) => {
+export const useUser = (username: string, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ['user', username],
     queryFn: () => getUser(username),
     retry: 1,
     staleTime: 1000 * 60 * 5,
+    enabled: options?.enabled ?? true,
   })
 }
 

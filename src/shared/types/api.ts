@@ -2,7 +2,18 @@ export type Tier =
   | 'CHALLENGER' | 'MASTER' | 'DIAMOND' | 'EMERALD' 
   | 'PLATINUM' | 'GOLD' | 'SILVER' | 'BRONZE' | 'IRON';
 
+// 백엔드 실제 응답 구조
 export interface ApiResponse<T> {
+  result: 'SUCCESS' | 'ERROR';
+  data: T | null;
+  error: {
+    code: string;
+    message: string;
+  } | null;
+}
+
+// 레거시 타입 (호환성 유지)
+export interface ApiResponseLegacy<T> {
   resultType: 'SUCCESS' | 'ERROR';
   error?: {
     code: string;

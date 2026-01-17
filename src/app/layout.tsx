@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import QueryProvider from "@/shared/providers/query-provider";
 import { ThemeProvider } from "@/shared/providers/theme-provider";
@@ -7,7 +7,12 @@ import { Toaster } from "@/shared/components/toaster";
 import { Header } from "@/shared/components/layout/header";
 import { cn } from "@/shared/lib/utils";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const pretendard = localFont({
+  src: "../fonts/PretendardVariable.woff2",
+  display: "swap",
+  weight: "45 920",
+  variable: "--font-sans",
+});
 // ... existing metadata ...
 export default function RootLayout({
   children,
@@ -19,7 +24,7 @@ export default function RootLayout({
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased flex flex-col",
-          inter.variable
+          pretendard.variable
         )}
       >
         <ThemeProvider
