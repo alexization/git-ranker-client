@@ -21,6 +21,29 @@ export default function UserDetailPage() {
     const { data: user, isLoading, isError } = useUser(username)
     const refreshMutation = useRefreshUser()
 
+    // ✅ [FIX] Hooks 위치 이동: 조건부 return 이전에 선언해야 합니다.
+    const [displayPercentile, setDisplayPercentile] = useState(0)
+
+    useEffect(() => {
+        if (user) {
+            let start = 0
+            const end = user.percentile
+            const duration = 1500
+            const increment = end / (duration / 16)
+
+            const timer = setInterval(() => {
+                start += increment
+                if (start >= end) {
+                    setDisplayPercentile(end)
+                    clearInterval(timer)
+                } else {
+                    setDisplayPercentile(start)
+                }
+            }, 16)
+            return () => clearInterval(timer)
+        }
+    }, [user])
+
     const handleRefresh = () => {
         toast.promise(refreshMutation.mutateAsync(username), {
             loading: '최신 데이터를 GitHub에서 가져오는 중...',
@@ -41,6 +64,8 @@ export default function UserDetailPage() {
             toast.success("링크가 복사되었습니다!")
         }
     }
+
+    // --- Early Returns (Hooks 선언 이후에 위치해야 함) ---
 
     if (isLoading) {
         return (
@@ -71,29 +96,7 @@ export default function UserDetailPage() {
         )
     }
 
-    // Animated percentile counter logic
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [displayPercentile, setDisplayPercentile] = useState(0)
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useEffect(() => {
-        if (user) {
-            let start = 0
-            const end = user.percentile
-            const duration = 1500
-            const increment = end / (duration / 16)
-
-            const timer = setInterval(() => {
-                start += increment
-                if (start >= end) {
-                    setDisplayPercentile(end)
-                    clearInterval(timer)
-                } else {
-                    setDisplayPercentile(start)
-                }
-            }, 16)
-            return () => clearInterval(timer)
-        }
-    }, [user])
+    // --- Render Logic ---
 
     const containerVariants = {
         hidden: { opacity: 0 },
