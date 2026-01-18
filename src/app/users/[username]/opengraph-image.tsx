@@ -13,9 +13,8 @@ export const contentType = 'image/png'
 export default async function Image({ params }: { params: { username: string } }) {
     const { username } = params
 
-    // 백엔드 API 직접 호출 (환경변수 사용 권장)
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'
-    const user = await fetch(`${apiUrl}/users/${username}`).then((res) => res.json()).then(res => res.data || res.success)
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL
+    const user = await fetch(`${apiUrl}/api/v1/users/${username}`).then((res) => res.json()).then(res => res.data || res.success)
 
     const tierColors: Record<string, string> = {
         CHALLENGER: '#EF4444',

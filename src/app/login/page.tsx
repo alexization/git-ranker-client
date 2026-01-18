@@ -9,7 +9,7 @@ import {cn} from "@/shared/lib/utils"
 
 export default function LoginPage() {
     const handleGithubLogin = () => {
-        window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/oauth2/authorization/github`
+        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/oauth2/authorization/github`
     }
 
     const containerVariants = {

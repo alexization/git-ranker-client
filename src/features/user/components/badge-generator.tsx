@@ -11,7 +11,7 @@ interface BadgeGeneratorProps {
 }
 
 export function BadgeGenerator({ nodeId }: BadgeGeneratorProps) {
-  const badgeUrl = `${process.env.NEXT_PUBLIC_API_URL || 'https://www.git-ranker.com/api/v1'}/badges/${nodeId}`
+  const badgeUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/badges/${nodeId}`
   const markdown = `[![Git Ranker](${badgeUrl})](https://www.git-ranker.com)`
 
   const handleCopy = () => {

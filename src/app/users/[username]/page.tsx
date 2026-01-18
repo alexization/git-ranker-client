@@ -1,6 +1,6 @@
 "use client"
 
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { useUser, useRefreshUser } from "@/features/user/api/user-service"
 import { ActivityGrid } from "@/features/user/components/activity-grid"
@@ -9,19 +9,22 @@ import { BadgeGenerator } from "@/features/user/components/badge-generator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/avatar"
 import { Button } from "@/shared/components/button"
 import { Skeleton } from "@/shared/components/skeleton"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/card"
-import { RefreshCcw, Github, Share2, Trophy } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/shared/components/card"
+import { RefreshCcw, Github, Share2, Trophy, SearchX, ArrowLeft, UserPlus } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/shared/lib/utils"
 import { useEffect, useState } from "react"
 
 export default function UserDetailPage() {
+    const router = useRouter()
     const params = useParams()
-    const username = params.username as string
-    const { data: user, isLoading, isError } = useUser(username)
+    // [FIX] URL 인코딩된 문자열(한글 등)을 디코딩하여 사람이 읽을 수 있게 변환
+    const rawUsername = params.username as string
+    const username = decodeURIComponent(rawUsername)
+
+    const { data: user, isLoading, isError } = useUser(rawUsername)
     const refreshMutation = useRefreshUser()
 
-    // ✅ [FIX] Hooks 위치 이동: 조건부 return 이전에 선언해야 합니다.
     const [displayPercentile, setDisplayPercentile] = useState(0)
 
     useEffect(() => {
@@ -45,7 +48,7 @@ export default function UserDetailPage() {
     }, [user])
 
     const handleRefresh = () => {
-        toast.promise(refreshMutation.mutateAsync(username), {
+        toast.promise(refreshMutation.mutateAsync(rawUsername), {
             loading: '최신 데이터를 GitHub에서 가져오는 중...',
             success: '데이터가 갱신되었습니다!',
             error: '데이터 갱신에 실패했습니다. (쿨다운 7일)',
@@ -65,8 +68,11 @@ export default function UserDetailPage() {
         }
     }
 
-    // --- Early Returns (Hooks 선언 이후에 위치해야 함) ---
+    const handleGithubRegister = () => {
+        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/oauth2/authorization/github`
+    }
 
+    // --- Loading State ---
     if (isLoading) {
         return (
             <div className="container py-12 max-w-6xl space-y-8">
@@ -86,17 +92,84 @@ export default function UserDetailPage() {
         )
     }
 
+    // --- Error / Not Found State (Refined UX) ---
     if (isError || !user) {
         return (
-            <div className="container flex flex-col items-center justify-center py-20 min-h-[50vh]">
-                <h1 className="text-3xl font-extrabold mb-4">사용자를 찾을 수 없습니다.</h1>
-                <p className="text-muted-foreground mb-8 text-lg">GitHub Username을 다시 확인해주세요.</p>
-                <Button onClick={() => window.history.back()} size="lg">뒤로 가기</Button>
+            <div className="container flex flex-col items-center justify-center py-20 min-h-[70vh]">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                    className="w-full max-w-lg"
+                >
+                    <Card className="border-2 border-dashed border-muted-foreground/20 bg-card/50 backdrop-blur-xl shadow-xl overflow-hidden">
+                        <CardHeader className="text-center pb-6 bg-secondary/10 border-b border-border/50">
+                            <div className="mx-auto bg-background w-20 h-20 rounded-full flex items-center justify-center mb-4 shadow-sm border border-border">
+                                <SearchX className="h-10 w-10 text-muted-foreground" />
+                            </div>
+
+                            {/* [FIX] break-all 추가로 긴 문자열도 안전하게 표시 */}
+                            <CardTitle className="text-3xl font-extrabold break-all px-4 leading-tight">
+                                @{username}
+                            </CardTitle>
+                            <CardDescription className="text-lg mt-2 font-medium">
+                                사용자를 찾을 수 없습니다.
+                            </CardDescription>
+                        </CardHeader>
+
+                        <CardContent className="space-y-6 pt-8 px-6 sm:px-8">
+                            {/* Case 1: Typo Check (Simplified Design) */}
+                            <div className="space-y-2">
+                                <h3 className="font-bold text-foreground flex items-center gap-2">
+                                    <span className="text-xl">🤔</span> 아이디가 정확한가요?
+                                </h3>
+                                <p className="text-sm text-muted-foreground leading-relaxed">
+                                    입력하신 GitHub Username에 오타가 없는지 다시 한번 확인해 주세요.
+                                </p>
+                            </div>
+
+                            {/* [FIX] 구분선(---OR---) 제거하고 간격(space-y-6)으로 자연스럽게 분리 */}
+
+                            {/* Case 2: New User Registration (Main CTA) */}
+                            <div className="bg-secondary/20 p-5 rounded-2xl border border-secondary space-y-4">
+                                <div>
+                                    <h3 className="font-bold text-foreground flex items-center gap-2">
+                                        <span className="text-xl">🚀</span> 아직 등록되지 않았나요?
+                                    </h3>
+                                    <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                                        Git Ranker는 등록된 사용자만 분석합니다.
+                                        <br/>지금 바로 등록하고 내 티어를 확인하세요!
+                                    </p>
+                                </div>
+
+                                <Button
+                                    onClick={handleGithubRegister}
+                                    size="lg"
+                                    className="w-full h-14 text-base font-bold shadow-md bg-[#24292F] hover:bg-[#24292F]/90 text-white dark:bg-white dark:text-[#24292F] dark:hover:bg-gray-100 transition-all active:scale-[0.98]"
+                                >
+                                    <Github className="mr-2 h-5 w-5 fill-current" />
+                                    @{username} 계정으로 등록하기
+                                </Button>
+                            </div>
+                        </CardContent>
+
+                        <CardFooter className="justify-center pt-2 pb-8">
+                            <Button
+                                variant="ghost"
+                                onClick={() => router.push('/')}
+                                className="text-muted-foreground hover:text-foreground h-auto py-2 px-4"
+                            >
+                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                홈으로 돌아가기
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                </motion.div>
             </div>
         )
     }
 
-    // --- Render Logic ---
+    // --- Main Content Render Logic ---
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -140,7 +213,6 @@ export default function UserDetailPage() {
                 initial="hidden"
                 animate="visible"
             >
-                {/* Header Section */}
                 <motion.div variants={itemVariants} className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-10">
                     <div className="flex items-center gap-6">
                         <motion.div whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}>
@@ -179,10 +251,8 @@ export default function UserDetailPage() {
                     </div>
                 </motion.div>
 
-                {/* Bento Grid Layout */}
                 <motion.div variants={containerVariants} className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-8">
 
-                    {/* 1. Radar Chart (Big Box) */}
                     <motion.div variants={itemVariants} className="md:col-span-8 md:row-span-2">
                         <Card className="h-full min-h-[400px]">
                             <CardHeader>
@@ -198,7 +268,6 @@ export default function UserDetailPage() {
                         </Card>
                     </motion.div>
 
-                    {/* 2. Score Card */}
                     <motion.div variants={itemVariants} className="md:col-span-4">
                         <Card className="h-full flex flex-col justify-center relative overflow-hidden group">
                             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -214,7 +283,6 @@ export default function UserDetailPage() {
                         </Card>
                     </motion.div>
 
-                    {/* 3. Percentile Card */}
                     <motion.div variants={itemVariants} className="md:col-span-4">
                         <Card className="h-full flex flex-col justify-center relative overflow-hidden group">
                             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -230,7 +298,6 @@ export default function UserDetailPage() {
                         </Card>
                     </motion.div>
 
-                    {/* 4. Activity Grid (Full Width) */}
                     <motion.div variants={itemVariants} className="md:col-span-12">
                         <Card>
                             <CardHeader>
@@ -242,7 +309,6 @@ export default function UserDetailPage() {
                         </Card>
                     </motion.div>
 
-                    {/* 5. Badge (Full Width) */}
                     <motion.div variants={itemVariants} className="md:col-span-12">
                         <BadgeGenerator nodeId={user.nodeId} />
                     </motion.div>
