@@ -1,24 +1,207 @@
 "use client"
 
+// ... (Imports 유지)
 import { useParams, useRouter } from "next/navigation"
 import { motion } from "framer-motion"
+import {
+    GitPullRequest,
+    GitMerge,
+    MessageSquare,
+    GitCommit,
+    AlertCircle,
+    RefreshCcw,
+    Github,
+    Share2,
+    Copy,
+    Trophy,
+    SearchX,
+    HelpCircle,
+    ArrowLeft
+} from "lucide-react"
 import { useUser, useRefreshUser } from "@/features/user/api/user-service"
-import { ActivityGrid } from "@/features/user/components/activity-grid"
 import { StatsChart } from "@/features/user/components/stats-chart"
 import { BadgeGenerator } from "@/features/user/components/badge-generator"
+import { ScoreInfoModal } from "@/features/user/components/score-info-modal"
+import { TiltCard } from "@/shared/components/ui/tilt-card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/avatar"
 import { Button } from "@/shared/components/button"
 import { Skeleton } from "@/shared/components/skeleton"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/shared/components/card"
-import { RefreshCcw, Github, Share2, Trophy, SearchX, ArrowLeft, UserPlus } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/components/card"
 import { toast } from "sonner"
 import { cn } from "@/shared/lib/utils"
 import { useEffect, useState } from "react"
+import { Tier } from "@/shared/types/api"
+
+// ... (TIER_STYLES는 동일하므로 생략 - 그대로 사용)
+const TIER_STYLES: Record<Tier | string, {
+    bgGradient: string;
+    border: string;
+    text: string;
+    badgeBg: string;
+    shadow: string;
+    iconColor: string;
+    overlay?: string;
+}> = {
+    CHALLENGER: {
+        bgGradient: "from-red-500/10 via-orange-500/5 to-background",
+        border: "border-red-500/30",
+        text: "text-red-500",
+        badgeBg: "bg-gradient-to-r from-red-500 to-orange-600 text-white shadow-red-500/30",
+        shadow: "shadow-[0_0_50px_-12px_rgba(239,68,68,0.3)]",
+        iconColor: "text-red-500",
+        overlay: "bg-[linear-gradient(110deg,transparent_25%,rgba(239,68,68,0.1)_50%,transparent_75%)]"
+    },
+    MASTER: {
+        bgGradient: "from-purple-600/10 via-pink-600/5 to-background",
+        border: "border-purple-500/30",
+        text: "text-purple-500",
+        badgeBg: "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-purple-500/30",
+        shadow: "shadow-[0_0_50px_-12px_rgba(168,85,247,0.3)]",
+        iconColor: "text-purple-500",
+        overlay: "bg-[linear-gradient(110deg,transparent_25%,rgba(168,85,247,0.1)_50%,transparent_75%)]"
+    },
+    DIAMOND: {
+        bgGradient: "from-blue-500/10 via-cyan-500/5 to-background",
+        border: "border-blue-500/30",
+        text: "text-blue-500",
+        badgeBg: "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-blue-500/30",
+        shadow: "shadow-[0_0_50px_-12px_rgba(59,130,246,0.3)]",
+        iconColor: "text-blue-500",
+        overlay: "bg-[linear-gradient(110deg,transparent_25%,rgba(59,130,246,0.1)_50%,transparent_75%)]"
+    },
+    EMERALD: {
+        bgGradient: "from-emerald-500/10 via-teal-500/5 to-background",
+        border: "border-emerald-500/30",
+        text: "text-emerald-500",
+        badgeBg: "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-emerald-500/30",
+        shadow: "shadow-[0_0_50px_-12px_rgba(16,185,129,0.3)]",
+        iconColor: "text-emerald-500",
+        overlay: "bg-[linear-gradient(110deg,transparent_25%,rgba(16,185,129,0.1)_50%,transparent_75%)]"
+    },
+    PLATINUM: {
+        bgGradient: "from-cyan-500/10 via-sky-500/5 to-background",
+        border: "border-cyan-500/30",
+        text: "text-cyan-500",
+        badgeBg: "bg-gradient-to-r from-cyan-500 to-sky-500 text-white shadow-cyan-500/30",
+        shadow: "shadow-[0_0_50px_-12px_rgba(6,182,212,0.3)]",
+        iconColor: "text-cyan-500",
+        overlay: "bg-[linear-gradient(110deg,transparent_25%,rgba(6,182,212,0.1)_50%,transparent_75%)]"
+    },
+    GOLD: {
+        bgGradient: "from-yellow-400/10 via-amber-400/5 to-background",
+        border: "border-yellow-500/30",
+        text: "text-yellow-500",
+        badgeBg: "bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-yellow-500/30",
+        shadow: "shadow-[0_0_50px_-12px_rgba(234,179,8,0.3)]",
+        iconColor: "text-yellow-500"
+    },
+    SILVER: {
+        bgGradient: "from-slate-300/10 via-gray-300/5 to-background",
+        border: "border-slate-400/30",
+        text: "text-slate-500",
+        badgeBg: "bg-gradient-to-r from-slate-400 to-gray-500 text-white shadow-slate-500/30",
+        shadow: "shadow-none",
+        iconColor: "text-slate-400"
+    },
+    BRONZE: {
+        bgGradient: "from-orange-700/10 via-amber-900/5 to-background",
+        border: "border-orange-700/30",
+        text: "text-orange-700",
+        badgeBg: "bg-gradient-to-r from-orange-600 to-amber-700 text-white shadow-orange-500/30",
+        shadow: "shadow-none",
+        iconColor: "text-orange-700"
+    },
+    IRON: {
+        bgGradient: "from-stone-500/10 via-neutral-500/5 to-background",
+        border: "border-stone-500/30",
+        text: "text-stone-500",
+        badgeBg: "bg-gradient-to-r from-stone-500 to-neutral-600 text-white shadow-stone-500/30",
+        shadow: "shadow-none",
+        iconColor: "text-stone-500"
+    }
+}
+
+// ... (StatCard Component도 동일하므로 생략)
+function StatCard({
+                      label,
+                      value,
+                      diff,
+                      icon,
+                      colorClass,
+                      colSpan = "col-span-1",
+                      delay = 0
+                  }: {
+    label: string,
+    value: number,
+    diff: number,
+    icon: React.ReactNode,
+    colorClass: string,
+    colSpan?: string,
+    delay?: number
+}) {
+    const [displayValue, setDisplayValue] = useState(0)
+
+    useEffect(() => {
+        let start = 0;
+        const end = value;
+        const duration = 1200;
+        const startTime = performance.now();
+
+        const animate = (currentTime: number) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easeOut = 1 - Math.pow(1 - progress, 3);
+
+            setDisplayValue(Math.floor(easeOut * end));
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            }
+        };
+        requestAnimationFrame(animate);
+    }, [value]);
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay }}
+            className={cn(
+                "relative flex flex-col justify-between rounded-[1.5rem] p-5 transition-all duration-300 border border-transparent hover:scale-[1.02] hover:shadow-lg",
+                colorClass,
+                colSpan
+            )}
+        >
+            <div className="flex justify-between items-start mb-2">
+                <span className="text-sm font-bold text-foreground/70 tracking-wide flex items-center gap-2">
+                    {label}
+                </span>
+                <div className="opacity-60">{icon}</div>
+            </div>
+
+            <div className="flex items-center gap-3">
+                <span className="text-3xl font-extrabold font-mono tabular-nums tracking-tighter text-foreground">
+                    {displayValue.toLocaleString()}
+                </span>
+
+                {diff !== 0 && (
+                    <span className={cn(
+                        "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold font-mono",
+                        diff > 0
+                            ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                            : "bg-red-500/20 text-red-600 dark:text-red-400"
+                    )}>
+                        {diff > 0 ? "+" : ""}{diff.toLocaleString()}
+                    </span>
+                )}
+            </div>
+        </motion.div>
+    )
+}
 
 export default function UserDetailPage() {
     const router = useRouter()
     const params = useParams()
-    // [FIX] URL 인코딩된 문자열(한글 등)을 디코딩하여 사람이 읽을 수 있게 변환
     const rawUsername = params.username as string
     const username = decodeURIComponent(rawUsername)
 
@@ -26,45 +209,60 @@ export default function UserDetailPage() {
     const refreshMutation = useRefreshUser()
 
     const [displayPercentile, setDisplayPercentile] = useState(0)
+    const [scoreInfoOpen, setScoreInfoOpen] = useState(false)
 
     useEffect(() => {
         if (user) {
-            let start = 0
-            const end = user.percentile
-            const duration = 1500
-            const increment = end / (duration / 16)
-
-            const timer = setInterval(() => {
-                start += increment
-                if (start >= end) {
-                    setDisplayPercentile(end)
-                    clearInterval(timer)
-                } else {
-                    setDisplayPercentile(start)
-                }
-            }, 16)
-            return () => clearInterval(timer)
+            setDisplayPercentile(0)
+            setTimeout(() => setDisplayPercentile(user.percentile), 100)
         }
     }, [user])
 
+    const COOLDOWN_MINUTES = 5;
+    const lastScan = user ? new Date(user.lastFullScanAt).getTime() : 0;
+    const nextRefreshTime = lastScan + COOLDOWN_MINUTES * 60 * 1000;
+    const now = new Date().getTime();
+    const canRefresh = now > nextRefreshTime;
+
+    const getTimeRemaining = () => {
+        if (canRefresh) return "지금 갱신 가능";
+        const diff = nextRefreshTime - now;
+        const minutes = Math.floor(diff / 1000 / 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+
+        if (minutes < 0) return "잠시 후 가능";
+        return `${minutes}분 ${seconds}초 후 가능`;
+    }
+
     const handleRefresh = () => {
+        if (!canRefresh) {
+            toast.error(`잠시 후 다시 시도해주세요. (${getTimeRemaining()})`);
+            return;
+        }
         toast.promise(refreshMutation.mutateAsync(rawUsername), {
-            loading: '최신 데이터를 GitHub에서 가져오는 중...',
+            loading: 'GitHub 데이터를 동기화 중입니다...',
             success: '데이터가 갱신되었습니다!',
-            error: '데이터 갱신에 실패했습니다. (쿨다운 7일)',
+            error: '데이터 갱신에 실패했습니다.',
         })
+    }
+
+    const handleCopyBadge = () => {
+        const badgeUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/badges/${user?.nodeId}`
+        const markdown = `[![Git Ranker](${badgeUrl})](https://www.git-ranker.com)`
+        navigator.clipboard.writeText(markdown)
+        toast.success("배지 마크다운이 복사되었습니다!")
     }
 
     const handleShare = () => {
         if (navigator.share) {
             navigator.share({
                 title: `Git Ranker - ${username}`,
-                text: `${username}님의 개발자 전투력을 확인해보세요!`,
+                text: `${username}님의 개발자 전투력: ${user?.tier} (${user?.totalScore}점)`,
                 url: window.location.href,
             })
         } else {
             navigator.clipboard.writeText(window.location.href)
-            toast.success("링크가 복사되었습니다!")
+            toast.success("프로필 링크가 복사되었습니다!")
         }
     }
 
@@ -72,249 +270,236 @@ export default function UserDetailPage() {
         window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/oauth2/authorization/github`
     }
 
-    // --- Loading State ---
+    // Loading State
     if (isLoading) {
         return (
-            <div className="container py-12 max-w-6xl space-y-8">
-                <div className="flex items-center gap-6">
-                    <Skeleton className="h-24 w-24 rounded-full" />
-                    <div className="space-y-3">
-                        <Skeleton className="h-10 w-60" />
-                        <Skeleton className="h-5 w-32" />
+            <div className="container py-12 max-w-6xl space-y-6">
+                <div className="grid lg:grid-cols-12 gap-6">
+                    <Skeleton className="lg:col-span-4 h-[600px] rounded-[2rem]" />
+                    <div className="lg:col-span-8 space-y-6">
+                        <Skeleton className="h-[400px] rounded-[2rem]" />
+                        <div className="grid grid-cols-2 gap-4">
+                            <Skeleton className="h-32 rounded-[1.5rem]" />
+                            <Skeleton className="h-32 rounded-[1.5rem]" />
+                            <Skeleton className="h-32 rounded-[1.5rem]" />
+                            <Skeleton className="h-32 rounded-[1.5rem]" />
+                            <Skeleton className="col-span-2 h-32 rounded-[1.5rem]" />
+                        </div>
                     </div>
-                </div>
-                <div className="grid gap-6 md:grid-cols-12 md:grid-rows-2 h-[600px]">
-                    <Skeleton className="md:col-span-8 md:row-span-2 rounded-3xl" />
-                    <Skeleton className="md:col-span-4 md:row-span-1 rounded-3xl" />
-                    <Skeleton className="md:col-span-4 md:row-span-1 rounded-3xl" />
                 </div>
             </div>
         )
     }
 
-    // --- Error / Not Found State (Refined UX) ---
     if (isError || !user) {
         return (
             <div className="container flex flex-col items-center justify-center py-20 min-h-[70vh]">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3 }}
-                    className="w-full max-w-lg"
-                >
-                    <Card className="border-2 border-dashed border-muted-foreground/20 bg-card/50 backdrop-blur-xl shadow-xl overflow-hidden">
-                        <CardHeader className="text-center pb-6 bg-secondary/10 border-b border-border/50">
-                            <div className="mx-auto bg-background w-20 h-20 rounded-full flex items-center justify-center mb-4 shadow-sm border border-border">
-                                <SearchX className="h-10 w-10 text-muted-foreground" />
-                            </div>
-
-                            {/* [FIX] break-all 추가로 긴 문자열도 안전하게 표시 */}
-                            <CardTitle className="text-3xl font-extrabold break-all px-4 leading-tight">
-                                @{username}
-                            </CardTitle>
-                            <CardDescription className="text-lg mt-2 font-medium">
-                                사용자를 찾을 수 없습니다.
-                            </CardDescription>
-                        </CardHeader>
-
-                        <CardContent className="space-y-6 pt-8 px-6 sm:px-8">
-                            {/* Case 1: Typo Check (Simplified Design) */}
-                            <div className="space-y-2">
-                                <h3 className="font-bold text-foreground flex items-center gap-2">
-                                    <span className="text-xl">🤔</span> 아이디가 정확한가요?
-                                </h3>
-                                <p className="text-sm text-muted-foreground leading-relaxed">
-                                    입력하신 GitHub Username에 오타가 없는지 다시 한번 확인해 주세요.
-                                </p>
-                            </div>
-
-                            {/* [FIX] 구분선(---OR---) 제거하고 간격(space-y-6)으로 자연스럽게 분리 */}
-
-                            {/* Case 2: New User Registration (Main CTA) */}
-                            <div className="bg-secondary/20 p-5 rounded-2xl border border-secondary space-y-4">
-                                <div>
-                                    <h3 className="font-bold text-foreground flex items-center gap-2">
-                                        <span className="text-xl">🚀</span> 아직 등록되지 않았나요?
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                                        Git Ranker는 등록된 사용자만 분석합니다.
-                                        <br/>지금 바로 등록하고 내 티어를 확인하세요!
-                                    </p>
-                                </div>
-
-                                <Button
-                                    onClick={handleGithubRegister}
-                                    size="lg"
-                                    className="w-full h-14 text-base font-bold shadow-md bg-[#24292F] hover:bg-[#24292F]/90 text-white dark:bg-white dark:text-[#24292F] dark:hover:bg-gray-100 transition-all active:scale-[0.98]"
-                                >
-                                    <Github className="mr-2 h-5 w-5 fill-current" />
-                                    @{username} 계정으로 등록하기
-                                </Button>
-                            </div>
-                        </CardContent>
-
-                        <CardFooter className="justify-center pt-2 pb-8">
-                            <Button
-                                variant="ghost"
-                                onClick={() => router.push('/')}
-                                className="text-muted-foreground hover:text-foreground h-auto py-2 px-4"
-                            >
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                홈으로 돌아가기
-                            </Button>
-                        </CardFooter>
-                    </Card>
-                </motion.div>
+                <Card className="w-full max-w-lg border-2 border-dashed bg-card/50 backdrop-blur-xl p-8 text-center shadow-xl rounded-[2rem]">
+                    <div className="mx-auto bg-muted w-20 h-20 rounded-full flex items-center justify-center mb-6">
+                        <SearchX className="h-10 w-10 text-muted-foreground" />
+                    </div>
+                    <h2 className="text-2xl font-bold mb-2">@{username}</h2>
+                    <p className="text-muted-foreground mb-8">
+                        사용자를 찾을 수 없습니다.<br/>GitHub 아이디를 확인하거나 새로 등록해 주세요.
+                    </p>
+                    <div className="flex gap-3 justify-center">
+                        <Button variant="outline" onClick={() => router.push('/')}>홈으로</Button>
+                        <Button onClick={handleGithubRegister} className="bg-[#24292F] text-white hover:bg-[#24292F]/90">
+                            <Github className="mr-2 h-4 w-4" /> 등록하기
+                        </Button>
+                    </div>
+                </Card>
             </div>
         )
     }
 
-    // --- Main Content Render Logic ---
-
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
-    }
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
-    }
-
-    const tierColors = {
-        'CHALLENGER': 'from-red-500/20 to-orange-500/20 text-red-500 border-red-500/50',
-        'MASTER': 'from-purple-600/20 to-pink-600/20 text-purple-600 border-purple-600/50',
-        'DIAMOND': 'from-blue-500/20 to-cyan-500/20 text-blue-500 border-blue-500/50',
-        'EMERALD': 'from-emerald-500/20 to-teal-500/20 text-emerald-500 border-emerald-500/50',
-        'PLATINUM': 'from-cyan-500/20 to-sky-500/20 text-cyan-600 border-cyan-500/50',
-        'GOLD': 'from-yellow-400/20 to-amber-400/20 text-yellow-600 border-yellow-500/50',
-        'SILVER': 'from-slate-300/20 to-gray-300/20 text-slate-500 border-slate-400/50',
-        'BRONZE': 'from-orange-700/20 to-red-800/20 text-orange-700 border-orange-700/50',
-        'IRON': 'from-stone-500/20 to-neutral-500/20 text-stone-500 border-stone-500/50',
-    }[user.tier] || 'from-gray-100 to-gray-200'
-
-    const tierBgClass = {
-        'CHALLENGER': 'bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/20 dark:to-orange-950/20',
-        'MASTER': 'bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20',
-        'DIAMOND': 'bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20',
-        'EMERALD': 'bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20',
-        'PLATINUM': 'bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-950/20 dark:to-gray-950/20',
-        'GOLD': 'bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/20 dark:to-amber-950/20',
-        'SILVER': 'bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20',
-        'BRONZE': 'bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20',
-        'IRON': 'bg-gradient-to-br from-stone-50 to-neutral-50 dark:from-stone-950/20 dark:to-neutral-950/20',
-    }[user.tier] || 'bg-background'
+    const style = TIER_STYLES[user.tier] || TIER_STYLES.IRON
 
     return (
-        <div className={cn("min-h-screen transition-colors duration-500", tierBgClass)}>
-            <motion.div
-                className="container py-12 max-w-6xl"
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-            >
-                <motion.div variants={itemVariants} className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-10">
-                    <div className="flex items-center gap-6">
-                        <motion.div whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}>
-                            <Avatar className="h-28 w-28 border-4 border-background shadow-2xl ring-4 ring-black/5 dark:ring-white/10">
-                                <AvatarImage src={user.profileImage} />
-                                <AvatarFallback className="text-4xl font-bold">{user.username[0]}</AvatarFallback>
-                            </Avatar>
-                        </motion.div>
-                        <div>
-                            <div className="flex items-center gap-3 mb-1">
-                                <h1 className="text-4xl font-extrabold tracking-tight">{user.username}</h1>
-                                <span className={cn("px-3 py-1 rounded-full text-xs font-bold border bg-gradient-to-r shadow-sm", tierColors)}>
-                  {user.tier}
-                </span>
-                            </div>
-                            <div className="flex items-center gap-4 text-muted-foreground font-medium text-sm">
-                                <a href={`https://github.com/${user.username}`} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-foreground transition-colors">
-                                    <Github className="h-4 w-4" />
-                                    GitHub
-                                </a>
-                                <span>•</span>
-                                <span>Updated {new Date(user.updatedAt).toLocaleDateString()}</span>
-                            </div>
+        <div className={cn("min-h-screen bg-background pb-20 transition-colors duration-700", style.bgGradient)}>
+            <div className="container py-12 max-w-6xl px-4">
+
+                <div className="grid lg:grid-cols-12 gap-6 items-start">
+
+                    {/* [Left Column] Profile Card */}
+                    <div className="lg:col-span-4 lg:sticky lg:top-24">
+                        <TiltCard className="rounded-[2.5rem]">
+                            {/* [FIX] Card Background Remove & Overflow Control */}
+                            <Card className={cn(
+                                "relative overflow-hidden rounded-[2.5rem] border-2 shadow-2xl flex flex-col items-center p-8 text-center h-full bg-white/80 dark:bg-black/40 backdrop-blur-xl",
+                                style.border,
+                                style.shadow
+                            )}>
+                                {/* Shine Overlay */}
+                                {style.overlay && (
+                                    <div className={cn(
+                                        "absolute inset-0 bg-[length:200%_100%] animate-background-shine opacity-0 hover:opacity-100 transition-opacity duration-700 pointer-events-none rounded-[2.5rem]", // rounded 추가
+                                        style.overlay
+                                    )} />
+                                )}
+
+                                {/* Avatar */}
+                                <div className="relative mb-5 group cursor-default z-10">
+                                    <div className={cn(
+                                        "absolute inset-0 rounded-full blur-2xl opacity-30 group-hover:opacity-50 transition-opacity duration-500",
+                                        style.text.replace('text-', 'bg-')
+                                    )} />
+                                    <Avatar className={cn(
+                                        "h-36 w-36 border-[5px] shadow-xl z-10 relative bg-background",
+                                        style.border
+                                    )}>
+                                        <AvatarImage src={user.profileImage} className="object-cover" />
+                                        <AvatarFallback className="text-4xl font-bold">{user.username[0]}</AvatarFallback>
+                                    </Avatar>
+                                </div>
+
+                                {/* Tier Badge */}
+                                <div className={cn(
+                                    "flex items-center gap-2 px-5 py-1.5 rounded-full text-sm font-extrabold tracking-widest uppercase shadow-md mb-6 hover:scale-105 transition-transform cursor-default z-10",
+                                    style.badgeBg
+                                )}>
+                                    <Trophy className="h-4 w-4 fill-current" />
+                                    {user.tier}
+                                </div>
+
+                                {/* Rank Info */}
+                                <div className="space-y-2 mb-8 w-full z-10">
+                                    <div className="flex items-center justify-center gap-2 text-muted-foreground font-medium text-sm">
+                                        <span>상위 <span className={cn("font-bold text-foreground/80")}>{displayPercentile.toFixed(2)}%</span></span>
+                                        <span className="text-foreground/40 font-bold">·</span>
+                                        <span>{user.ranking.toLocaleString()}위</span>
+                                    </div>
+
+                                    {/* Total Score with Info Button */}
+                                    <div className="flex items-center justify-center gap-3 relative group">
+                                        <span className={cn("text-6xl font-black font-mono tracking-tighter tabular-nums", style.text)}>
+                                            {user.totalScore.toLocaleString()}
+                                        </span>
+                                        <button
+                                            onClick={() => setScoreInfoOpen(true)}
+                                            className="p-1.5 rounded-full hover:bg-muted transition-colors opacity-50 hover:opacity-100 cursor-pointer z-50" // z-index 확실히 부여
+                                            aria-label="점수 산정 기준 확인"
+                                        >
+                                            <HelpCircle className="w-5 h-5 text-muted-foreground" />
+                                        </button>
+                                    </div>
+                                    <div className="text-sm font-bold text-muted-foreground/50 tracking-wider">Total Score</div>
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="w-full space-y-3 mt-auto relative z-20">
+                                    <Button
+                                        onClick={handleShare}
+                                        className="w-full h-12 rounded-2xl text-[15px] font-bold bg-[#191919] hover:bg-black text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 shadow-md active:scale-[0.98] transition-transform cursor-pointer"
+                                    >
+                                        <Share2 className="mr-2 h-4 w-4" />
+                                        이미지 공유/저장
+                                    </Button>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <Button onClick={handleCopyBadge} variant="secondary" className="h-11 rounded-2xl font-semibold bg-secondary/80 hover:bg-secondary active:scale-[0.98] cursor-pointer">
+                                            <Copy className="mr-2 h-4 w-4" /> 배지 복사
+                                        </Button>
+                                        <Button asChild variant="secondary" className="h-11 rounded-2xl font-semibold bg-secondary/80 hover:bg-secondary active:scale-[0.98] cursor-pointer">
+                                            <a href={`https://github.com/${user.username}`} target="_blank" rel="noreferrer">
+                                                <Github className="mr-2 h-4 w-4" /> GitHub
+                                            </a>
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                {/* Refresh Section */}
+                                <div className="w-full mt-6 pt-6 border-t border-border/50 relative z-20">
+                                    <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-secondary/50 text-[11px] font-medium text-muted-foreground mb-3">
+                                        {canRefresh ? "✨ 지금 바로 갱신 가능" : `⏳ ${getTimeRemaining()}`}
+                                    </div>
+                                    <Button
+                                        onClick={handleRefresh}
+                                        disabled={!canRefresh || refreshMutation.isPending}
+                                        variant="outline"
+                                        className="w-full rounded-2xl border-dashed border-border hover:bg-accent/50 h-11 text-sm font-medium disabled:opacity-50 transition-all active:scale-[0.98] cursor-pointer"
+                                    >
+                                        <RefreshCcw className={cn("mr-2 h-4 w-4", refreshMutation.isPending && "animate-spin")} />
+                                        {refreshMutation.isPending ? "동기화 중..." : "최신 데이터 불러오기"}
+                                    </Button>
+                                </div>
+                            </Card>
+                        </TiltCard>
+                    </div>
+
+                    {/* [Right Column] Dashboard */}
+                    <div className="lg:col-span-8 flex flex-col gap-6">
+
+                        {/* 1. Radar Chart Section */}
+                        <Card className="rounded-[2.5rem] shadow-sm border-0 bg-white/60 dark:bg-black/20 backdrop-blur-xl p-0 overflow-hidden min-h-[380px]">
+                            <CardContent className="p-0 h-full relative">
+                                <div className="absolute top-8 left-8 z-10">
+                                    <CardTitle className="text-lg font-bold text-foreground/80 flex items-center gap-2">
+                                        <Trophy className={cn("h-5 w-5", style.text)} />
+                                        Activity Radar
+                                    </CardTitle>
+                                    <CardDescription className="text-xs font-medium mt-1">활동별 가중치 적용 분석</CardDescription>
+                                </div>
+                                <div className="w-full h-[380px] mt-4">
+                                    <StatsChart user={user} />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* 2. Activity Grid (2x2 + 1 Layout) */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <StatCard
+                                label="PR Merged"
+                                value={user.mergedPrCount}
+                                diff={user.diffMergedPrCount}
+                                icon={<GitMerge className="h-5 w-5 text-blue-600" />}
+                                colorClass="bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-800"
+                                delay={0.1}
+                            />
+                            <StatCard
+                                label="PR Open"
+                                value={user.prCount - user.mergedPrCount}
+                                diff={user.diffPrCount - user.diffMergedPrCount}
+                                icon={<GitPullRequest className="h-5 w-5 text-purple-600" />}
+                                colorClass="bg-purple-50/50 dark:bg-purple-900/10 border-purple-100 dark:border-purple-800"
+                                delay={0.2}
+                            />
+                            <StatCard
+                                label="Reviews"
+                                value={user.reviewCount}
+                                diff={user.diffReviewCount}
+                                icon={<MessageSquare className="h-5 w-5 text-teal-600" />}
+                                colorClass="bg-teal-50/50 dark:bg-teal-900/10 border-teal-100 dark:border-teal-800"
+                                delay={0.3}
+                            />
+                            <StatCard
+                                label="Issues"
+                                value={user.issueCount}
+                                diff={user.diffIssueCount}
+                                icon={<AlertCircle className="h-5 w-5 text-amber-600" />}
+                                colorClass="bg-amber-50/50 dark:bg-amber-900/10 border-amber-100 dark:border-amber-800"
+                                delay={0.4}
+                            />
+                            <StatCard
+                                label="Commits"
+                                value={user.commitCount}
+                                diff={user.diffCommitCount}
+                                icon={<GitCommit className="h-5 w-5 text-slate-600" />}
+                                colorClass="bg-slate-50/50 dark:bg-slate-900/10 border-slate-100 dark:border-slate-800"
+                                colSpan="md:col-span-2"
+                                delay={0.5}
+                            />
+                        </div>
+
+                        {/* Badge Preview (Without Copy Button) */}
+                        <div className="mt-2">
+                            <BadgeGenerator nodeId={user.nodeId} />
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <div className="flex gap-2 w-full md:w-auto">
-                        <Button onClick={handleRefresh} disabled={refreshMutation.isPending} variant="outline" className="flex-1 md:flex-none shadow-sm bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 border-transparent">
-                            <RefreshCcw className={cn("mr-2 h-4 w-4", refreshMutation.isPending && "animate-spin")} />
-                            갱신
-                        </Button>
-                        <Button onClick={handleShare} variant="outline" className="flex-1 md:flex-none shadow-sm bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 border-transparent">
-                            <Share2 className="mr-2 h-4 w-4" />
-                            공유
-                        </Button>
-                    </div>
-                </motion.div>
-
-                <motion.div variants={containerVariants} className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-8">
-
-                    <motion.div variants={itemVariants} className="md:col-span-8 md:row-span-2">
-                        <Card className="h-full min-h-[400px]">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Trophy className="h-5 w-5 text-yellow-500" />
-                                    Combat Radar
-                                </CardTitle>
-                                <CardDescription>활동 유형별 전투력 분석</CardDescription>
-                            </CardHeader>
-                            <CardContent className="h-[350px]">
-                                <StatsChart user={user} />
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-
-                    <motion.div variants={itemVariants} className="md:col-span-4">
-                        <Card className="h-full flex flex-col justify-center relative overflow-hidden group">
-                            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <CardHeader>
-                                <CardTitle className="text-muted-foreground text-sm font-medium uppercase tracking-wider">Total Score</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-5xl font-black text-primary tracking-tight">
-                                    {user.totalScore.toLocaleString()}
-                                </div>
-                                <p className="text-sm text-muted-foreground mt-2 font-medium">Points</p>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-
-                    <motion.div variants={itemVariants} className="md:col-span-4">
-                        <Card className="h-full flex flex-col justify-center relative overflow-hidden group">
-                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <CardHeader>
-                                <CardTitle className="text-muted-foreground text-sm font-medium uppercase tracking-wider">Global Ranking</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-5xl font-black bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent tracking-tight">
-                                    Top {displayPercentile.toFixed(1)}%
-                                </div>
-                                <p className="text-sm text-muted-foreground mt-2 font-medium">#{user.ranking.toLocaleString()} of All Users</p>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-
-                    <motion.div variants={itemVariants} className="md:col-span-12">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Detailed Activity</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <ActivityGrid user={user} />
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-
-                    <motion.div variants={itemVariants} className="md:col-span-12">
-                        <BadgeGenerator nodeId={user.nodeId} />
-                    </motion.div>
-
-                </motion.div>
-            </motion.div>
+            {/* Modal Component Injection */}
+            <ScoreInfoModal open={scoreInfoOpen} onOpenChange={setScoreInfoOpen} />
         </div>
     )
 }

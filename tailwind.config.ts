@@ -56,6 +56,8 @@ const config: Config = {
             },
             fontFamily: {
                 sans: ["var(--font-sans)", "sans-serif"],
+                // [Priority 2] Monospace 폰트 설정 유지
+                mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"],
             },
             keyframes: {
                 "accordion-down": {
@@ -66,19 +68,22 @@ const config: Config = {
                     from: { height: "var(--radix-accordion-content-height)" },
                     to: { height: "0" },
                 },
-                // [Optimiztion] Infinite Scroll Logic
-                // 0% -> -50%로 이동. 데이터가 2배수 이상 복제되어 있다면,
-                // -50% 지점의 시각적 상태는 0%와 동일하므로 끊김 없이 무한 루프처럼 보임
                 "infinite-scroll": {
                     "0%": { transform: "translateX(0)" },
                     "100%": { transform: "translateX(-50%)" },
+                },
+                // [Priority 3] 배경이 흐르는 듯한 Shine 애니메이션 추가
+                "background-shine": {
+                    "0%": { backgroundPosition: "0 0" },
+                    "100%": { backgroundPosition: "-200% 0" },
                 },
             },
             animation: {
                 "accordion-down": "accordion-down 0.2s ease-out",
                 "accordion-up": "accordion-up 0.2s ease-out",
-                // [FIX] 속도 조절: 60s -> 30s (더 경쾌한 속도)
                 "infinite-scroll": "infinite-scroll 30s linear infinite",
+                // [Priority 3] 애니메이션 유틸리티 등록
+                "background-shine": "background-shine 3s linear infinite",
             },
         },
     },
