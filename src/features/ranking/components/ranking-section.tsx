@@ -18,6 +18,30 @@ const tiers: Tier[] = [
   'PLATINUM', 'GOLD', 'SILVER', 'BRONZE', 'IRON'
 ]
 
+// ✅ Object lookup for O(1) performance
+const TIER_COLOR_STYLES: Record<Tier | string, string> = {
+  'CHALLENGER': "bg-red-500/10 text-red-500 border-red-500/20",
+  'MASTER': "bg-purple-500/10 text-purple-500 border-purple-500/20",
+  'DIAMOND': "bg-blue-500/10 text-blue-500 border-blue-500/20",
+  'PLATINUM': "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+  'EMERALD': "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+  'GOLD': "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
+  'SILVER': "bg-slate-500/10 text-slate-500 border-slate-500/20",
+  'BRONZE': "bg-orange-500/10 text-orange-500 border-orange-500/20",
+  'IRON': "bg-stone-500/10 text-stone-500 border-stone-500/20",
+}
+
+const tierColorClass = (tier: Tier) =>
+  TIER_COLOR_STYLES[tier] || TIER_COLOR_STYLES['IRON']
+
+// ✅ Hoisted rank icon renderer
+const renderRankIcon = (rank: number) => {
+  if (rank === 1) return <div className="relative"><Trophy className="h-6 w-6 text-yellow-500 fill-yellow-500" /><div className="absolute -top-1 -right-1 animate-ping h-2 w-2 rounded-full bg-yellow-400 opacity-75"></div></div>
+  if (rank === 2) return <Medal className="h-6 w-6 text-slate-400 fill-slate-400" />
+  if (rank === 3) return <Medal className="h-6 w-6 text-amber-700 fill-amber-700" />
+  return <span className="font-bold text-muted-foreground w-6 text-center">{rank}</span>
+}
+
 export function RankingSection() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -65,28 +89,6 @@ export function RankingSection() {
 
   const rankings = data?.rankings || [];
   const pageInfo = data?.pageInfo;
-
-  // 랭킹 메달 아이콘 렌더링
-  const renderRankIcon = (rank: number) => {
-    if (rank === 1) return <div className="relative"><Trophy className="h-6 w-6 text-yellow-500 fill-yellow-500" /><div className="absolute -top-1 -right-1 animate-ping h-2 w-2 rounded-full bg-yellow-400 opacity-75"></div></div>
-    if (rank === 2) return <Medal className="h-6 w-6 text-slate-400 fill-slate-400" />
-    if (rank === 3) return <Medal className="h-6 w-6 text-amber-700 fill-amber-700" />
-    return <span className="font-bold text-muted-foreground w-6 text-center">{rank}</span>
-  }
-
-  const tierColorClass = (tier: Tier) => {
-    switch (tier) {
-      case 'CHALLENGER': return "bg-red-500/10 text-red-500 border-red-500/20";
-      case 'MASTER': return "bg-purple-500/10 text-purple-500 border-purple-500/20";
-      case 'DIAMOND': return "bg-blue-500/10 text-blue-500 border-blue-500/20";
-      case 'PLATINUM':
-      case 'EMERALD': return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
-      case 'GOLD': return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20";
-      case 'SILVER': return "bg-slate-500/10 text-slate-500 border-slate-500/20";
-      case 'BRONZE': return "bg-orange-500/10 text-orange-500 border-orange-500/20";
-      default: return "bg-stone-500/10 text-stone-500 border-stone-500/20";
-    }
-  }
 
   if (isError) {
     return (
@@ -291,11 +293,14 @@ export function RankingSection() {
           </Button>
         </div>
 
-        <UserDetailModal
-            username={selectedUsername}
-            open={modalOpen}
-            onOpenChange={handleModalClose}
-        />
+        {/* ✅ Conditional rendering: only render modal when open to reduce DOM nodes */}
+        {modalOpen && (
+            <UserDetailModal
+                username={selectedUsername}
+                open={modalOpen}
+                onOpenChange={handleModalClose}
+            />
+        )}
       </section>
   )
 }

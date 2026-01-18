@@ -18,20 +18,21 @@ const TIERS: (Tier | 'ALL')[] = [
     'PLATINUM', 'GOLD', 'SILVER', 'BRONZE', 'IRON'
 ]
 
-// ✅ Hoisted tier badge styles to prevent recreation on every render
-const getTierBadgeStyle = (tier: string) => {
-    switch(tier) {
-        case 'CHALLENGER': return "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300";
-        case 'MASTER': return "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300";
-        case 'DIAMOND': return "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300";
-        case 'EMERALD': return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300";
-        case 'PLATINUM': return "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300";
-        case 'GOLD': return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300";
-        case 'SILVER': return "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
-        case 'BRONZE': return "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300";
-        default: return "bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300";
-    }
+// ✅ Object lookup for O(1) performance instead of O(n) switch statement
+const TIER_BADGE_STYLES: Record<string, string> = {
+    'CHALLENGER': "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
+    'MASTER': "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
+    'DIAMOND': "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300",
+    'EMERALD': "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+    'PLATINUM': "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300",
+    'GOLD': "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300",
+    'SILVER': "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+    'BRONZE': "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300",
+    'IRON': "bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300",
 }
+
+const getTierBadgeStyle = (tier: string) =>
+    TIER_BADGE_STYLES[tier] || TIER_BADGE_STYLES['IRON']
 
 // [Component] Sticky Toolbar
 function RankingToolbar({
@@ -252,11 +253,14 @@ function RankingContent() {
                 </div>
             </main>
 
-            <UserDetailModal
-                username={selectedUsername}
-                open={modalOpen}
-                onOpenChange={handleModalClose}
-            />
+            {/* ✅ Conditional rendering: only render modal when open to reduce DOM nodes */}
+            {modalOpen && (
+                <UserDetailModal
+                    username={selectedUsername}
+                    open={modalOpen}
+                    onOpenChange={handleModalClose}
+                />
+            )}
         </div>
     )
 }
