@@ -216,9 +216,9 @@ export function UserDetailModal({ username, open, onOpenChange }: UserDetailModa
                         delay={0.1}
                     />
                     <StatRow
-                        label="Open PRs"
-                        value={user.prCount - user.mergedPrCount}
-                        diff={user.diffPrCount - user.diffMergedPrCount}
+                        label="PR Count"
+                        value={user.PrCount ?? user.prCount}
+                        diff={user.diffPrCount}
                         icon={<GitPullRequest className="w-4 h-4" />}
                         delay={0.2}
                     />

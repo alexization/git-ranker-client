@@ -1,5 +1,5 @@
 import {HeroSection} from "@/features/home/components/hero-section"
-import {Github} from "lucide-react"
+import { Github } from "lucide-react"
 
 export default function Home() {
     return (<div className="flex min-h-[calc(100vh-3.5rem)] flex-col">

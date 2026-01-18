@@ -32,7 +32,7 @@ import { cn } from "@/shared/lib/utils"
 import { useEffect, useState } from "react"
 import { Tier } from "@/shared/types/api"
 
-// ... (TIER_STYLES는 동일하므로 생략 - 그대로 사용)
+// ✅ Hoisted outside component to prevent recreation on every render
 const TIER_STYLES: Record<Tier | string, {
     bgGradient: string;
     border: string;
@@ -456,9 +456,9 @@ export default function UserDetailPage() {
                                 delay={0.1}
                             />
                             <StatCard
-                                label="PR Open"
-                                value={user.prCount - user.mergedPrCount}
-                                diff={user.diffPrCount - user.diffMergedPrCount}
+                                label="PR Count"
+                                value={user.PrCount ?? user.prCount}
+                                diff={user.diffPrCount}
                                 icon={<GitPullRequest className="h-5 w-5 text-purple-600" />}
                                 colorClass="bg-purple-50/50 dark:bg-purple-900/10 border-purple-100 dark:border-purple-800"
                                 delay={0.2}

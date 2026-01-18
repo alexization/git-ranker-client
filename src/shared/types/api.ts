@@ -50,6 +50,8 @@ export interface UserStats {
   diffPrCount: number;
   diffMergedPrCount: number;
   diffReviewCount: number;
+  // [Fix] 백엔드 응답 포맷 대응 (PascalCase fallback)
+  PrCount?: number;
 }
 
 export interface RegisterUserResponse extends User, UserStats {

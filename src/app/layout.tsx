@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type {Metadata, Viewport} from "next";
 import localFont from "next/font/local";
 import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
@@ -23,11 +23,38 @@ const jetbrainsMono = JetBrains_Mono({
 
 // [FIX] favicon.ico 명시적 지정
 export const metadata: Metadata = {
-    title: "Git Ranker",
-    description: "GitHub 활동 기반 개발자 전투력 측정 서비스",
-    icons: {
-        icon: "/favicon.ico", // public/favicon.ico를 참조합니다.
+    title: {
+        default: "Git Ranker | 개발자 전투력 측정",
+        template: "%s | Git Ranker"
     },
+    description: "GitHub 활동 기반 개발자 전투력 측정 및 티어 랭킹 서비스. 당신의 진짜 기여도를 확인하세요.",
+    keywords: ["GitHub", "Ranking", "Developer", "Combat Power", "깃허브", "랭킹", "개발자", "전투력"],
+    authors: [{ name: "Git Ranker Team" }],
+    openGraph: {
+        type: "website",
+        locale: "ko_KR",
+        url: "https://www.git-ranker.com",
+        title: "Git Ranker | 개발자 전투력 측정",
+        description: "GitHub 활동 기반 개발자 전투력 측정 및 티어 랭킹 서비스.",
+        siteName: "Git Ranker",
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "Git Ranker | 개발자 전투력 측정",
+        description: "GitHub 활동 기반 개발자 전투력 측정 및 티어 랭킹 서비스.",
+    },
+    icons: {
+        icon: "/favicon.ico",
+    },
+};
+
+export const viewport: Viewport = {
+    themeColor: [
+        { media: "(prefers-color-scheme: light)", color: "white" },
+        { media: "(prefers-color-scheme: dark)", color: "black" },
+    ],
+    width: "device-width",
+    initialScale: 1,
 };
 
 export default function RootLayout({

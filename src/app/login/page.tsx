@@ -1,7 +1,7 @@
 "use client"
 
 import {motion} from "framer-motion"
-import {Activity, Github, ShieldCheck, Trophy} from "lucide-react"
+import { Activity, Github, ShieldCheck, Trophy } from "lucide-react"
 import {Button} from "@/shared/components/button"
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/shared/components/card"
 import {Avatar, AvatarFallback, AvatarImage} from "@/shared/components/avatar"

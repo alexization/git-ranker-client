@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import { useRankingList } from "@/features/ranking/api/ranking-service"
@@ -17,6 +17,21 @@ const TIERS: (Tier | 'ALL')[] = [
     'ALL', 'CHALLENGER', 'MASTER', 'DIAMOND', 'EMERALD',
     'PLATINUM', 'GOLD', 'SILVER', 'BRONZE', 'IRON'
 ]
+
+// ✅ Hoisted tier badge styles to prevent recreation on every render
+const getTierBadgeStyle = (tier: string) => {
+    switch(tier) {
+        case 'CHALLENGER': return "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300";
+        case 'MASTER': return "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300";
+        case 'DIAMOND': return "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300";
+        case 'EMERALD': return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300";
+        case 'PLATINUM': return "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300";
+        case 'GOLD': return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300";
+        case 'SILVER': return "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+        case 'BRONZE': return "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300";
+        default: return "bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300";
+    }
+}
 
 // [Component] Sticky Toolbar
 function RankingToolbar({
@@ -68,7 +83,7 @@ function RankingToolbar({
     )
 }
 
-export default function RankingPage() {
+function RankingContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [page, setPage] = useState(0)
@@ -110,21 +125,6 @@ export default function RankingPage() {
             params.delete('user')
             const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname
             router.push(newUrl, { scroll: false })
-        }
-    }
-
-    // [Design] Tier Badge Styles (Matches Image Reference)
-    const getTierBadgeStyle = (tier: string) => {
-        switch(tier) {
-            case 'CHALLENGER': return "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300";
-            case 'MASTER': return "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300";
-            case 'DIAMOND': return "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300";
-            case 'EMERALD': return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300";
-            case 'PLATINUM': return "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300";
-            case 'GOLD': return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300";
-            case 'SILVER': return "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
-            case 'BRONZE': return "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300";
-            default: return "bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300";
         }
     }
 
@@ -258,5 +258,31 @@ export default function RankingPage() {
                 onOpenChange={handleModalClose}
             />
         </div>
+    )
+}
+
+function RankingPageSkeleton() {
+    return (
+        <div className="min-h-screen bg-background pb-20 pt-16">
+            <div className="container max-w-5xl px-4">
+                <div className="text-center mb-10">
+                    <Skeleton className="h-16 w-64 mx-auto mb-3" />
+                    <Skeleton className="h-6 w-32 mx-auto" />
+                </div>
+                <div className="space-y-4">
+                    {Array.from({ length: 10 }).map((_, i) => (
+                        <Skeleton key={i} className="h-16 w-full rounded-2xl" />
+                    ))}
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default function RankingPage() {
+    return (
+        <Suspense fallback={<RankingPageSkeleton />}>
+            <RankingContent />
+        </Suspense>
     )
 }
