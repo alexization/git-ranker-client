@@ -20,7 +20,7 @@ export function HeroSection() {
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Typing Effect for Placeholder
+  // Typing Effect
   const placeholderText = useTypingEffect(
       ["torvalds", "shadcn", "leerob", "alexization", "your_username"],
       100,
@@ -85,15 +85,12 @@ export function HeroSection() {
   return (
       <section className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden pt-10 pb-20">
 
-        {/* 1. Spotlight Background */}
         <HeroSpotlight />
 
-        {/* 2. Grid Pattern Overlay (Optional for tech vibe) */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none -z-10" />
 
         <div className="container relative z-10 max-w-5xl px-6 flex flex-col items-center">
 
-          {/* Badge */}
           <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -106,7 +103,6 @@ export function HeroSection() {
           </span>
           </motion.div>
 
-          {/* Main Title */}
           <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -124,7 +120,6 @@ export function HeroSection() {
             </p>
           </motion.div>
 
-          {/* Search Bar */}
           <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -132,7 +127,6 @@ export function HeroSection() {
               className="relative mx-auto w-full max-w-2xl"
           >
             <div className="relative group">
-              {/* Glow Effect behind search bar */}
               <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 rounded-2xl blur-xl opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
 
               <div className={cn(
@@ -163,12 +157,12 @@ export function HeroSection() {
                       className="h-12 gap-2 rounded-xl px-6 font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
                       onClick={() => handleSearch(query)}
                   >
-                    분석하기
+                    {/* [FIX] 버튼 텍스트 변경: 분석하기 -> 검색 */}
+                    검색
                   </Button>
                 </div>
               </div>
 
-              {/* Recent Searches Dropdown */}
               <AnimatePresence>
                 {open && mounted && recentSearches.length > 0 && (
                     <motion.div
@@ -223,7 +217,6 @@ export function HeroSection() {
             </div>
           </motion.div>
 
-          {/* Links */}
           <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -250,7 +243,6 @@ export function HeroSection() {
           </motion.div>
         </div>
 
-        {/* 3. Live Ticker at Bottom */}
         <div className="absolute bottom-0 w-full">
           <LiveTicker />
         </div>
