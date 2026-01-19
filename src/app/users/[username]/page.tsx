@@ -1,14 +1,8 @@
 "use client"
 
-// ... (Imports 유지)
 import { useParams, useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import {
-    GitPullRequest,
-    GitMerge,
-    MessageSquare,
-    GitCommit,
-    AlertCircle,
     RefreshCcw,
     Github,
     Share2,
@@ -21,6 +15,7 @@ import {
 import { useUser, useRefreshUser } from "@/features/user/api/user-service"
 import { StatsChart } from "@/features/user/components/stats-chart"
 import { BadgeGenerator } from "@/features/user/components/badge-generator"
+import { ActivityGrid } from "@/features/user/components/activity-grid"
 import { ScoreInfoModal } from "@/features/user/components/score-info-modal"
 import { TiltCard } from "@/shared/components/ui/tilt-card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/avatar"
@@ -32,7 +27,7 @@ import { cn } from "@/shared/lib/utils"
 import { useEffect, useState } from "react"
 import { Tier } from "@/shared/types/api"
 
-// ✅ Hoisted outside component to prevent recreation on every render
+// Tier Styles (변동 없음, 그대로 유지)
 const TIER_STYLES: Record<Tier | string, {
     bgGradient: string;
     border: string;
@@ -121,84 +116,6 @@ const TIER_STYLES: Record<Tier | string, {
     }
 }
 
-// ... (StatCard Component도 동일하므로 생략)
-function StatCard({
-                      label,
-                      value,
-                      diff,
-                      icon,
-                      colorClass,
-                      colSpan = "col-span-1",
-                      delay = 0
-                  }: {
-    label: string,
-    value: number,
-    diff: number,
-    icon: React.ReactNode,
-    colorClass: string,
-    colSpan?: string,
-    delay?: number
-}) {
-    const [displayValue, setDisplayValue] = useState(0)
-
-    useEffect(() => {
-        let start = 0;
-        const end = value;
-        const duration = 1200;
-        const startTime = performance.now();
-
-        const animate = (currentTime: number) => {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const easeOut = 1 - Math.pow(1 - progress, 3);
-
-            setDisplayValue(Math.floor(easeOut * end));
-
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            }
-        };
-        requestAnimationFrame(animate);
-    }, [value]);
-
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay }}
-            className={cn(
-                "relative flex flex-col justify-between rounded-[1.5rem] p-5 transition-all duration-300 border border-transparent hover:scale-[1.02] hover:shadow-lg",
-                colorClass,
-                colSpan
-            )}
-        >
-            <div className="flex justify-between items-start mb-2">
-                <span className="text-sm font-bold text-foreground/70 tracking-wide flex items-center gap-2">
-                    {label}
-                </span>
-                <div className="opacity-60">{icon}</div>
-            </div>
-
-            <div className="flex items-center gap-3">
-                <span className="text-3xl font-extrabold font-mono tabular-nums tracking-tighter text-foreground">
-                    {displayValue.toLocaleString()}
-                </span>
-
-                {diff !== 0 && (
-                    <span className={cn(
-                        "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold font-mono",
-                        diff > 0
-                            ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-                            : "bg-red-500/20 text-red-600 dark:text-red-400"
-                    )}>
-                        {diff > 0 ? "+" : ""}{diff.toLocaleString()}
-                    </span>
-                )}
-            </div>
-        </motion.div>
-    )
-}
-
 export default function UserDetailPage() {
     const router = useRouter()
     const params = useParams()
@@ -229,7 +146,6 @@ export default function UserDetailPage() {
         const diff = nextRefreshTime - now;
         const minutes = Math.floor(diff / 1000 / 60);
         const seconds = Math.floor((diff / 1000) % 60);
-
         if (minutes < 0) return "잠시 후 가능";
         return `${minutes}분 ${seconds}초 후 가능`;
     }
@@ -270,7 +186,6 @@ export default function UserDetailPage() {
         window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/oauth2/authorization/github`
     }
 
-    // Loading State
     if (isLoading) {
         return (
             <div className="container py-12 max-w-6xl space-y-6">
@@ -319,26 +234,31 @@ export default function UserDetailPage() {
         <div className={cn("min-h-screen bg-background pb-20 transition-colors duration-700", style.bgGradient)}>
             <div className="container py-12 max-w-6xl px-4">
 
+                {/* Back Button */}
+                <div className="mb-6 lg:hidden">
+                    <Button variant="ghost" size="sm" onClick={() => router.push('/')} className="gap-2 text-muted-foreground hover:text-foreground pl-0">
+                        <ArrowLeft className="h-4 w-4" /> 뒤로가기
+                    </Button>
+                </div>
+
                 <div className="grid lg:grid-cols-12 gap-6 items-start">
 
                     {/* [Left Column] Profile Card */}
                     <div className="lg:col-span-4 lg:sticky lg:top-24">
                         <TiltCard className="rounded-[2.5rem]">
-                            {/* [FIX] Card Background Remove & Overflow Control */}
                             <Card className={cn(
                                 "relative overflow-hidden rounded-[2.5rem] border-2 shadow-2xl flex flex-col items-center p-8 text-center h-full bg-white/80 dark:bg-black/40 backdrop-blur-xl",
                                 style.border,
                                 style.shadow
                             )}>
-                                {/* Shine Overlay */}
                                 {style.overlay && (
                                     <div className={cn(
-                                        "absolute inset-0 bg-[length:200%_100%] animate-background-shine opacity-0 hover:opacity-100 transition-opacity duration-700 pointer-events-none rounded-[2.5rem]", // rounded 추가
+                                        "absolute inset-0 bg-[length:200%_100%] animate-background-shine opacity-0 hover:opacity-100 transition-opacity duration-700 pointer-events-none rounded-[2.5rem]",
                                         style.overlay
                                     )} />
                                 )}
 
-                                {/* Avatar */}
+                                {/* Avatar Section */}
                                 <div className="relative mb-5 group cursor-default z-10">
                                     <div className={cn(
                                         "absolute inset-0 rounded-full blur-2xl opacity-30 group-hover:opacity-50 transition-opacity duration-500",
@@ -351,55 +271,55 @@ export default function UserDetailPage() {
                                         <AvatarImage src={user.profileImage} className="object-cover" />
                                         <AvatarFallback className="text-4xl font-bold">{user.username[0]}</AvatarFallback>
                                     </Avatar>
+                                    {/* [Design] 랭킹 배지 (아바타 하단에 겹치게) */}
+                                    <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-foreground text-background px-3 py-0.5 rounded-full text-[10px] font-bold shadow-lg z-20 border border-background whitespace-nowrap">
+                                        #{user.ranking}
+                                    </div>
                                 </div>
+
+                                {/* User Info */}
+                                <h1 className="text-2xl font-bold mb-1 z-10">{user.username}</h1>
 
                                 {/* Tier Badge */}
                                 <div className={cn(
-                                    "flex items-center gap-2 px-5 py-1.5 rounded-full text-sm font-extrabold tracking-widest uppercase shadow-md mb-6 hover:scale-105 transition-transform cursor-default z-10",
+                                    "flex items-center gap-2 px-5 py-1.5 rounded-full text-sm font-extrabold tracking-widest uppercase shadow-md mb-8 hover:scale-105 transition-transform cursor-default z-10 mt-2",
                                     style.badgeBg
                                 )}>
                                     <Trophy className="h-4 w-4 fill-current" />
                                     {user.tier}
                                 </div>
 
-                                {/* Rank Info */}
-                                <div className="space-y-2 mb-8 w-full z-10">
-                                    <div className="flex items-center justify-center gap-2 text-muted-foreground font-medium text-sm">
-                                        <span>상위 <span className={cn("font-bold text-foreground/80")}>{displayPercentile.toFixed(2)}%</span></span>
-                                        <span className="text-foreground/40 font-bold">·</span>
-                                        <span>{user.ranking.toLocaleString()}위</span>
-                                    </div>
-
-                                    {/* Total Score with Info Button */}
-                                    <div className="flex items-center justify-center gap-3 relative group">
-                                        <span className={cn("text-6xl font-black font-mono tracking-tighter tabular-nums", style.text)}>
-                                            {user.totalScore.toLocaleString()}
-                                        </span>
-                                        <button
-                                            onClick={() => setScoreInfoOpen(true)}
-                                            className="p-1.5 rounded-full hover:bg-muted transition-colors opacity-50 hover:opacity-100 cursor-pointer z-50" // z-index 확실히 부여
-                                            aria-label="점수 산정 기준 확인"
-                                        >
-                                            <HelpCircle className="w-5 h-5 text-muted-foreground" />
+                                {/* [Typography Improvement] Total Score & Percentile */}
+                                <div className="space-y-1 mb-8 w-full z-10 p-4 rounded-2xl bg-secondary/30 border border-white/10 backdrop-blur-sm">
+                                    <div className="flex items-center justify-center gap-1 text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                                        Total Score
+                                        <button onClick={() => setScoreInfoOpen(true)} className="opacity-50 hover:opacity-100 transition-opacity">
+                                            <HelpCircle className="w-3.5 h-3.5" />
                                         </button>
                                     </div>
-                                    <div className="text-sm font-bold text-muted-foreground/50 tracking-wider">Total Score</div>
+                                    <div className={cn("text-5xl font-black font-mono tracking-tighter tabular-nums leading-tight", style.text)}>
+                                        {user.totalScore.toLocaleString()}
+                                    </div>
+                                    <div className="text-sm font-medium pt-1 flex justify-center gap-2">
+                                        <span className="text-muted-foreground">상위</span>
+                                        <span className="text-foreground font-bold">{displayPercentile.toFixed(2)}%</span>
+                                    </div>
                                 </div>
 
                                 {/* Action Buttons */}
                                 <div className="w-full space-y-3 mt-auto relative z-20">
                                     <Button
                                         onClick={handleShare}
-                                        className="w-full h-12 rounded-2xl text-[15px] font-bold bg-[#191919] hover:bg-black text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 shadow-md active:scale-[0.98] transition-transform cursor-pointer"
+                                        className="w-full h-12 rounded-2xl text-[15px] font-bold bg-[#191919] hover:bg-black text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 shadow-md active:scale-[0.98] transition-transform"
                                     >
                                         <Share2 className="mr-2 h-4 w-4" />
                                         이미지 공유/저장
                                     </Button>
                                     <div className="grid grid-cols-2 gap-3">
-                                        <Button onClick={handleCopyBadge} variant="secondary" className="h-11 rounded-2xl font-semibold bg-secondary/80 hover:bg-secondary active:scale-[0.98] cursor-pointer">
+                                        <Button onClick={handleCopyBadge} variant="secondary" className="h-11 rounded-2xl font-semibold bg-secondary/80 hover:bg-secondary active:scale-[0.98]">
                                             <Copy className="mr-2 h-4 w-4" /> 배지 복사
                                         </Button>
-                                        <Button asChild variant="secondary" className="h-11 rounded-2xl font-semibold bg-secondary/80 hover:bg-secondary active:scale-[0.98] cursor-pointer">
+                                        <Button asChild variant="secondary" className="h-11 rounded-2xl font-semibold bg-secondary/80 hover:bg-secondary active:scale-[0.98]">
                                             <a href={`https://github.com/${user.username}`} target="_blank" rel="noreferrer">
                                                 <Github className="mr-2 h-4 w-4" /> GitHub
                                             </a>
@@ -416,7 +336,7 @@ export default function UserDetailPage() {
                                         onClick={handleRefresh}
                                         disabled={!canRefresh || refreshMutation.isPending}
                                         variant="outline"
-                                        className="w-full rounded-2xl border-dashed border-border hover:bg-accent/50 h-11 text-sm font-medium disabled:opacity-50 transition-all active:scale-[0.98] cursor-pointer"
+                                        className="w-full rounded-2xl border-dashed border-border hover:bg-accent/50 h-11 text-sm font-medium disabled:opacity-50 transition-all active:scale-[0.98]"
                                     >
                                         <RefreshCcw className={cn("mr-2 h-4 w-4", refreshMutation.isPending && "animate-spin")} />
                                         {refreshMutation.isPending ? "동기화 중..." : "최신 데이터 불러오기"}
@@ -430,67 +350,27 @@ export default function UserDetailPage() {
                     <div className="lg:col-span-8 flex flex-col gap-6">
 
                         {/* 1. Radar Chart Section */}
-                        <Card className="rounded-[2.5rem] shadow-sm border-0 bg-white/60 dark:bg-black/20 backdrop-blur-xl p-0 overflow-hidden min-h-[380px]">
+                        <Card className="rounded-[2.5rem] shadow-sm border-0 bg-white/60 dark:bg-black/20 backdrop-blur-xl p-0 overflow-hidden min-h-[420px]">
                             <CardContent className="p-0 h-full relative">
-                                <div className="absolute top-8 left-8 z-10">
-                                    <CardTitle className="text-lg font-bold text-foreground/80 flex items-center gap-2">
+                                <div className="absolute top-8 left-8 z-10 pointer-events-none">
+                                    <CardTitle className="text-xl font-bold text-foreground/80 flex items-center gap-2">
                                         <Trophy className={cn("h-5 w-5", style.text)} />
-                                        Activity Radar
+                                        Stats Radar
                                     </CardTitle>
-                                    <CardDescription className="text-xs font-medium mt-1">활동별 가중치 적용 분석</CardDescription>
+                                    <CardDescription className="text-xs font-medium mt-1 ml-7">
+                                        활동 유형별 기여도 분포
+                                    </CardDescription>
                                 </div>
-                                <div className="w-full h-[380px] mt-4">
+                                <div className="w-full h-[420px] mt-4">
                                     <StatsChart user={user} />
                                 </div>
                             </CardContent>
                         </Card>
 
-                        {/* 2. Activity Grid (2x2 + 1 Layout) */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <StatCard
-                                label="PR Merged"
-                                value={user.mergedPrCount}
-                                diff={user.diffMergedPrCount}
-                                icon={<GitMerge className="h-5 w-5 text-blue-600" />}
-                                colorClass="bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-800"
-                                delay={0.1}
-                            />
-                            <StatCard
-                                label="PR Count"
-                                value={user.PrCount ?? user.prCount}
-                                diff={user.diffPrCount}
-                                icon={<GitPullRequest className="h-5 w-5 text-purple-600" />}
-                                colorClass="bg-purple-50/50 dark:bg-purple-900/10 border-purple-100 dark:border-purple-800"
-                                delay={0.2}
-                            />
-                            <StatCard
-                                label="Reviews"
-                                value={user.reviewCount}
-                                diff={user.diffReviewCount}
-                                icon={<MessageSquare className="h-5 w-5 text-teal-600" />}
-                                colorClass="bg-teal-50/50 dark:bg-teal-900/10 border-teal-100 dark:border-teal-800"
-                                delay={0.3}
-                            />
-                            <StatCard
-                                label="Issues"
-                                value={user.issueCount}
-                                diff={user.diffIssueCount}
-                                icon={<AlertCircle className="h-5 w-5 text-amber-600" />}
-                                colorClass="bg-amber-50/50 dark:bg-amber-900/10 border-amber-100 dark:border-amber-800"
-                                delay={0.4}
-                            />
-                            <StatCard
-                                label="Commits"
-                                value={user.commitCount}
-                                diff={user.diffCommitCount}
-                                icon={<GitCommit className="h-5 w-5 text-slate-600" />}
-                                colorClass="bg-slate-50/50 dark:bg-slate-900/10 border-slate-100 dark:border-slate-800"
-                                colSpan="md:col-span-2"
-                                delay={0.5}
-                            />
-                        </div>
+                        {/* 2. Activity Grid (New Component Applied) */}
+                        <ActivityGrid user={user} />
 
-                        {/* Badge Preview (Without Copy Button) */}
+                        {/* Badge Preview */}
                         <div className="mt-2">
                             <BadgeGenerator nodeId={user.nodeId} />
                         </div>
@@ -498,7 +378,6 @@ export default function UserDetailPage() {
                 </div>
             </div>
 
-            {/* Modal Component Injection */}
             <ScoreInfoModal open={scoreInfoOpen} onOpenChange={setScoreInfoOpen} />
         </div>
     )

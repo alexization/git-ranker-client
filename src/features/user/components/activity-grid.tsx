@@ -12,73 +12,69 @@ interface ActivityItemProps {
     diff: number
     icon: React.ReactNode
     colorClass: string
-    delay?: number // [ADD] 순차적 등장을 위한 delay prop
+    delay?: number
 }
 
 function ActivityItem({ label, value, diff, icon, colorClass, delay = 0 }: ActivityItemProps) {
     const [displayValue, setDisplayValue] = useState(0)
 
-    // Count-up Animation with Ease-out effect
+    // [Typography] Count-up Animation
     useEffect(() => {
         let startTimestamp: number | null = null;
-        const duration = 1500; // 1.5s duration
+        const duration = 1200;
 
         const step = (timestamp: number) => {
             if (!startTimestamp) startTimestamp = timestamp;
             const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-
-            // Ease-out expo function: 1 - pow(2, -10 * progress)
-            const easeOut = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+            const easeOut = 1 - Math.pow(1 - progress, 3);
 
             setDisplayValue(Math.floor(easeOut * value));
 
             if (progress < 1) {
                 window.requestAnimationFrame(step);
+            } else {
+                setDisplayValue(value);
             }
         };
-
         window.requestAnimationFrame(step);
     }, [value]);
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay }} // [UX] 순차적 애니메이션 적용
+            transition={{ duration: 0.4, delay }}
             className={cn(
-                "rounded-3xl p-6 shadow-sm border border-opacity-20 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative overflow-hidden group",
+                "relative overflow-hidden rounded-3xl p-6 border border-transparent transition-all duration-300 hover:scale-[1.02] hover:shadow-lg group",
                 colorClass
             )}
         >
-            {/* Background Decoration Icon */}
-            <div className="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-300 transform rotate-12 scale-150 pointer-events-none text-foreground">
+            {/* 배경 데코레이션 아이콘 */}
+            <div className="absolute right-2 bottom-2 opacity-[0.15] transform rotate-12 scale-[2.5] pointer-events-none transition-transform group-hover:scale-[2.8] group-hover:rotate-6 duration-500 origin-bottom-right grayscale-0">
                 {icon}
             </div>
 
-            <div className="flex items-center justify-between mb-3 relative z-10">
-                <span className="text-sm font-semibold text-foreground/60 uppercase tracking-wider">{label}</span>
-                <div className="p-2 rounded-xl bg-white/50 dark:bg-black/20 backdrop-blur-sm shadow-sm opacity-80">
-                    {icon}
+            <div className="relative z-10 flex flex-col h-full justify-between gap-6">
+                <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-foreground/60">{label}</span>
                 </div>
-            </div>
 
-            <div className="flex items-end gap-3 relative z-10">
-                {/* [UX/Typography] font-mono와 tabular-nums로 숫자 정렬 최적화 */}
-                <span className="text-4xl font-extrabold font-mono tabular-nums tracking-tight text-foreground/90">
-            {displayValue.toLocaleString()}
-        </span>
+                <div className="flex items-end gap-2">
+                    <span className="text-4xl font-black font-mono tabular-nums tracking-tighter text-foreground/90 leading-none">
+                        {displayValue.toLocaleString()}
+                    </span>
 
-                {diff !== 0 && (
-                    <div className={cn(
-                        "flex flex-col mb-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold border backdrop-blur-sm",
-                        diff > 0
-                            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400"
-                            : "bg-red-500/10 text-red-600 border-red-500/20 dark:text-red-400"
-                    )}>
-                        <span className="leading-none">{diff > 0 ? "+" : ""}{diff.toLocaleString()}</span>
-                        <span className="text-[8px] opacity-70 font-sans font-normal">Today</span>
-                    </div>
-                )}
+                    {diff !== 0 && (
+                        <div className={cn(
+                            "flex items-center mb-1 px-1.5 py-0.5 rounded text-[10px] font-bold backdrop-blur-sm",
+                            diff > 0
+                                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                : "bg-red-500/10 text-red-600 dark:text-red-400"
+                        )}>
+                            <span>{diff > 0 ? "+" : ""}{diff.toLocaleString()}</span>
+                        </div>
+                    )}
+                </div>
             </div>
         </motion.div>
     )
@@ -90,45 +86,47 @@ interface ActivityGridProps {
 
 export function ActivityGrid({ user }: ActivityGridProps) {
     return (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"> {/* [Layout] lg 사이즈에서 3열로 확장 */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <ActivityItem
                 label="Merged PRs"
                 value={user.mergedPrCount}
                 diff={user.diffMergedPrCount}
-                icon={<GitMerge className="h-6 w-6 text-blue-600" />}
-                colorClass="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800/50"
+                // [Fix] Dark 모드 아이콘 컬러 밝게 조정 (blue-600 -> dark:blue-400)
+                icon={<GitMerge className="h-5 w-5 text-blue-600 dark:text-blue-400" />}
+                // [Fix] Dark 모드 배경 가시성 확보 (blue-900/20 -> blue-500/10)
+                colorClass="bg-blue-50 dark:bg-blue-500/10 border-blue-100 dark:border-blue-500/20"
                 delay={0.1}
             />
             <ActivityItem
                 label="Open PRs"
-                value={user.prCount - user.mergedPrCount}
-                diff={user.diffPrCount - user.diffMergedPrCount}
-                icon={<GitPullRequest className="h-6 w-6 text-purple-600" />}
-                colorClass="bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-800/50"
+                value={Math.max(0, (user.prCount || 0) - user.mergedPrCount)}
+                diff={(user.diffPrCount || 0) - user.diffMergedPrCount}
+                icon={<GitPullRequest className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
+                colorClass="bg-purple-50 dark:bg-purple-500/10 border-purple-100 dark:border-purple-500/20"
                 delay={0.2}
             />
             <ActivityItem
                 label="Code Reviews"
                 value={user.reviewCount}
                 diff={user.diffReviewCount}
-                icon={<MessageSquare className="h-6 w-6 text-teal-600" />}
-                colorClass="bg-teal-50 dark:bg-teal-950/20 border-teal-200 dark:border-teal-800/50"
+                icon={<MessageSquare className="h-5 w-5 text-teal-600 dark:text-teal-400" />}
+                colorClass="bg-teal-50 dark:bg-teal-500/10 border-teal-100 dark:border-teal-500/20"
                 delay={0.3}
             />
             <ActivityItem
-                label="Total Issues"
+                label="Issues Created"
                 value={user.issueCount}
                 diff={user.diffIssueCount}
-                icon={<AlertCircle className="h-6 w-6 text-amber-600" />}
-                colorClass="bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/50"
+                icon={<AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />}
+                colorClass="bg-amber-50 dark:bg-amber-500/10 border-amber-100 dark:border-amber-500/20"
                 delay={0.4}
             />
             <ActivityItem
                 label="Total Commits"
                 value={user.commitCount}
                 diff={user.diffCommitCount}
-                icon={<GitCommit className="h-6 w-6 text-slate-600" />}
-                colorClass="bg-slate-50 dark:bg-slate-900/20 border-slate-200 dark:border-slate-700/50"
+                icon={<GitCommit className="h-5 w-5 text-slate-600 dark:text-slate-400" />}
+                colorClass="bg-slate-50 dark:bg-slate-500/10 border-slate-100 dark:border-slate-500/20"
                 delay={0.5}
             />
         </div>
