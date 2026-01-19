@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useRef, useState, useCallback, useEffect } from "react";
-import { motion, useSpring, useTransform, MotionValue } from "framer-motion";
+import React, { useRef, useState, useCallback } from "react";
+import { motion, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/shared/lib/utils";
+import { useThrottledCallback } from "@/shared/hooks/use-throttle";
 
 type SpotlightProps = {
     className?: string;
@@ -10,14 +11,29 @@ type SpotlightProps = {
 };
 
 export function Spotlight({ className, fill = "white" }: SpotlightProps) {
-    const mouseX = useSpring(0, { stiffness: 500, damping: 100 });
-    const mouseY = useSpring(0, { stiffness: 500, damping: 100 });
+    const rectRef = useRef<DOMRect | null>(null);
 
-    function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
-        const { left, top } = currentTarget.getBoundingClientRect();
-        mouseX.set(clientX - left);
-        mouseY.set(clientY - top);
-    }
+    // Lower stiffness for smoother, less CPU-intensive animation
+    const mouseX = useSpring(0, { stiffness: 300, damping: 50 });
+    const mouseY = useSpring(0, { stiffness: 300, damping: 50 });
+
+    // Throttle to ~30fps for non-critical visual effect
+    const handleMouseMove = useThrottledCallback(
+        (e: React.MouseEvent) => {
+            const target = e.currentTarget as HTMLElement;
+            // Cache rect to avoid layout thrashing
+            if (!rectRef.current) {
+                rectRef.current = target.getBoundingClientRect();
+            }
+            mouseX.set(e.clientX - rectRef.current.left);
+            mouseY.set(e.clientY - rectRef.current.top);
+        },
+        32 // ~30fps
+    );
+
+    const handleMouseLeave = useCallback(() => {
+        rectRef.current = null; // Invalidate cache on leave
+    }, []);
 
     return (
         <div
@@ -26,6 +42,7 @@ export function Spotlight({ className, fill = "white" }: SpotlightProps) {
                 className
             )}
             onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
         >
             <motion.div
                 className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-300 group-hover/spotlight:opacity-100"
@@ -44,22 +61,43 @@ export function Spotlight({ className, fill = "white" }: SpotlightProps) {
 // 전체 화면 배경용 Spotlight (HeroSection 전용)
 export function HeroSpotlight() {
     const divRef = useRef<HTMLDivElement>(null);
+    const rectRef = useRef<DOMRect | null>(null);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [opacity, setOpacity] = useState(0);
 
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!divRef.current) return;
-        const div = divRef.current;
-        const rect = div.getBoundingClientRect();
-        setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-    };
+    // Throttle to ~30fps - spotlight effect doesn't need 60fps precision
+    const handleMouseMove = useThrottledCallback(
+        (e: React.MouseEvent<HTMLDivElement>) => {
+            if (!divRef.current) return;
+            // Cache rect to avoid layout thrashing on every move
+            if (!rectRef.current) {
+                rectRef.current = divRef.current.getBoundingClientRect();
+            }
+            setPosition({
+                x: e.clientX - rectRef.current.left,
+                y: e.clientY - rectRef.current.top
+            });
+        },
+        32 // ~30fps
+    );
+
+    const handleMouseEnter = useCallback(() => {
+        setOpacity(1);
+        // Refresh rect on enter in case of scroll/resize
+        rectRef.current = null;
+    }, []);
+
+    const handleMouseLeave = useCallback(() => {
+        setOpacity(0);
+        rectRef.current = null;
+    }, []);
 
     return (
         <div
             ref={divRef}
             onMouseMove={handleMouseMove}
-            onMouseEnter={() => setOpacity(1)}
-            onMouseLeave={() => setOpacity(0)}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
             className="absolute inset-0 z-0 overflow-hidden"
         >
             <div

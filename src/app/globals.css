@@ -188,3 +188,95 @@
     }
   }
 }
+
+/* Performance: content-visibility for long lists */
+@layer utilities {
+  /* Ranking list items - defer rendering of off-screen items */
+  .ranking-item {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 80px;
+  }
+
+  /* Table rows for ranking desktop view */
+  .ranking-row {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 64px;
+  }
+
+  /* Mobile card items */
+  .ranking-card {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 96px;
+  }
+}
+
+/* Performance: CSS-based animations (GPU accelerated, no JS overhead) */
+@layer utilities {
+  /* Heatmap block pulse animation - replaces Framer Motion infinite loop */
+  @keyframes heatmap-pulse {
+    0%, 100% {
+      opacity: var(--heatmap-opacity-min, 0.03);
+    }
+    50% {
+      opacity: var(--heatmap-opacity-max, 0.4);
+    }
+  }
+
+  .heatmap-block {
+    animation: heatmap-pulse var(--heatmap-duration, 4s) ease-in-out infinite;
+    animation-delay: var(--heatmap-delay, 0s);
+    will-change: opacity;
+  }
+
+  /* Reduce motion: respect user preference */
+  @media (prefers-reduced-motion: reduce) {
+    .heatmap-block {
+      animation: none;
+      opacity: var(--heatmap-opacity-max, 0.4);
+    }
+
+    .ranking-card,
+    .ranking-row {
+      transition: none !important;
+    }
+
+    /* Disable all motion.div animations */
+    [data-framer-component-type] {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+
+  /* Counter animation for ActivityGrid - CSS only */
+  @keyframes count-up {
+    from {
+      --num: 0;
+    }
+    to {
+      --num: var(--target);
+    }
+  }
+
+  .count-animation {
+    animation: count-up 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    counter-reset: num var(--num);
+  }
+
+  .count-animation::after {
+    content: counter(num);
+  }
+
+  /* Optimized backdrop blur - lighter version for low-spec devices */
+  @supports (backdrop-filter: blur(8px)) {
+    .backdrop-blur-optimized {
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+  }
+
+  @supports not (backdrop-filter: blur(8px)) {
+    .backdrop-blur-optimized {
+      background-color: rgba(var(--background), 0.95);
+    }
+  }
+}

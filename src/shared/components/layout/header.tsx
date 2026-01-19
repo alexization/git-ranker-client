@@ -181,7 +181,10 @@ export function Header() {
                         >
                             {logoutMutation.isPending ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    {/* Wrap SVG in div for hardware-accelerated animation */}
+                                    <div className="mr-2 animate-spin">
+                                        <Loader2 className="h-4 w-4" />
+                                    </div>
                                     로그아웃 중...
                                 </>
                             ) : (

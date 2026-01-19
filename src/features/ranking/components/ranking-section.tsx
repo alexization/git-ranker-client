@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, memo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { useRankingList } from "../api/ranking-service"
+import { usePrefetchUser } from "@/features/user/api/user-service"
 import { Tier, RankingUserInfo } from "@/shared/types/api"
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/avatar"
 import { Skeleton } from "@/shared/components/skeleton"
@@ -49,6 +50,9 @@ export function RankingSection() {
   const [selectedTier, setSelectedTier] = useState<Tier | 'ALL'>('ALL')
   const [selectedUsername, setSelectedUsername] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
+
+  // Prefetch user data on hover/focus for faster modal opening
+  const prefetchUser = usePrefetchUser()
 
   const { data, isLoading, isError } = useRankingList(
       page,
@@ -159,15 +163,15 @@ export function RankingSection() {
                   랭킹 데이터가 없습니다.
                 </div>
             ) : (
-                rankings.map((user, index) => (
-                    <motion.div
+                rankings.map((user) => (
+                    <div
                         key={user.username}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.05 }}
                         onClick={() => handleUserClick(user.username)}
+                        onMouseEnter={() => prefetchUser(user.username)}
+                        onFocus={() => prefetchUser(user.username)}
+                        className="ranking-card"
                     >
-                      <Card className="flex items-center p-4 gap-4 cursor-pointer active:scale-95 transition-transform border-none bg-secondary/10 hover:bg-secondary/20">
+                      <Card className="flex items-center p-4 gap-4 cursor-pointer active:scale-[0.98] transition-all duration-200 border-none bg-secondary/10 hover:bg-secondary/20">
                         <div className="flex-shrink-0 flex flex-col items-center justify-center w-10">
                           {renderRankIcon(user.ranking)}
                         </div>
@@ -188,13 +192,13 @@ export function RankingSection() {
                           <p className="text-lg font-bold font-mono text-primary">{user.totalScore.toLocaleString()}</p>
                         </div>
                       </Card>
-                    </motion.div>
+                    </div>
                 ))
             )}
           </div>
 
           {/* Desktop View: Table */}
-          <div className="hidden md:block rounded-3xl border bg-card/50 backdrop-blur-xl shadow-sm overflow-hidden">
+          <div className="hidden md:block rounded-3xl border bg-card/80 backdrop-blur-sm shadow-sm overflow-hidden">
             <div className="relative w-full overflow-auto">
               <table className="w-full caption-bottom text-sm">
                 <thead>
@@ -225,14 +229,13 @@ export function RankingSection() {
                       </td>
                     </tr>
                 ) : (
-                    rankings.map((user, index) => (
-                        <motion.tr
+                    rankings.map((user) => (
+                        <tr
                             key={user.username}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.2, delay: index * 0.03 }}
-                            className="border-b transition-colors hover:bg-muted/50 cursor-pointer group"
+                            className="border-b transition-colors duration-150 hover:bg-muted/50 cursor-pointer group ranking-row"
                             onClick={() => handleUserClick(user.username)}
+                            onMouseEnter={() => prefetchUser(user.username)}
+                            onFocus={() => prefetchUser(user.username)}
                         >
                           <td className="p-4 text-center">
                             <div className="flex justify-center items-center">
@@ -241,25 +244,25 @@ export function RankingSection() {
                           </td>
                           <td className="p-4">
                             <div className="flex items-center gap-4">
-                              <Avatar className="h-10 w-10 border-2 border-background group-hover:border-primary/20 transition-colors">
+                              <Avatar className="h-10 w-10 border-2 border-background group-hover:border-primary/20 transition-colors duration-150">
                                 <AvatarImage src={user.profileImage} alt={user.username} />
                                 <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
                               </Avatar>
-                              <span className="font-bold text-base group-hover:text-primary transition-colors">{user.username}</span>
+                              <span className="font-bold text-base group-hover:text-primary transition-colors duration-150">{user.username}</span>
                             </div>
                           </td>
                           <td className="p-4 text-center">
                         <span className={cn(
-                            "inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide transition-transform group-hover:scale-105",
+                            "inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide",
                             tierColorClass(user.tier)
                         )}>
                           {user.tier}
                         </span>
                           </td>
-                          <td className="p-4 text-right font-mono font-bold text-lg text-foreground/80 group-hover:text-primary transition-colors">
+                          <td className="p-4 text-right font-mono font-bold text-lg text-foreground/80 group-hover:text-primary transition-colors duration-150">
                             {user.totalScore.toLocaleString()}
                           </td>
-                        </motion.tr>
+                        </tr>
                     ))
                 )}
                 </tbody>

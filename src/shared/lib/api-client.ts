@@ -1,4 +1,10 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import {
+  getLocalStorage,
+  setLocalStorage,
+  removeLocalStorage,
+  invalidateLocalStorageCache
+} from './storage-cache';
 
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1`;
 
@@ -133,12 +139,12 @@ apiClient.interceptors.response.use(
       try {
         const newAccessToken = await refreshAccessToken();
 
-        // auth-store 업데이트 (localStorage 직접 접근)
-        const authStorage = localStorage.getItem('auth-storage');
+        // auth-store 업데이트 (캐시된 localStorage 접근)
+        const authStorage = getLocalStorage('auth-storage');
         if (authStorage) {
           const parsed = JSON.parse(authStorage);
           parsed.state.accessToken = newAccessToken;
-          localStorage.setItem('auth-storage', JSON.stringify(parsed));
+          setLocalStorage('auth-storage', JSON.stringify(parsed));
         }
 
         // 기본 헤더 업데이트
@@ -154,7 +160,7 @@ apiClient.interceptors.response.use(
         processQueue(refreshError as AxiosError, null);
 
         // auth-store 초기화
-        localStorage.removeItem('auth-storage');
+        removeLocalStorage('auth-storage');
         delete apiClient.defaults.headers.common['Authorization'];
 
         // 로그인 페이지로 리다이렉트 (클라이언트 사이드에서만)

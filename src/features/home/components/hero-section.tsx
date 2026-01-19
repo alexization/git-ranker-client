@@ -98,14 +98,14 @@ export function HeroSection() {
   return (
       <section className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden pt-10 pb-20">
 
-        {/* [Change] Focus Mode Backdrop */}
+        {/* [Change] Focus Mode Backdrop - optimized: removed backdrop-blur for better perf on low-spec devices */}
         <AnimatePresence>
           {isFocused && (
               <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm"
+                  className="fixed inset-0 z-40 bg-background/90"
                   onClick={() => {
                     setIsFocused(false)
                     setOpen(false)
@@ -145,7 +145,7 @@ export function HeroSection() {
               className="relative mx-auto w-full max-w-2xl"
           >
             <div className={cn(
-                "relative flex items-center rounded-2xl border transition-all duration-300 overflow-hidden bg-background/60 backdrop-blur-xl shadow-2xl",
+                "relative flex items-center rounded-2xl border transition-all duration-300 overflow-hidden bg-background/80 backdrop-blur-sm shadow-2xl",
                 isFocused ? "border-primary ring-4 ring-primary/10 scale-105" : "border-border/50 hover:border-primary/50"
             )}>
               <div className="pl-5 pr-2">
@@ -184,7 +184,7 @@ export function HeroSection() {
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="absolute top-full z-50 mt-2 w-full overflow-hidden rounded-2xl border bg-background/95 backdrop-blur-xl p-2 shadow-xl"
+                      className="absolute top-full z-50 mt-2 w-full overflow-hidden rounded-2xl border bg-background/95 backdrop-blur-sm p-2 shadow-xl"
                   >
                     <div className="flex items-center justify-between px-3 py-2 text-[11px] font-bold text-muted-foreground uppercase">
                       <span>최근 검색 기록</span>

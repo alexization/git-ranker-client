@@ -13,9 +13,20 @@ const nextConfig: NextConfig = {
             },
         ],
     },
-    // 성능을 위한 실험적 기능 (선택 사항)
+    // 성능을 위한 실험적 기능 - Barrel imports 최적화
     experimental: {
-        optimizePackageImports: ["lucide-react", "framer-motion"],
+        optimizePackageImports: [
+            "lucide-react",
+            "framer-motion",
+            "@radix-ui/react-avatar",
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-dropdown-menu",
+            "@radix-ui/react-alert-dialog",
+            "@radix-ui/react-popover",
+            "@radix-ui/react-tabs",
+            "recharts",
+            "sonner",
+        ],
     },
 };
 

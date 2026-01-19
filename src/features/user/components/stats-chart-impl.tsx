@@ -11,6 +11,7 @@ import {
     Tooltip,
 } from "recharts"
 import { RegisterUserResponse } from "@/shared/types/api"
+import { useReducedMotion } from "@/shared/hooks/use-reduced-motion"
 
 interface StatsChartProps {
     user: RegisterUserResponse
@@ -27,6 +28,7 @@ const WEIGHTS = {
 }
 
 export function StatsChartImpl({ user }: StatsChartProps) {
+    const prefersReducedMotion = useReducedMotion()
 
     const chartData = useMemo(() => {
         // [Logic] 있는 그대로의 가중치 점수 계산
@@ -65,7 +67,7 @@ export function StatsChartImpl({ user }: StatsChartProps) {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
             return (
-                <div className="bg-popover/95 backdrop-blur-md border border-border px-4 py-3 rounded-xl shadow-2xl text-sm min-w-[150px]">
+                <div className="bg-popover border border-border px-4 py-3 rounded-xl shadow-xl text-sm min-w-[150px]">
                     <p className="font-bold text-foreground mb-2 border-b border-border/50 pb-1">
                         {data.subject}
                     </p>
@@ -132,8 +134,8 @@ export function StatsChartImpl({ user }: StatsChartProps) {
                         strokeWidth={3}
                         fill="hsl(var(--primary))"
                         fillOpacity={0.3}
-                        isAnimationActive={true}
-                        animationDuration={1500}
+                        isAnimationActive={!prefersReducedMotion}
+                        animationDuration={800}
                         animationEasing="ease-out"
                     />
 

@@ -82,7 +82,10 @@ function RedirectHandler() {
           <div className="relative mb-6">
             <Skeleton className="h-36 w-36 rounded-full" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <Loader2 className="h-10 w-10 text-primary animate-spin opacity-50" />
+              {/* Wrap SVG in div for hardware-accelerated animation */}
+              <div className="animate-spin">
+                <Loader2 className="h-10 w-10 text-primary opacity-50" />
+              </div>
             </div>
           </div>
 

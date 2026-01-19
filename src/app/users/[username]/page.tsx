@@ -402,7 +402,10 @@ export default function UserDetailPage() {
                                         variant="outline"
                                         className="w-full rounded-2xl border-dashed border-border hover:bg-accent/50 h-11 text-sm font-medium disabled:opacity-50 transition-all active:scale-[0.98]"
                                     >
-                                        <RefreshCcw className={cn("mr-2 h-4 w-4", refreshMutation.isPending && "animate-spin")} />
+                                        {/* Wrap SVG in div for hardware-accelerated animation */}
+                                        <div className={cn("mr-2", refreshMutation.isPending && "animate-spin")}>
+                                            <RefreshCcw className="h-4 w-4" />
+                                        </div>
                                         {refreshMutation.isPending ? "동기화 중..." : "최신 데이터 불러오기"}
                                     </Button>
                                 </div>
