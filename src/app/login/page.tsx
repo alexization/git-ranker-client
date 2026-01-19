@@ -1,11 +1,21 @@
 "use client"
 
-import {motion} from "framer-motion"
-import { Activity, Github, ShieldCheck, Trophy } from "lucide-react"
-import {Button} from "@/shared/components/button"
-import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/shared/components/card"
-import {Avatar, AvatarFallback, AvatarImage} from "@/shared/components/avatar"
-import {cn} from "@/shared/lib/utils"
+import { motion } from "framer-motion"
+import { Github, Zap, Trophy, GitCommit } from "lucide-react"
+import { Button } from "@/shared/components/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/shared/components/card"
+import { cn } from "@/shared/lib/utils"
+import { LiveTicker, TickerUpdate } from "@/shared/components/ui/live-ticker"
+
+// [Data] Action 필드 제거 (User + Tier)
+const MOCK_LIVE_UPDATES: TickerUpdate[] = [
+    { user: "new_challenger", tier: "CHALLENGER" },
+    { user: "frontend_master", tier: "DIAMOND" },
+    { user: "backend_pro", tier: "PLATINUM" },
+    { user: "opensource_L", tier: "GOLD" },
+    { user: "junior_dev", tier: "SILVER" },
+    { user: "fullstack_JS", tier: "EMERALD" },
+];
 
 export default function LoginPage() {
     const handleGithubLogin = () => {
@@ -13,127 +23,108 @@ export default function LoginPage() {
     }
 
     const containerVariants = {
-        hidden: {opacity: 0, scale: 0.95}, visible: {
-            opacity: 1, scale: 1, transition: {
-                duration: 0.5, staggerChildren: 0.1,
-            }
+        hidden: {opacity: 0, scale: 0.95},
+        visible: {
+            opacity: 1, scale: 1,
+            transition: { duration: 0.5, staggerChildren: 0.1 }
         }
     }
 
     const itemVariants = {
-        hidden: {opacity: 0, y: 10}, visible: {opacity: 1, y: 0}
+        hidden: {opacity: 0, y: 10},
+        visible: {opacity: 1, y: 0}
     }
 
-    // 가상의 유저 아바타 데이터 (Social Proof용)
-    const users = [{src: "https://github.com/shadcn.png", fallback: "CN"}, {
-        src: "https://github.com/vercel.png",
-        fallback: "VC"
-    }, {src: "https://github.com/react.png", fallback: "RC"}, {
-        src: "https://github.com/tailwindlabs.png",
-        fallback: "TW"
-    },]
+    return (
+        <div className="relative flex min-h-[calc(100vh-4rem)] items-center justify-center p-4 overflow-hidden">
+            <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse"/>
+                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px] animate-pulse delay-1000"/>
+            </div>
 
-    return (<div className="relative flex min-h-[calc(100vh-4rem)] items-center justify-center p-4 overflow-hidden">
-        {/* Dynamic Background - [FIX] 색감을 더 선명하게 조정 (opacity 20/10 -> 30/20) */}
-        <div className="absolute inset-0 -z-10">
-            <div
-                className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/30 rounded-full blur-[100px] animate-pulse"/>
-            <div
-                className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-[100px] animate-pulse delay-1000"/>
+            <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="w-full max-w-md"
+            >
+                <Card className="border-white/20 bg-white/70 dark:bg-black/40 backdrop-blur-2xl shadow-2xl overflow-hidden rounded-[2rem]">
+                    <CardHeader className="text-center space-y-2 pb-6 pt-10">
+                        <motion.div variants={itemVariants} className="mx-auto mb-4">
+                            <div className="inline-flex items-center justify-center p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-purple-500/10 ring-1 ring-black/5 dark:ring-white/10 shadow-inner">
+                                <Trophy className="w-10 h-10 text-primary fill-primary/20" />
+                            </div>
+                        </motion.div>
+
+                        <motion.div variants={itemVariants}>
+                            <CardTitle className="text-3xl font-black tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+                                Check Your Tier
+                            </CardTitle>
+                        </motion.div>
+
+                        <motion.div variants={itemVariants}>
+                            <CardDescription className="text-base font-medium leading-relaxed">
+                                내 깃허브 활동은 상위 몇 %일까요?<br/>
+                                <span className="text-primary font-bold">10초</span>만에 분석 결과를 확인하세요.
+                            </CardDescription>
+                        </motion.div>
+                    </CardHeader>
+
+                    <CardContent className="space-y-6 px-0 pb-2">
+                        {/* LiveTicker: 유저와 티어만 깔끔하게 노출 */}
+                        <motion.div variants={itemVariants} className="relative w-full">
+                            <div className="opacity-90 hover:opacity-100 transition-opacity">
+                                <LiveTicker updates={MOCK_LIVE_UPDATES} />
+                            </div>
+                        </motion.div>
+
+                        <div className="px-8 space-y-3">
+                            <div className="flex items-center gap-4 p-4 rounded-2xl bg-secondary/40 border border-border/50 hover:bg-secondary/60 transition-colors">
+                                <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
+                                    <GitCommit className="w-5 h-5" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-bold text-foreground">활동 정밀 분석</span>
+                                    <span className="text-xs text-muted-foreground">커밋, PR, 리뷰 등 기여도 기반 산정</span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-4 p-4 rounded-2xl bg-secondary/40 border border-border/50 hover:bg-secondary/60 transition-colors">
+                                <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 shrink-0">
+                                    <Zap className="w-5 h-5" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-bold text-foreground">실시간 랭킹</span>
+                                    <span className="text-xs text-muted-foreground">전체 개발자 중 나의 전투력 순위</span>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+
+                    <CardFooter className="flex flex-col gap-4 pb-10 px-8 pt-4">
+                        <motion.div variants={itemVariants} className="w-full">
+                            <Button
+                                className={cn(
+                                    "w-full h-14 text-[15px] font-bold rounded-xl shadow-xl transition-all active:scale-[0.98] relative overflow-hidden group",
+                                    "bg-[#24292F] hover:bg-[#24292F]/90 text-white",
+                                    "dark:bg-white dark:text-[#24292F] dark:hover:bg-gray-100"
+                                )}
+                                onClick={handleGithubLogin}
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:animate-[shimmer_1.5s_infinite]" />
+                                <Github className="mr-2 h-5 w-5 fill-current" />
+                                내 티어 확인하기 (GitHub)
+                            </Button>
+                        </motion.div>
+
+                        <motion.div variants={itemVariants} className="text-center">
+                            <p className="text-[10px] text-muted-foreground/60">
+                                로그인 시 이용약관 및 개인정보처리방침에 동의하게 됩니다.
+                            </p>
+                        </motion.div>
+                    </CardFooter>
+                </Card>
+            </motion.div>
         </div>
-
-        <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="w-full max-w-md"
-        >
-            <Card className="border-white/20 bg-white/60 dark:bg-black/40 backdrop-blur-xl shadow-2xl">
-                <CardHeader className="text-center space-y-2 pb-8">
-                    <motion.div variants={itemVariants}
-                                className="mx-auto bg-primary/10 w-12 h-12 rounded-2xl flex items-center justify-center mb-2">
-                        <ShieldCheck className="w-6 h-6 text-primary"/>
-                    </motion.div>
-                    <motion.div variants={itemVariants}>
-                        <CardTitle
-                            className="text-2xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-                            Git Ranker 시작하기
-                        </CardTitle>
-                    </motion.div>
-                    <motion.div variants={itemVariants}>
-                        <CardDescription className="text-base">
-                            당신의 개발 여정을 증명할 시간입니다.
-                        </CardDescription>
-                    </motion.div>
-                </CardHeader>
-
-                <CardContent className="space-y-8">
-                    {/* Value Props */}
-                    <motion.div variants={itemVariants} className="space-y-4">
-                        <div
-                            className="flex items-center gap-3 p-3 rounded-xl bg-background/50 border border-border/50">
-                            <div className="p-2 rounded-lg bg-yellow-500/10 text-yellow-600">
-                                <Trophy className="w-5 h-5"/>
-                            </div>
-                            <div className="text-sm">
-                                <span className="font-semibold block text-foreground">객관적인 실력 지표</span>
-                                <span className="text-muted-foreground">내 코딩 실력을 티어로 확인하세요.</span>
-                            </div>
-                        </div>
-                        <div
-                            className="flex items-center gap-3 p-3 rounded-xl bg-background/50 border border-border/50">
-                            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600">
-                                <Activity className="w-5 h-5"/>
-                            </div>
-                            <div className="text-sm">
-                                <span className="font-semibold block text-foreground">성장 그래프 분석</span>
-                                <span className="text-muted-foreground">활동 데이터를 시각화하여 보여줍니다.</span>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    {/* Social Proof */}
-                    <motion.div variants={itemVariants} className="flex flex-col items-center gap-2">
-                        <div className="flex -space-x-3">
-                            {users.map((u, i) => (<Avatar key={i} className="border-2 border-background w-8 h-8">
-                                <AvatarImage src={u.src}/>
-                                <AvatarFallback>{u.fallback}</AvatarFallback>
-                            </Avatar>))}
-                            <div
-                                className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-background bg-muted text-[10px] font-bold text-muted-foreground">
-                                +3k
-                            </div>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                            이미 <span className="font-bold text-primary">3,000+</span>명의 개발자가 함께하고 있습니다.
-                        </p>
-                    </motion.div>
-                </CardContent>
-
-                <CardFooter className="flex flex-col gap-4 pb-8">
-                    <motion.div variants={itemVariants} className="w-full">
-                        <Button
-                            className={cn("w-full h-12 text-base font-bold shadow-lg transition-all active:scale-[0.98]", "bg-[#24292F] hover:bg-[#24292F]/90 text-white", // GitHub Brand Color
-                                "dark:bg-white dark:text-[#24292F] dark:hover:bg-gray-100" // Dark mode inversion for better visibility
-                            )}
-                            onClick={handleGithubLogin}
-                        >
-                            <Github className="mr-2 h-5 w-5 fill-current"/>
-                            GitHub로 계속하기
-                        </Button>
-                    </motion.div>
-
-                    <motion.div variants={itemVariants} className="text-center">
-                        <p className="text-[10px] text-muted-foreground/60 px-4">
-                            로그인 시 <span
-                            className="underline decoration-muted-foreground/30 cursor-pointer hover:text-muted-foreground">이용약관</span> 및 <span
-                            className="underline decoration-muted-foreground/30 cursor-pointer hover:text-muted-foreground">개인정보처리방침</span>에
-                            동의하게 됩니다.
-                            <br/>Git Ranker는 Public 데이터만 수집하며 코드는 저장하지 않습니다.
-                        </p>
-                    </motion.div>
-                </CardFooter>
-            </Card>
-        </motion.div>
-    </div>)
+    )
 }
