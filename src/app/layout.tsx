@@ -4,6 +4,7 @@ import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/shared/providers/query-provider";
 import { ThemeProvider } from "@/shared/providers/theme-provider";
+import { AuthProvider } from "@/shared/providers/auth-provider";
 import { Toaster } from "@/shared/components/toaster";
 import { Header } from "@/shared/components/layout/header";
 import { cn } from "@/shared/lib/utils";
@@ -78,11 +79,13 @@ export default function RootLayout({
             disableTransitionOnChange
         >
             <QueryProvider>
-                <Header />
-                <div className="flex-1">
-                    {children}
-                </div>
-                <Toaster />
+                <AuthProvider>
+                    <Header />
+                    <div className="flex-1">
+                        {children}
+                    </div>
+                    <Toaster />
+                </AuthProvider>
             </QueryProvider>
         </ThemeProvider>
         </body>

@@ -16,64 +16,72 @@ interface StatsChartProps {
     user: RegisterUserResponse
 }
 
-// [Logic] Git Ranker Scoring Weights
+// [Logic] 활동별 가중치 (점수 계산용)
+// 이 가중치를 곱한 값이 곧 그래프의 점수가 됩니다.
 const WEIGHTS = {
-    mergedPr: 8,
-    openPr: 5,
-    review: 5,
-    issue: 2,
-    commit: 1,
+    commit: 1,       // 1점
+    issue: 2,        // 2점
+    review: 5,       // 5점
+    pr: 5,           // 5점
+    mergedPr: 8,     // 8점
 }
 
 export function StatsChartImpl({ user }: StatsChartProps) {
-    // [Fix] 단순 횟수가 아닌 '가중치 점수'로 변환하여 그래프 균형 보정
-    const chartData = useMemo(() => [
-        {
-            subject: 'Commits',
-            raw: user.commitCount,
-            value: user.commitCount * WEIGHTS.commit,
-            fullMark: 100
-        },
-        {
-            subject: 'Issues',
-            raw: user.issueCount,
-            value: user.issueCount * WEIGHTS.issue,
-            fullMark: 100
-        },
-        {
-            subject: 'PR Merged',
-            raw: user.mergedPrCount,
-            value: user.mergedPrCount * WEIGHTS.mergedPr,
-            fullMark: 100
-        },
-        {
-            subject: 'PR Count',
-            raw: user.PrCount ?? user.prCount,
-            value: (user.PrCount ?? user.prCount) * WEIGHTS.openPr,
-            fullMark: 100
-        },
-        {
-            subject: 'Reviews',
-            raw: user.reviewCount,
-            value: user.reviewCount * WEIGHTS.review,
-            fullMark: 100
-        },
-    ], [user.commitCount, user.issueCount, user.mergedPrCount, user.PrCount, user.prCount, user.reviewCount])
 
-    // Custom Tooltip: 점수와 원본 횟수를 함께 표시
-    const CustomTooltip = ({ active, payload, label }: any) => {
+    const chartData = useMemo(() => {
+        // [Logic] 있는 그대로의 가중치 점수 계산
+        // 인위적인 Normalization 없이 (Count * Weight) 값을 그대로 사용합니다.
+        return [
+            {
+                subject: 'Commits',
+                raw: user.commitCount,
+                value: user.commitCount * WEIGHTS.commit
+            },
+            {
+                subject: 'Issues',
+                raw: user.issueCount,
+                value: user.issueCount * WEIGHTS.issue
+            },
+            {
+                subject: 'PR Merged',
+                raw: user.mergedPrCount,
+                value: user.mergedPrCount * WEIGHTS.mergedPr
+            },
+            {
+                subject: 'PR Open',
+                raw: user.prCount,
+                value: (user.prCount ?? 0) * WEIGHTS.pr // PR Open은 5점
+            },
+            {
+                subject: 'Reviews',
+                raw: user.reviewCount,
+                value: user.reviewCount * WEIGHTS.review
+            },
+        ];
+    }, [user]);
+
+    // [UX] Custom Tooltip: 디자인은 유지하되 데이터 표시는 원본 유지
+    const CustomTooltip = ({ active, payload }: any) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
             return (
-                <div className="bg-popover/90 backdrop-blur-md border border-border px-3 py-2 rounded-xl shadow-xl text-xs">
-                    <p className="font-bold text-foreground mb-1">{data.subject}</p>
-                    <div className="flex flex-col gap-0.5">
-                        <p className="text-muted-foreground">
-                            Count: <span className="text-foreground font-mono font-semibold">{data.raw.toLocaleString()}</span>
-                        </p>
-                        <p className="text-primary font-medium">
-                            Score: <span className="font-mono">{data.value.toLocaleString()}</span> pts
-                        </p>
+                <div className="bg-popover/95 backdrop-blur-md border border-border px-4 py-3 rounded-xl shadow-2xl text-sm min-w-[150px]">
+                    <p className="font-bold text-foreground mb-2 border-b border-border/50 pb-1">
+                        {data.subject}
+                    </p>
+                    <div className="space-y-1.5">
+                        <div className="flex items-center justify-between gap-4">
+                            <span className="text-muted-foreground text-xs font-medium">Count</span>
+                            <span className="text-foreground font-mono font-semibold">
+                                {data.raw.toLocaleString()}
+                            </span>
+                        </div>
+                        <div className="flex items-center justify-between gap-4">
+                            <span className="text-muted-foreground text-xs font-medium">Score</span>
+                            <span className="text-primary font-mono font-bold">
+                                {data.value.toLocaleString()} pts
+                            </span>
+                        </div>
                     </div>
                 </div>
             );
@@ -82,14 +90,15 @@ export function StatsChartImpl({ user }: StatsChartProps) {
     };
 
     return (
-        <div className="w-full h-full flex items-center justify-center py-2">
+        <div className="w-full h-full flex items-center justify-center py-2 select-none">
             <ResponsiveContainer width="100%" height="100%">
                 <RadarChart cx="50%" cy="50%" outerRadius="70%" data={chartData}>
                     <PolarGrid
                         gridType="polygon"
                         stroke="hsl(var(--muted-foreground))"
-                        strokeOpacity={0.2}
+                        strokeOpacity={0.15}
                     />
+
                     <PolarAngleAxis
                         dataKey="subject"
                         tick={({ x, y, payload, textAnchor }) => (
@@ -99,25 +108,35 @@ export function StatsChartImpl({ user }: StatsChartProps) {
                                 textAnchor={textAnchor}
                                 fill="hsl(var(--muted-foreground))"
                                 fontSize={11}
-                                fontWeight={600}
-                                dy={payload.value === 'Commits' ? -10 : 5} // 라벨 위치 미세 조정
+                                fontWeight={700}
+                                dy={payload.value === 'Commits' ? -10 : 5}
+                                className="uppercase tracking-wider"
                             >
                                 {payload.value}
                             </text>
                         )}
                     />
-                    {/* RadiusAxis는 시각적 노이즈를 줄이기 위해 숨김 처리 */}
-                    <PolarRadiusAxis angle={30} domain={[0, 'auto']} tick={false} axisLine={false} />
+
+                    {/* [Logic] domain을 'auto'로 설정하여 데이터 최대값에 맞춰 그래프가 자동으로 커지게 함 */}
+                    <PolarRadiusAxis
+                        angle={30}
+                        domain={[0, 'auto']}
+                        tick={false}
+                        axisLine={false}
+                    />
 
                     <Radar
-                        name={user.username}
+                        name="Activity"
                         dataKey="value"
                         stroke="hsl(var(--primary))"
                         strokeWidth={3}
                         fill="hsl(var(--primary))"
                         fillOpacity={0.3}
                         isAnimationActive={true}
+                        animationDuration={1500}
+                        animationEasing="ease-out"
                     />
+
                     <Tooltip content={<CustomTooltip />} cursor={false} />
                 </RadarChart>
             </ResponsiveContainer>
