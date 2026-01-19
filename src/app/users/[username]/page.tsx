@@ -226,7 +226,7 @@ export default function UserDetailPage() {
                             initial={{ scale: 0.5, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             transition={{ delay: 0.1, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                            className="relative z-10 mx-auto mb-6"
+                            className="relative z-10 mb-6 w-full flex justify-center"
                         >
                             <motion.div
                                 animate={{ y: [0, -6, 0] }}

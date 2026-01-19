@@ -137,7 +137,13 @@ export function StatsChartImpl({ user }: StatsChartProps) {
                         animationEasing="ease-out"
                     />
 
-                    <Tooltip content={<CustomTooltip />} cursor={false} />
+                    <Tooltip
+                        content={<CustomTooltip />}
+                        cursor={false}
+                        isAnimationActive={false}
+                        animationDuration={0}
+                        allowEscapeViewBox={{ x: true, y: true }}
+                    />
                 </RadarChart>
             </ResponsiveContainer>
         </div>
