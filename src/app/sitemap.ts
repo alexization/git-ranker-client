@@ -1,15 +1,29 @@
-import { MetadataRoute } from "next";
+import { MetadataRoute } from "next"
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://www.git-ranker.com";
-  
-  // 정적 페이지 리스트
-  const routes = ["", "/ranking"].map((route) => ({
-    url: `${baseUrl}${route}`,
-    lastModified: new Date().toISOString(),
-    changeFrequency: "daily" as const,
-    priority: route === "" ? 1 : 0.8,
-  }));
+    const baseUrl = "https://www.git-ranker.com"
+    const currentDate = new Date().toISOString()
 
-  return [...routes];
+    const staticRoutes: MetadataRoute.Sitemap = [
+        {
+            url: baseUrl,
+            lastModified: currentDate,
+            changeFrequency: "daily",
+            priority: 1,
+        },
+        {
+            url: `${baseUrl}/ranking`,
+            lastModified: currentDate,
+            changeFrequency: "hourly",
+            priority: 0.9,
+        },
+        {
+            url: `${baseUrl}/login`,
+            lastModified: currentDate,
+            changeFrequency: "monthly",
+            priority: 0.5,
+        },
+    ]
+
+    return staticRoutes
 }

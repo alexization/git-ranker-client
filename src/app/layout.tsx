@@ -65,6 +65,14 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="ko" suppressHydrationWarning>
+        <head>
+            {/* Preconnect to external origins for faster resource loading */}
+            <link rel="preconnect" href="https://avatars.githubusercontent.com" />
+            <link rel="dns-prefetch" href="https://avatars.githubusercontent.com" />
+            <link rel="preconnect" href="https://api.git-ranker.com" />
+            <link rel="dns-prefetch" href="https://api.git-ranker.com" />
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        </head>
         <body
             className={cn(
                 "min-h-screen bg-background font-sans antialiased flex flex-col",
