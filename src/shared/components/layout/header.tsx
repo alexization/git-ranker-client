@@ -1,9 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Github, LogOut, User, Trophy } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { Github, LogOut, User, Trophy, Loader2 } from "lucide-react"
 import { useAuthStore } from "@/features/auth/store/auth-store"
+import { useLogout } from "@/features/auth/api/auth-service"
 import { Button } from "@/shared/components/button"
 import { ThemeToggle } from "@/shared/components/theme-toggle"
 import {
@@ -29,7 +30,9 @@ import { useEffect, useState } from "react"
 import { cn } from "@/shared/lib/utils"
 
 export function Header() {
-    const { user, isAuthenticated, logout } = useAuthStore()
+    const { user, isAuthenticated } = useAuthStore()
+    const logoutMutation = useLogout()
+    const router = useRouter()
     const [mounted, setMounted] = useState(false)
     const [showLogoutDialog, setShowLogoutDialog] = useState(false)
     const pathname = usePathname()
@@ -46,9 +49,10 @@ export function Header() {
         setShowLogoutDialog(true)
     }
 
-    const handleLogoutConfirm = () => {
-        logout()
+    const handleLogoutConfirm = async () => {
+        await logoutMutation.mutateAsync()
         setShowLogoutDialog(false)
+        router.push('/')
     }
 
     return (
@@ -142,9 +146,20 @@ export function Header() {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>취소</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleLogoutConfirm} className="bg-red-600 hover:bg-red-700">
-                            로그아웃
+                        <AlertDialogCancel disabled={logoutMutation.isPending}>취소</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleLogoutConfirm}
+                            className="bg-red-600 hover:bg-red-700"
+                            disabled={logoutMutation.isPending}
+                        >
+                            {logoutMutation.isPending ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    로그아웃 중...
+                                </>
+                            ) : (
+                                '로그아웃'
+                            )}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
