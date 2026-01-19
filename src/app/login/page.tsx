@@ -1,11 +1,12 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Github, Zap, Trophy, GitCommit } from "lucide-react"
+import { Zap, Trophy, GitCommit } from "lucide-react"
 import { Button } from "@/shared/components/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/shared/components/card"
 import { cn } from "@/shared/lib/utils"
 import { LiveTicker, TickerUpdate } from "@/shared/components/ui/live-ticker"
+import { GithubIcon } from "@/shared/components/icons/github-icon"
 
 // [Data] Action 필드 제거 (User + Tier)
 const MOCK_LIVE_UPDATES: TickerUpdate[] = [
@@ -112,7 +113,7 @@ export default function LoginPage() {
                                 onClick={handleGithubLogin}
                             >
                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:animate-[shimmer_1.5s_infinite]" />
-                                <Github className="mr-2 h-5 w-5 fill-current" />
+                                <GithubIcon className="mr-2 h-5 w-5" />
                                 내 티어 확인하기 (GitHub)
                             </Button>
                         </motion.div>

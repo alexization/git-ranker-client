@@ -1,5 +1,5 @@
 import {HeroSection} from "@/features/home/components/hero-section"
-import { Github } from "lucide-react"
+import { GithubIcon } from "@/shared/components/icons/github-icon"
 
 export default function Home() {
     return (<div className="flex min-h-[calc(100vh-3.5rem)] flex-col">
@@ -18,7 +18,7 @@ export default function Home() {
                         rel="noreferrer"
                         className="flex items-center gap-2 text-sm font-semibold text-foreground/80 hover:text-primary transition-colors"
                     >
-                        <Github className="h-4 w-4"/>
+                        <GithubIcon className="h-4 w-4"/>
                         <span>alexization</span>
                     </a>
                 </div>

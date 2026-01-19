@@ -4,7 +4,6 @@ import { useParams, useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import {
     RefreshCcw,
-    Github,
     Share2,
     Copy,
     Trophy,
@@ -12,6 +11,7 @@ import {
     HelpCircle,
     ArrowLeft
 } from "lucide-react"
+import { GithubIcon } from "@/shared/components/icons/github-icon"
 import { useUser, useRefreshUser } from "@/features/user/api/user-service"
 import { StatsChart } from "@/features/user/components/stats-chart"
 import { BadgeGenerator } from "@/features/user/components/badge-generator"
@@ -220,7 +220,7 @@ export default function UserDetailPage() {
                     <div className="flex gap-3 justify-center">
                         <Button variant="outline" onClick={() => router.push('/')}>홈으로</Button>
                         <Button onClick={handleGithubRegister} className="bg-[#24292F] text-white hover:bg-[#24292F]/90">
-                            <Github className="mr-2 h-4 w-4" /> 등록하기
+                            <GithubIcon className="mr-2 h-4 w-4" /> 등록하기
                         </Button>
                     </div>
                 </Card>
@@ -321,7 +321,7 @@ export default function UserDetailPage() {
                                         </Button>
                                         <Button asChild variant="secondary" className="h-11 rounded-2xl font-semibold bg-secondary/80 hover:bg-secondary active:scale-[0.98]">
                                             <a href={`https://github.com/${user.username}`} target="_blank" rel="noreferrer">
-                                                <Github className="mr-2 h-4 w-4" /> GitHub
+                                                <GithubIcon className="mr-2 h-4 w-4" /> GitHub
                                             </a>
                                         </Button>
                                     </div>

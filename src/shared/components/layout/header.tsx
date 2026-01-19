@@ -2,11 +2,12 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Github, LogOut, User, Trophy, Loader2 } from "lucide-react"
+import { LogOut, User, Trophy, Loader2 } from "lucide-react"
 import { useAuthStore } from "@/features/auth/store/auth-store"
 import { useLogout } from "@/features/auth/api/auth-service"
 import { Button } from "@/shared/components/button"
 import { ThemeToggle } from "@/shared/components/theme-toggle"
+import { GithubIcon } from "@/shared/components/icons/github-icon"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -62,7 +63,7 @@ export function Header() {
                 {/* Left Side: Logo & Navigation */}
                 <div className="flex items-center gap-8">
                     <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-80">
-                        <Github className="h-8 w-8 text-foreground" />
+                        <GithubIcon className="h-8 w-8 text-foreground" />
                         <span className="text-xl font-bold tracking-tight text-foreground">
               Git Ranker
             </span>
@@ -130,7 +131,7 @@ export function Header() {
                             variant="outline"
                             className="gap-2 border-primary/20 hover:bg-secondary active:scale-95 transition-all"
                         >
-                            <Github className="h-4 w-4" />
+                            <GithubIcon className="h-4 w-4" />
                             로그인
                         </Button>
                     )}
