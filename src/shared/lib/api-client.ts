@@ -2,6 +2,60 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1`;
 
+// 서버 에러 응답에서 메시지 추출
+export interface ApiErrorResponse {
+  result: 'ERROR';
+  data: null;
+  error: {
+    code: string;
+    message: string;
+  };
+}
+
+// 커스텀 에러 클래스 - 서버 에러 메시지 포함
+export class ApiError extends Error {
+  code: string;
+  status: number;
+
+  constructor(message: string, code: string = 'UNKNOWN_ERROR', status: number = 500) {
+    super(message);
+    this.name = 'ApiError';
+    this.code = code;
+    this.status = status;
+  }
+}
+
+// 에러에서 메시지 추출하는 유틸리티 함수
+export const getErrorMessage = (error: unknown, fallback: string = '오류가 발생했습니다.'): string => {
+  if (error instanceof ApiError) {
+    return error.message;
+  }
+
+  if (axios.isAxiosError(error)) {
+    // 서버 응답에서 에러 메시지 추출
+    const responseData = error.response?.data as ApiErrorResponse | undefined;
+    if (responseData?.error?.message) {
+      return responseData.error.message;
+    }
+
+    // HTTP 상태 코드 기반 기본 메시지
+    const status = error.response?.status;
+    if (status === 401) return '로그인이 필요합니다.';
+    if (status === 403) return '접근 권한이 없습니다.';
+    if (status === 404) return '요청한 리소스를 찾을 수 없습니다.';
+    if (status === 429) return '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
+    if (status && status >= 500) return '서버 오류가 발생했습니다.';
+
+    return error.message || fallback;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return fallback;
+};
+
 // 토큰 갱신 중 상태 관리 (중복 갱신 방지)
 let isRefreshing = false;
 let failedQueue: Array<{

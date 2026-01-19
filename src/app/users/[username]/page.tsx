@@ -24,6 +24,7 @@ import { Skeleton } from "@/shared/components/skeleton"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/components/card"
 import { toast } from "sonner"
 import { cn } from "@/shared/lib/utils"
+import { getErrorMessage } from "@/shared/lib/api-client"
 import { useEffect, useState } from "react"
 import { Tier } from "@/shared/types/api"
 
@@ -158,7 +159,7 @@ export default function UserDetailPage() {
         toast.promise(refreshMutation.mutateAsync(rawUsername), {
             loading: 'GitHub 데이터를 동기화 중입니다...',
             success: '데이터가 갱신되었습니다!',
-            error: '데이터 갱신에 실패했습니다.',
+            error: (err) => getErrorMessage(err, '데이터 갱신에 실패했습니다.'),
         })
     }
 
@@ -208,22 +209,85 @@ export default function UserDetailPage() {
 
     if (isError || !user) {
         return (
-            <div className="container flex flex-col items-center justify-center py-20 min-h-[70vh]">
-                <Card className="w-full max-w-lg border-2 border-dashed bg-card/50 backdrop-blur-xl p-8 text-center shadow-xl rounded-[2rem]">
-                    <div className="mx-auto bg-muted w-20 h-20 rounded-full flex items-center justify-center mb-6">
-                        <SearchX className="h-10 w-10 text-muted-foreground" />
-                    </div>
-                    <h2 className="text-2xl font-bold mb-2">@{username}</h2>
-                    <p className="text-muted-foreground mb-8">
-                        사용자를 찾을 수 없습니다.<br/>GitHub 아이디를 확인하거나 새로 등록해 주세요.
-                    </p>
-                    <div className="flex gap-3 justify-center">
-                        <Button variant="outline" onClick={() => router.push('/')}>홈으로</Button>
-                        <Button onClick={handleGithubRegister} className="bg-[#24292F] text-white hover:bg-[#24292F]/90">
-                            <GithubIcon className="mr-2 h-4 w-4" /> 등록하기
-                        </Button>
-                    </div>
-                </Card>
+            <div className="container flex flex-col items-center justify-center py-16 min-h-[70vh] px-4">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                    className="w-full max-w-md"
+                >
+                    <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl p-8 text-center shadow-2xl rounded-[2rem]">
+                        {/* Decorative gradient */}
+                        <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+
+                        {/* Animated Icon */}
+                        <motion.div
+                            initial={{ scale: 0.5, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.1, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                            className="relative z-10 mx-auto mb-6"
+                        >
+                            <motion.div
+                                animate={{ y: [0, -6, 0] }}
+                                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-full flex items-center justify-center shadow-lg"
+                            >
+                                <SearchX className="h-12 w-12 text-muted-foreground" />
+                            </motion.div>
+                        </motion.div>
+
+                        {/* Username Badge */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.2, duration: 0.3 }}
+                            className="relative z-10 inline-flex items-center gap-2 px-4 py-2 bg-secondary/50 rounded-full mb-4"
+                        >
+                            <GithubIcon className="w-4 h-4" />
+                            <span className="font-mono font-semibold text-sm">@{username}</span>
+                        </motion.div>
+
+                        {/* Text Content */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3, duration: 0.4 }}
+                            className="relative z-10"
+                        >
+                            <h2 className="text-xl font-bold mb-3 text-foreground">
+                                사용자를 찾을 수 없어요
+                            </h2>
+                            <p className="text-muted-foreground text-[15px] leading-relaxed mb-8">
+                                GitHub 아이디를 다시 확인해 주세요.<br/>
+                                아직 등록하지 않으셨다면, 간단하게 등록해 보세요!
+                            </p>
+                        </motion.div>
+
+                        {/* Action Buttons */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4, duration: 0.4 }}
+                            className="relative z-10 flex flex-col gap-3"
+                        >
+                            <Button
+                                onClick={handleGithubRegister}
+                                className="w-full h-12 rounded-2xl font-semibold bg-[#24292F] hover:bg-[#24292F]/90 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200"
+                            >
+                                <GithubIcon className="mr-2 h-5 w-5" />
+                                GitHub로 등록하기
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                onClick={() => router.push('/')}
+                                className="w-full h-11 rounded-2xl font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 active:scale-[0.98] transition-all duration-200"
+                            >
+                                홈으로 돌아가기
+                            </Button>
+                        </motion.div>
+                    </Card>
+                </motion.div>
             </div>
         )
     }

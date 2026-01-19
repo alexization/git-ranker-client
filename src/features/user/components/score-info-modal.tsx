@@ -65,17 +65,17 @@ export function ScoreInfoModal({ open, onOpenChange }: ScoreInfoModalProps) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[420px] p-0 overflow-hidden bg-white dark:bg-[#1C1C1E] border-none shadow-2xl rounded-[28px] gap-0">
+            <DialogContent className="sm:max-w-[420px] p-0 overflow-hidden bg-white dark:bg-[#1C1C1E] border-none shadow-2xl rounded-[28px] gap-0 flex flex-col max-h-[85vh]">
 
-                {/* Header - [FIX] 중복 닫기 버튼 제거 */}
-                <div className="relative px-7 pt-8 pb-6 bg-white dark:bg-[#1C1C1E]">
+                {/* Header - Fixed */}
+                <div className="relative px-7 pt-8 pb-6 bg-white dark:bg-[#1C1C1E] shrink-0">
                     <DialogTitle className="text-[22px] font-bold text-foreground leading-snug">
                         점수 산정 및<br/>갱신 기준
                     </DialogTitle>
                 </div>
 
                 {/* Scrollable Content */}
-                <div className="px-7 pb-8 space-y-8 bg-white dark:bg-[#1C1C1E]">
+                <div className="px-7 pb-6 space-y-8 bg-white dark:bg-[#1C1C1E] overflow-y-auto flex-1 min-h-0">
 
                     {/* Section 1: Score Weights */}
                     <div className="space-y-3">
@@ -133,8 +133,8 @@ export function ScoreInfoModal({ open, onOpenChange }: ScoreInfoModalProps) {
 
                 </div>
 
-                {/* Footer Button */}
-                <div className="p-4 bg-secondary/10 border-t border-border/10">
+                {/* Footer Button - Fixed at bottom */}
+                <div className="p-4 bg-secondary/10 border-t border-border/10 shrink-0">
                     <Button
                         onClick={() => onOpenChange(false)}
                         className="w-full h-12 rounded-xl text-[15px] font-bold bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20"

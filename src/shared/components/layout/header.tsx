@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LogOut, User, Trophy, Loader2 } from "lucide-react"
+import { LogOut, User, Trophy, Loader2, DoorOpen } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 import { useAuthStore } from "@/features/auth/store/auth-store"
 import { useLogout } from "@/features/auth/api/auth-service"
 import { Button } from "@/shared/components/button"
@@ -139,18 +140,43 @@ export function Header() {
             </div>
 
             <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>로그아웃 하시겠습니까?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            현재 세션에서 로그아웃됩니다. 언제든지 다시 로그인할 수 있습니다.
-                        </AlertDialogDescription>
+                <AlertDialogContent className="max-w-[340px] p-6">
+                    <AlertDialogHeader className="space-y-4">
+                        {/* Animated Icon */}
+                        <motion.div
+                            className="mx-auto w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.1 }}
+                        >
+                            <motion.div
+                                initial={{ x: 0 }}
+                                animate={{ x: [0, 4, 0] }}
+                                transition={{ duration: 0.6, delay: 0.3, ease: "easeInOut" }}
+                            >
+                                <DoorOpen className="w-8 h-8 text-red-500 dark:text-red-400" />
+                            </motion.div>
+                        </motion.div>
+                        <div className="space-y-2">
+                            <AlertDialogTitle className="text-xl font-bold">
+                                로그아웃 할까요?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-[15px] leading-relaxed">
+                                다음에 다시 로그인하면<br />
+                                언제든지 돌아올 수 있어요
+                            </AlertDialogDescription>
+                        </div>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={logoutMutation.isPending}>취소</AlertDialogCancel>
+                    <AlertDialogFooter className="mt-2">
+                        <AlertDialogCancel
+                            disabled={logoutMutation.isPending}
+                            className="flex-1 sm:flex-1"
+                        >
+                            취소
+                        </AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleLogoutConfirm}
-                            className="bg-red-600 hover:bg-red-700"
+                            className="flex-1 sm:flex-1 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700"
                             disabled={logoutMutation.isPending}
                         >
                             {logoutMutation.isPending ? (

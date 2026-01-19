@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useAuthStore } from "@/features/auth/store/auth-store"
-import { apiClient } from "@/shared/lib/api-client"
+import { apiClient, getErrorMessage } from "@/shared/lib/api-client"
 import { getUser } from "@/features/user/api/user-service"
 import { jwtDecode } from "jwt-decode"
 import { toast } from "sonner"
@@ -59,7 +59,7 @@ function RedirectHandler() {
           router.replace(`/users/${user.username}`)
         }).catch((err) => {
           console.error("Failed to fetch user info", err)
-          toast.error("사용자 정보를 불러오는데 실패했습니다.")
+          toast.error(getErrorMessage(err, "사용자 정보를 불러오는데 실패했습니다."))
           router.replace("/login")
         })
 
