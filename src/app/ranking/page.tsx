@@ -207,7 +207,7 @@ function RankingContent() {
                     )}
 
                     {/* Header Row - Desktop Only */}
-                    <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 mb-2 text-xs font-bold text-muted-foreground/60 uppercase tracking-widest select-none bg-muted/20 rounded-xl">
+                    <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3.5 mb-3 text-xs font-bold text-muted-foreground uppercase tracking-widest select-none bg-secondary/80 dark:bg-secondary/50 border border-border/50 rounded-xl">
                         <div className="col-span-1 text-center">#</div>
                         <div className="col-span-5 pl-2">User</div>
                         <div className="col-span-3 text-center">Tier</div>
@@ -236,7 +236,7 @@ function RankingContent() {
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.2, delay: index * 0.02 }}
                                         onClick={() => handleUserClick(user.username)}
-                                        className="group grid grid-cols-12 gap-2 md:gap-4 items-center px-3 py-3 md:p-4 rounded-2xl border border-transparent bg-white/50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 hover:border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all cursor-pointer backdrop-blur-sm"
+                                        className="group grid grid-cols-12 gap-2 md:gap-4 items-center px-3 py-3 md:p-4 rounded-2xl border border-border/40 bg-card shadow-sm hover:bg-accent/50 dark:hover:bg-accent/30 hover:border-border hover:shadow-md hover:shadow-primary/5 transition-all duration-200 cursor-pointer"
                                     >
                                         {/* Rank Number */}
                                         <div className="col-span-2 md:col-span-1 text-center flex justify-center items-center">

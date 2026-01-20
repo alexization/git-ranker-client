@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { LogOut, User, Flame, Loader2, DoorOpen } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { useAuthStore } from "@/features/auth/store/auth-store"
 import { useLogout } from "@/features/auth/api/auth-service"
 import { Button } from "@/shared/components/button"
@@ -13,8 +13,6 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/shared/components/dropdown-menu"
 import {
@@ -99,34 +97,65 @@ export function Header() {
                     {mounted && isAuthenticated && user ? (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                                    <Avatar className="h-10 w-10 ring-2 ring-background">
+                                <button className="flex items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-3 transition-all duration-200 hover:bg-secondary/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                                    <Avatar className="h-8 w-8 ring-2 ring-border/50">
                                         <AvatarImage src={user.profileImage} alt={user.username} />
-                                        <AvatarFallback>{user.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                                        <AvatarFallback className="text-xs font-medium">{user.username.slice(0, 2).toUpperCase()}</AvatarFallback>
                                     </Avatar>
-                                </Button>
+                                    <span className="hidden sm:block text-sm font-medium text-foreground max-w-[100px] truncate">
+                                        {user.username}
+                                    </span>
+                                </button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56" align="end" forceMount>
-                                <DropdownMenuLabel className="font-normal">
-                                    <div className="flex flex-col space-y-1">
-                                        <p className="text-sm font-semibold leading-none">{user.username}</p>
-                                        <p className="text-xs leading-none text-muted-foreground">
-                                            {user.email}
-                                        </p>
+                            <DropdownMenuContent
+                                className="w-72 p-0 rounded-2xl shadow-xl border-border/50 overflow-hidden"
+                                align="end"
+                                sideOffset={8}
+                                forceMount
+                            >
+                                {/* User Info Section */}
+                                <div className="p-4 bg-gradient-to-br from-secondary/50 to-secondary/30">
+                                    <div className="flex items-center gap-3">
+                                        <Avatar className="h-12 w-12 ring-2 ring-background shadow-md">
+                                            <AvatarImage src={user.profileImage} alt={user.username} />
+                                            <AvatarFallback className="text-sm font-semibold">{user.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-[15px] font-semibold text-foreground truncate">{user.username}</p>
+                                            <p className="text-[13px] text-muted-foreground truncate mt-0.5">
+                                                {user.email}
+                                            </p>
+                                        </div>
                                     </div>
-                                </DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem asChild>
-                                    <Link href={`/users/${user.username}`} className="cursor-pointer">
-                                        <User className="mr-2 h-4 w-4" />
-                                        <span>내 프로필</span>
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={handleLogoutClick} className="text-red-600 focus:text-red-600 cursor-pointer">
-                                    <LogOut className="mr-2 h-4 w-4" />
-                                    <span>로그아웃</span>
-                                </DropdownMenuItem>
+                                </div>
+
+                                {/* Menu Items */}
+                                <div className="p-2">
+                                    <DropdownMenuItem asChild className="rounded-xl h-11 px-3 cursor-pointer transition-colors duration-150">
+                                        <Link href={`/users/${user.username}`} className="flex items-center gap-3">
+                                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
+                                                <User className="h-4 w-4 text-primary" />
+                                            </div>
+                                            <span className="text-[14px] font-medium">내 프로필</span>
+                                        </Link>
+                                    </DropdownMenuItem>
+                                </div>
+
+                                {/* Logout Section */}
+                                <div className="p-2 pt-0">
+                                    <div className="h-px bg-border/60 mx-2 mb-2" />
+                                    <DropdownMenuItem
+                                        onClick={handleLogoutClick}
+                                        className="rounded-xl h-11 px-3 cursor-pointer transition-colors duration-150 text-red-500 focus:text-red-500 focus:bg-red-500/10"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-red-500/10">
+                                                <LogOut className="h-4 w-4" />
+                                            </div>
+                                            <span className="text-[14px] font-medium">로그아웃</span>
+                                        </div>
+                                    </DropdownMenuItem>
+                                </div>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     ) : (
