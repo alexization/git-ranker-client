@@ -86,7 +86,11 @@ export function Header() {
 
                 {/* Right Actions */}
                 <div className="flex items-center gap-3">
-                    <Link href="/ranking" className="md:hidden p-2 text-muted-foreground hover:text-primary">
+                    <Link
+                        href="/ranking"
+                        className="md:hidden p-2 text-muted-foreground hover:text-primary"
+                        aria-label="랭킹 페이지로 이동"
+                    >
                         <Flame className="h-5 w-5" />
                     </Link>
 

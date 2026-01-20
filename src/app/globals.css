@@ -249,25 +249,6 @@
     }
   }
 
-  /* Counter animation for ActivityGrid - CSS only */
-  @keyframes count-up {
-    from {
-      --num: 0;
-    }
-    to {
-      --num: var(--target);
-    }
-  }
-
-  .count-animation {
-    animation: count-up 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    counter-reset: num var(--num);
-  }
-
-  .count-animation::after {
-    content: counter(num);
-  }
-
   /* Optimized backdrop blur - lighter version for low-spec devices */
   @supports (backdrop-filter: blur(8px)) {
     .backdrop-blur-optimized {

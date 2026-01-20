@@ -12,6 +12,7 @@ import { cn } from "@/shared/lib/utils"
 import { motion } from "framer-motion"
 import { ActivityGrid } from "./activity-grid"
 import { GithubIcon } from "@/shared/components/icons/github-icon"
+import { getTierTextColor } from "@/shared/constants/tier-styles"
 
 interface UserDetailModalProps {
   username: string | null
@@ -19,22 +20,10 @@ interface UserDetailModalProps {
   onOpenChange: (open: boolean) => void
 }
 
-const TIER_TEXT_COLORS: Record<string, string> = {
-  CHALLENGER: "text-red-500",
-  MASTER: "text-purple-500",
-  DIAMOND: "text-blue-500",
-  EMERALD: "text-emerald-500",
-  PLATINUM: "text-cyan-500",
-  GOLD: "text-yellow-500",
-  SILVER: "text-slate-500",
-  BRONZE: "text-orange-500",
-  IRON: "text-stone-500",
-}
-
 export function UserDetailModal({ username, open, onOpenChange }: UserDetailModalProps) {
   const { data: user, isLoading, isError } = useUser(username || "", { enabled: !!username && open })
 
-  const tierColor = user && TIER_TEXT_COLORS[user.tier] ? TIER_TEXT_COLORS[user.tier] : "text-muted-foreground"
+  const tierColor = user ? getTierTextColor(user.tier) : "text-muted-foreground"
 
   return (
       <Dialog open={open} onOpenChange={onOpenChange}>

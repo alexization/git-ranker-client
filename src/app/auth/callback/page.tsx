@@ -3,14 +3,16 @@
 import { useEffect, useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useAuthStore } from "@/features/auth/store/auth-store"
-import { apiClient } from "@/shared/lib/api-client"
+import { apiClient, getErrorMessage } from "@/shared/lib/api-client"
 import { getUser } from "@/features/user/api/user-service"
 import { jwtDecode } from "jwt-decode"
 import { toast } from "sonner"
 import { Card } from "@/shared/components/card"
+import { Button } from "@/shared/components/button"
 import { Skeleton } from "@/shared/components/skeleton"
-import { Loader2 } from "lucide-react"
+import { Loader2, AlertCircle, RefreshCcw } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import Link from "next/link"
 
 interface JwtPayload {
   sub: string;
@@ -32,16 +34,18 @@ function RedirectHandler() {
   const searchParams = useSearchParams()
   const { login } = useAuthStore()
 
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0)
+  const [error, setError] = useState<string | null>(null)
 
   // Fake Progress Logic
   useEffect(() => {
+    if (error) return
     const interval = setInterval(() => {
       setCurrentStep((prev) => (prev < LOADING_STEPS.length - 1 ? prev + 1 : prev));
-    }, 1500); // 1.5초마다 멘트 변경
+    }, 1500)
 
     return () => clearInterval(interval);
-  }, []);
+  }, [error]);
 
   useEffect(() => {
     const accessToken = searchParams.get("accessToken")
@@ -59,19 +63,66 @@ function RedirectHandler() {
           router.replace(`/users/${user.username}`)
         }).catch((err) => {
           console.error("Failed to fetch user info", err)
-          toast.error("사용자 정보를 불러오는데 실패했습니다.")
-          router.replace("/login")
+          const errorMessage = getErrorMessage(err, "사용자 정보를 불러오는데 실패했습니다.")
+          setError(errorMessage)
+          toast.error(errorMessage)
         })
 
       } catch (e) {
         console.error("Invalid Token", e)
+        setError("로그인 토큰이 올바르지 않습니다.")
         toast.error("로그인 토큰이 올바르지 않습니다.")
-        router.replace("/login")
       }
     } else {
       router.replace("/login")
     }
   }, [searchParams, router, login])
+
+  // Error State UI
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full max-w-md space-y-8 px-4">
+        <Card className="w-full relative overflow-hidden rounded-[2.5rem] border-2 border-red-200 dark:border-red-800/50 bg-red-50/50 dark:bg-red-950/20 backdrop-blur-xl p-8 flex flex-col items-center text-center shadow-2xl">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            className="mb-6 bg-red-100 dark:bg-red-900/30 w-20 h-20 rounded-full flex items-center justify-center"
+          >
+            <AlertCircle className="h-10 w-10 text-red-500 dark:text-red-400" />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.4 }}
+          >
+            <h2 className="text-xl font-bold mb-2 text-foreground">로그인 실패</h2>
+            <p className="text-sm text-muted-foreground mb-6">{error}</p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            className="flex flex-col sm:flex-row gap-3 w-full"
+          >
+            <Button
+              onClick={() => window.location.reload()}
+              variant="outline"
+              className="flex-1 rounded-xl h-11"
+            >
+              <RefreshCcw className="mr-2 h-4 w-4" />
+              다시 시도
+            </Button>
+            <Button asChild className="flex-1 rounded-xl h-11">
+              <Link href="/login">로그인 페이지로</Link>
+            </Button>
+          </motion.div>
+        </Card>
+      </div>
+    )
+  }
 
   return (
       <div className="flex flex-col items-center justify-center w-full max-w-md space-y-8 px-4">

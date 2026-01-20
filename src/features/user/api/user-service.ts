@@ -6,11 +6,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 // Server-side: React.cache() for per-request deduplication
 // Multiple components calling getUser() with same username will only make 1 request
 export const getUser = cache(async (username: string): Promise<RegisterUserResponse> => {
-  return apiClient.get<any, RegisterUserResponse>(`/users/${username}`)
+  return apiClient.get<void, RegisterUserResponse>(`/users/${username}`)
 })
 
 export const refreshUser = async (username: string): Promise<RegisterUserResponse> => {
-  return apiClient.post<any, RegisterUserResponse>(`/users/${username}/refresh`)
+  return apiClient.post<void, RegisterUserResponse>(`/users/${username}/refresh`)
 }
 
 export const useUser = (username: string, options?: { enabled?: boolean }) => {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, memo, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import { useRankingList } from "../api/ranking-service"
@@ -14,43 +14,12 @@ import { ChevronLeft, ChevronRight, Crown, Award, Flame, ChevronsLeft, ChevronsR
 import { cn } from "@/shared/lib/utils"
 import { UserDetailModal } from "@/features/user/components/user-detail-modal"
 import { Card } from "@/shared/components/card"
+import { TIER_ORDER, getTierColorClass, getTierDotColor } from "@/shared/constants/tier-styles"
 
-const tiers: Tier[] = [
-  'CHALLENGER', 'MASTER', 'DIAMOND', 'EMERALD',
-  'PLATINUM', 'GOLD', 'SILVER', 'BRONZE', 'IRON'
-]
+const tiers = TIER_ORDER
 
-// ✅ Tier color styles for badges
-const TIER_COLOR_STYLES: Record<Tier | string, string> = {
-  'CHALLENGER': "bg-red-500/10 text-red-500 border-red-500/30",
-  'MASTER': "bg-purple-500/10 text-purple-500 border-purple-500/30",
-  'DIAMOND': "bg-sky-500/10 text-sky-500 border-sky-500/30",
-  'EMERALD': "bg-emerald-500/10 text-emerald-500 border-emerald-500/30",
-  'PLATINUM': "bg-cyan-500/10 text-cyan-500 border-cyan-500/30",
-  'GOLD': "bg-yellow-500/10 text-yellow-600 border-yellow-500/30",
-  'SILVER': "bg-slate-400/10 text-slate-500 border-slate-400/30",
-  'BRONZE': "bg-orange-600/10 text-orange-600 border-orange-500/30",
-  'IRON': "bg-stone-500/10 text-stone-500 border-stone-500/30",
-}
-
-// ✅ Tier dot colors for mobile view
-const TIER_DOT_COLORS: Record<Tier | string, string> = {
-  'CHALLENGER': "bg-red-500",
-  'MASTER': "bg-purple-500",
-  'DIAMOND': "bg-sky-500",
-  'EMERALD': "bg-emerald-500",
-  'PLATINUM': "bg-cyan-500",
-  'GOLD': "bg-yellow-500",
-  'SILVER': "bg-slate-400",
-  'BRONZE': "bg-orange-600",
-  'IRON': "bg-stone-500",
-}
-
-const tierColorClass = (tier: Tier) =>
-  TIER_COLOR_STYLES[tier] || TIER_COLOR_STYLES['IRON']
-
-const tierDotColor = (tier: Tier) =>
-  TIER_DOT_COLORS[tier] || TIER_DOT_COLORS['IRON']
+const tierColorClass = getTierColorClass
+const tierDotColor = getTierDotColor
 
 // ✅ Hoisted rank icon renderer - Modern style icons
 const renderRankIcon = (rank: number) => {
@@ -59,6 +28,89 @@ const renderRankIcon = (rank: number) => {
   if (rank === 3) return <Award className="h-6 w-6 text-amber-600" />
   return <span className="font-bold text-foreground/70 w-6 text-center">{rank}</span>
 }
+
+// ✅ Memoized Mobile Ranking Card - prevents unnecessary re-renders
+interface RankingItemProps {
+  user: RankingUserInfo
+  onUserClick: (username: string) => void
+  onPrefetch: (username: string) => void
+}
+
+const MobileRankingCard = memo(function MobileRankingCard({ user, onUserClick, onPrefetch }: RankingItemProps) {
+  return (
+    <div
+      onClick={() => onUserClick(user.username)}
+      onMouseEnter={() => onPrefetch(user.username)}
+      onFocus={() => onPrefetch(user.username)}
+      className="ranking-card"
+    >
+      <Card className="flex items-center px-3 py-3 gap-3 cursor-pointer active:scale-[0.98] transition-all duration-200 border-none bg-secondary/10 hover:bg-secondary/20">
+        <div className="flex-shrink-0 w-8 flex items-center justify-center">
+          {user.ranking <= 3 ? renderRankIcon(user.ranking) : (
+            <span className="text-sm font-bold text-foreground/60">{user.ranking}</span>
+          )}
+        </div>
+        <div className="relative flex-shrink-0">
+          <Avatar className="h-10 w-10 border border-border">
+            <AvatarImage src={user.profileImage} alt={`${user.username}의 프로필 이미지`} />
+            <AvatarFallback className="text-sm">{user.username[0].toUpperCase()}</AvatarFallback>
+          </Avatar>
+          <div
+            className={cn(
+              "absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-background",
+              tierDotColor(user.tier)
+            )}
+            title={user.tier}
+          />
+        </div>
+        <div className="flex-1 min-w-0">
+          <span className="font-semibold text-sm truncate block">{user.username}</span>
+        </div>
+        <div className="flex-shrink-0 text-right">
+          <p className="text-base font-bold font-mono text-foreground">{user.totalScore.toLocaleString()}</p>
+        </div>
+      </Card>
+    </div>
+  )
+})
+
+// ✅ Memoized Desktop Ranking Row - prevents unnecessary re-renders
+const DesktopRankingRow = memo(function DesktopRankingRow({ user, onUserClick, onPrefetch }: RankingItemProps) {
+  return (
+    <tr
+      className="border-b transition-colors duration-150 hover:bg-muted/50 cursor-pointer group ranking-row"
+      onClick={() => onUserClick(user.username)}
+      onMouseEnter={() => onPrefetch(user.username)}
+      onFocus={() => onPrefetch(user.username)}
+    >
+      <td className="p-4 text-center">
+        <div className="flex justify-center items-center">
+          {renderRankIcon(user.ranking)}
+        </div>
+      </td>
+      <td className="p-4">
+        <div className="flex items-center gap-4">
+          <Avatar className="h-10 w-10 border-2 border-background group-hover:border-primary/20 transition-colors duration-150">
+            <AvatarImage src={user.profileImage} alt={`${user.username}의 프로필 이미지`} />
+            <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
+          </Avatar>
+          <span className="font-bold text-base group-hover:text-primary transition-colors duration-150">{user.username}</span>
+        </div>
+      </td>
+      <td className="p-4 text-center">
+        <span className={cn(
+          "inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide",
+          tierColorClass(user.tier)
+        )}>
+          {user.tier}
+        </span>
+      </td>
+      <td className="p-4 text-right font-mono font-bold text-lg text-foreground group-hover:text-primary transition-colors duration-150">
+        {user.totalScore.toLocaleString()}
+      </td>
+    </tr>
+  )
+})
 
 export function RankingSection() {
   const router = useRouter()
@@ -121,13 +173,14 @@ export function RankingSection() {
     setPageInput("")
   }
 
-  const handleUserClick = (username: string) => {
+  // ✅ Memoized callback for child components
+  const handleUserClick = useCallback((username: string) => {
     setSelectedUsername(username)
     setModalOpen(true)
     const params = new URLSearchParams(searchParams.toString())
     params.set('user', username)
     router.push(`?${params.toString()}`, { scroll: false })
-  }
+  }, [router, searchParams])
 
   const handleModalClose = (open: boolean) => {
     setModalOpen(open)
@@ -222,50 +275,12 @@ export function RankingSection() {
                 </div>
             ) : (
                 rankings.map((user) => (
-                    <div
+                    <MobileRankingCard
                         key={user.username}
-                        onClick={() => handleUserClick(user.username)}
-                        onMouseEnter={() => prefetchUser(user.username)}
-                        onFocus={() => prefetchUser(user.username)}
-                        className="ranking-card"
-                    >
-                      <Card className="flex items-center px-3 py-3 gap-3 cursor-pointer active:scale-[0.98] transition-all duration-200 border-none bg-secondary/10 hover:bg-secondary/20">
-                        {/* Rank - Compact */}
-                        <div className="flex-shrink-0 w-8 flex items-center justify-center">
-                          {user.ranking <= 3 ? (
-                              renderRankIcon(user.ranking)
-                          ) : (
-                              <span className="text-sm font-bold text-foreground/60">{user.ranking}</span>
-                          )}
-                        </div>
-
-                        {/* Avatar with Tier Dot */}
-                        <div className="relative flex-shrink-0">
-                          <Avatar className="h-10 w-10 border border-border">
-                            <AvatarImage src={user.profileImage} alt={user.username} />
-                            <AvatarFallback className="text-sm">{user.username[0].toUpperCase()}</AvatarFallback>
-                          </Avatar>
-                          {/* Tier Color Dot */}
-                          <div
-                            className={cn(
-                              "absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-background",
-                              tierDotColor(user.tier)
-                            )}
-                            title={user.tier}
-                          />
-                        </div>
-
-                        {/* Username */}
-                        <div className="flex-1 min-w-0">
-                          <span className="font-semibold text-sm truncate block">{user.username}</span>
-                        </div>
-
-                        {/* Score - Right aligned */}
-                        <div className="flex-shrink-0 text-right">
-                          <p className="text-base font-bold font-mono text-foreground">{user.totalScore.toLocaleString()}</p>
-                        </div>
-                      </Card>
-                    </div>
+                        user={user}
+                        onUserClick={handleUserClick}
+                        onPrefetch={prefetchUser}
+                    />
                 ))
             )}
           </div>
@@ -303,39 +318,12 @@ export function RankingSection() {
                     </tr>
                 ) : (
                     rankings.map((user) => (
-                        <tr
+                        <DesktopRankingRow
                             key={user.username}
-                            className="border-b transition-colors duration-150 hover:bg-muted/50 cursor-pointer group ranking-row"
-                            onClick={() => handleUserClick(user.username)}
-                            onMouseEnter={() => prefetchUser(user.username)}
-                            onFocus={() => prefetchUser(user.username)}
-                        >
-                          <td className="p-4 text-center">
-                            <div className="flex justify-center items-center">
-                              {renderRankIcon(user.ranking)}
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <div className="flex items-center gap-4">
-                              <Avatar className="h-10 w-10 border-2 border-background group-hover:border-primary/20 transition-colors duration-150">
-                                <AvatarImage src={user.profileImage} alt={user.username} />
-                                <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
-                              </Avatar>
-                              <span className="font-bold text-base group-hover:text-primary transition-colors duration-150">{user.username}</span>
-                            </div>
-                          </td>
-                          <td className="p-4 text-center">
-                        <span className={cn(
-                            "inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide",
-                            tierColorClass(user.tier)
-                        )}>
-                          {user.tier}
-                        </span>
-                          </td>
-                          <td className="p-4 text-right font-mono font-bold text-lg text-foreground group-hover:text-primary transition-colors duration-150">
-                            {user.totalScore.toLocaleString()}
-                          </td>
-                        </tr>
+                            user={user}
+                            onUserClick={handleUserClick}
+                            onPrefetch={prefetchUser}
+                        />
                     ))
                 )}
                 </tbody>

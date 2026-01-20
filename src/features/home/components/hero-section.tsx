@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
-import { Search, History, X, BookOpen, TrendingUp, ArrowRight, User } from "lucide-react"
+import { Search, History, X, BookOpen, TrendingUp, User } from "lucide-react"
 import { useSearchStore } from "../store/search-store"
 import { Button } from "@/shared/components/button"
 import { cn } from "@/shared/lib/utils"
@@ -38,19 +38,19 @@ export function HeroSection() {
     setMounted(true)
   }, [])
 
-  const handleFocus = () => {
+  const handleFocus = useCallback(() => {
     setOpen(true)
     setIsFocused(true)
-  }
+  }, [])
 
-  const handleBlur = () => {
+  const handleBlur = useCallback(() => {
     setTimeout(() => {
       setOpen(false)
       setIsFocused(false)
     }, 200)
-  }
+  }, [])
 
-  const handleSearch = (username: string) => {
+  const handleSearch = useCallback((username: string) => {
     if (!username.trim()) return
     addSearch(username)
     setOpen(false)
@@ -59,9 +59,9 @@ export function HeroSection() {
     setSelectedIndex(-1)
     inputRef.current?.blur()
     router.push(`/users/${username}`)
-  }
+  }, [addSearch, router])
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (!open) {
       if (e.key === 'Enter') handleSearch(query)
       return
@@ -87,7 +87,7 @@ export function HeroSection() {
         inputRef.current?.blur()
         break
     }
-  }
+  }, [open, query, recentSearches, selectedIndex, handleSearch])
 
   useEffect(() => {
     if (selectedIndex >= 0 && recentSearches[selectedIndex]) {
