@@ -92,9 +92,9 @@ export function StatsChartImpl({ user }: StatsChartProps) {
     };
 
     return (
-        <div className="w-full h-full flex items-center justify-center py-2 select-none">
+        <div className="w-full h-full flex items-center justify-center py-2 select-none outline-none focus:outline-none [&_*]:outline-none [&_svg]:focus:outline-none">
             <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={chartData}>
+                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={chartData} style={{ outline: 'none' }}>
                     <PolarGrid
                         gridType="polygon"
                         stroke="hsl(var(--muted-foreground))"
@@ -110,9 +110,9 @@ export function StatsChartImpl({ user }: StatsChartProps) {
                                 textAnchor={textAnchor}
                                 fill="hsl(var(--muted-foreground))"
                                 fontSize={11}
-                                fontWeight={700}
+                                fontWeight={600}
                                 dy={payload.value === 'Commits' ? -10 : 5}
-                                className="uppercase tracking-wider"
+                                className="tracking-wide"
                             >
                                 {payload.value}
                             </text>

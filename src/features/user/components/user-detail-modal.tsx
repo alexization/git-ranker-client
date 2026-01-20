@@ -6,7 +6,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/avatar"
 import { Button } from "@/shared/components/button"
 import { Skeleton } from "@/shared/components/skeleton"
-import { ExternalLink, Trophy, AlertCircle, X } from "lucide-react"
+import { ExternalLink, Crown, AlertCircle, X } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/shared/lib/utils"
 import { motion } from "framer-motion"
@@ -107,7 +107,7 @@ export function UserDetailModal({ username, open, onOpenChange }: UserDetailModa
                       <h2 className="text-2xl font-bold tracking-tight text-foreground">{user.username}</h2>
                       <div className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground">
                             <span className="flex items-center gap-1">
-                                <Trophy className="w-3.5 h-3.5" />
+                                <Crown className="w-3.5 h-3.5" />
                               #{user.ranking.toLocaleString()}
                             </span>
                         <span className="w-0.5 h-3 bg-border" />

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, memo } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import { useRankingList } from "../api/ranking-service"
@@ -9,7 +9,8 @@ import { Tier, RankingUserInfo } from "@/shared/types/api"
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/avatar"
 import { Skeleton } from "@/shared/components/skeleton"
 import { Button } from "@/shared/components/button"
-import { ChevronLeft, ChevronRight, Trophy, Medal } from "lucide-react"
+import { Input } from "@/shared/components/input"
+import { ChevronLeft, ChevronRight, Crown, Award, Flame, ChevronsLeft, ChevronsRight } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 import { UserDetailModal } from "@/features/user/components/user-detail-modal"
 import { Card } from "@/shared/components/card"
@@ -19,37 +20,55 @@ const tiers: Tier[] = [
   'PLATINUM', 'GOLD', 'SILVER', 'BRONZE', 'IRON'
 ]
 
-// ✅ Object lookup for O(1) performance
+// ✅ Tier color styles for badges
 const TIER_COLOR_STYLES: Record<Tier | string, string> = {
-  'CHALLENGER': "bg-red-500/10 text-red-500 border-red-500/20",
-  'MASTER': "bg-purple-500/10 text-purple-500 border-purple-500/20",
-  'DIAMOND': "bg-blue-500/10 text-blue-500 border-blue-500/20",
-  'PLATINUM': "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
-  'EMERALD': "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
-  'GOLD': "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
-  'SILVER': "bg-slate-500/10 text-slate-500 border-slate-500/20",
-  'BRONZE': "bg-orange-500/10 text-orange-500 border-orange-500/20",
-  'IRON': "bg-stone-500/10 text-stone-500 border-stone-500/20",
+  'CHALLENGER': "bg-red-500/10 text-red-500 border-red-500/30",
+  'MASTER': "bg-purple-500/10 text-purple-500 border-purple-500/30",
+  'DIAMOND': "bg-sky-500/10 text-sky-500 border-sky-500/30",
+  'EMERALD': "bg-emerald-500/10 text-emerald-500 border-emerald-500/30",
+  'PLATINUM': "bg-cyan-500/10 text-cyan-500 border-cyan-500/30",
+  'GOLD': "bg-yellow-500/10 text-yellow-600 border-yellow-500/30",
+  'SILVER': "bg-slate-400/10 text-slate-500 border-slate-400/30",
+  'BRONZE': "bg-orange-600/10 text-orange-600 border-orange-500/30",
+  'IRON': "bg-stone-500/10 text-stone-500 border-stone-500/30",
+}
+
+// ✅ Tier dot colors for mobile view
+const TIER_DOT_COLORS: Record<Tier | string, string> = {
+  'CHALLENGER': "bg-red-500",
+  'MASTER': "bg-purple-500",
+  'DIAMOND': "bg-sky-500",
+  'EMERALD': "bg-emerald-500",
+  'PLATINUM': "bg-cyan-500",
+  'GOLD': "bg-yellow-500",
+  'SILVER': "bg-slate-400",
+  'BRONZE': "bg-orange-600",
+  'IRON': "bg-stone-500",
 }
 
 const tierColorClass = (tier: Tier) =>
   TIER_COLOR_STYLES[tier] || TIER_COLOR_STYLES['IRON']
 
-// ✅ Hoisted rank icon renderer
+const tierDotColor = (tier: Tier) =>
+  TIER_DOT_COLORS[tier] || TIER_DOT_COLORS['IRON']
+
+// ✅ Hoisted rank icon renderer - Modern style icons
 const renderRankIcon = (rank: number) => {
-  if (rank === 1) return <div className="relative"><Trophy className="h-6 w-6 text-yellow-500 fill-yellow-500" /><div className="absolute -top-1 -right-1 animate-ping h-2 w-2 rounded-full bg-yellow-400 opacity-75"></div></div>
-  if (rank === 2) return <Medal className="h-6 w-6 text-slate-400 fill-slate-400" />
-  if (rank === 3) return <Medal className="h-6 w-6 text-amber-700 fill-amber-700" />
-  return <span className="font-bold text-muted-foreground w-6 text-center">{rank}</span>
+  if (rank === 1) return <div className="relative"><Crown className="h-6 w-6 text-yellow-500 fill-yellow-500/30" /><div className="absolute -top-1 -right-1 animate-ping h-2 w-2 rounded-full bg-yellow-400 opacity-75"></div></div>
+  if (rank === 2) return <Award className="h-6 w-6 text-slate-400" />
+  if (rank === 3) return <Award className="h-6 w-6 text-amber-600" />
+  return <span className="font-bold text-foreground/70 w-6 text-center">{rank}</span>
 }
 
 export function RankingSection() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [page, setPage] = useState(0)
+  const [pageInput, setPageInput] = useState("")
   const [selectedTier, setSelectedTier] = useState<Tier | 'ALL'>('ALL')
   const [selectedUsername, setSelectedUsername] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
+  const listRef = useRef<HTMLDivElement>(null)
 
   // Prefetch user data on hover/focus for faster modal opening
   const prefetchUser = usePrefetchUser()
@@ -59,6 +78,10 @@ export function RankingSection() {
       selectedTier === 'ALL' ? undefined : selectedTier
   )
 
+  const rankings = data?.rankings || [];
+  const pageInfo = data?.pageInfo;
+  const totalPages = pageInfo?.totalPages || 1;
+
   useEffect(() => {
     const userParam = searchParams.get('user')
     if (userParam) {
@@ -67,9 +90,35 @@ export function RankingSection() {
     }
   }, [searchParams])
 
+  // ✅ Scroll to list top when page changes
+  const scrollToList = () => {
+    if (listRef.current) {
+      const offset = 100; // Header height consideration
+      const top = listRef.current.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  }
+
+  const handlePageChange = (newPage: number) => {
+    const validPage = Math.max(0, Math.min(newPage, totalPages - 1));
+    setPage(validPage);
+    setPageInput("");
+    scrollToList();
+  }
+
+  const handlePageInputSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const inputPage = parseInt(pageInput, 10);
+    if (!isNaN(inputPage) && inputPage >= 1 && inputPage <= totalPages) {
+      handlePageChange(inputPage - 1);
+    }
+    setPageInput("");
+  }
+
   const handleTierChange = (value: string) => {
     setSelectedTier(value as Tier | 'ALL')
     setPage(0)
+    setPageInput("")
   }
 
   const handleUserClick = (username: string) => {
@@ -91,9 +140,6 @@ export function RankingSection() {
     }
   }
 
-  const rankings = data?.rankings || [];
-  const pageInfo = data?.pageInfo;
-
   if (isError) {
     return (
         <section className="container py-12 text-center text-muted-foreground">
@@ -113,7 +159,7 @@ export function RankingSection() {
               transition={{ duration: 0.5 }}
           >
             <h2 className="text-4xl font-extrabold flex items-center justify-center gap-3 mb-2">
-              <Trophy className="h-8 w-8 text-yellow-500" />
+              <Flame className="h-8 w-8 text-orange-500" />
               Global Ranking
             </h2>
             <p className="text-muted-foreground">전체 개발자들의 실시간 순위입니다.</p>
@@ -151,12 +197,24 @@ export function RankingSection() {
           </div>
         </div>
 
-        <div className="w-full">
-          {/* Mobile View: Card List */}
-          <div className="md:hidden space-y-3">
+        {/* Page Info Header - Shows current page status */}
+        {totalPages > 1 && !isLoading && rankings.length > 0 && (
+          <div className="flex items-center justify-between mb-4 px-1">
+            <p className="text-sm text-muted-foreground">
+              총 <span className="font-semibold text-foreground">{pageInfo?.totalElements?.toLocaleString() || 0}</span>명
+            </p>
+            <p className="text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">{page + 1}</span> / {totalPages} 페이지
+            </p>
+          </div>
+        )}
+
+        <div className="w-full" ref={listRef}>
+          {/* Mobile View: Card List - Optimized for narrow screens */}
+          <div className="md:hidden space-y-2">
             {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="h-24 w-full rounded-2xl" />
+                    <Skeleton key={i} className="h-[72px] w-full rounded-2xl" />
                 ))
             ) : rankings.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground bg-secondary/20 rounded-3xl">
@@ -171,25 +229,40 @@ export function RankingSection() {
                         onFocus={() => prefetchUser(user.username)}
                         className="ranking-card"
                     >
-                      <Card className="flex items-center p-4 gap-4 cursor-pointer active:scale-[0.98] transition-all duration-200 border-none bg-secondary/10 hover:bg-secondary/20">
-                        <div className="flex-shrink-0 flex flex-col items-center justify-center w-10">
-                          {renderRankIcon(user.ranking)}
+                      <Card className="flex items-center px-3 py-3 gap-3 cursor-pointer active:scale-[0.98] transition-all duration-200 border-none bg-secondary/10 hover:bg-secondary/20">
+                        {/* Rank - Compact */}
+                        <div className="flex-shrink-0 w-8 flex items-center justify-center">
+                          {user.ranking <= 3 ? (
+                              renderRankIcon(user.ranking)
+                          ) : (
+                              <span className="text-sm font-bold text-foreground/60">{user.ranking}</span>
+                          )}
                         </div>
-                        <Avatar className="h-12 w-12 border border-border">
-                          <AvatarImage src={user.profileImage} alt={user.username} />
-                          <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
-                        </Avatar>
+
+                        {/* Avatar with Tier Dot */}
+                        <div className="relative flex-shrink-0">
+                          <Avatar className="h-10 w-10 border border-border">
+                            <AvatarImage src={user.profileImage} alt={user.username} />
+                            <AvatarFallback className="text-sm">{user.username[0].toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          {/* Tier Color Dot */}
+                          <div
+                            className={cn(
+                              "absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-background",
+                              tierDotColor(user.tier)
+                            )}
+                            title={user.tier}
+                          />
+                        </div>
+
+                        {/* Username */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-base truncate">{user.username}</span>
-                          </div>
-                          <span className={cn("text-[10px] px-2 py-0.5 rounded-full border font-semibold", tierColorClass(user.tier))}>
-                      {user.tier}
-                    </span>
+                          <span className="font-semibold text-sm truncate block">{user.username}</span>
                         </div>
-                        <div className="text-right">
-                          <p className="text-xs text-muted-foreground font-medium uppercase">Score</p>
-                          <p className="text-lg font-bold font-mono text-primary">{user.totalScore.toLocaleString()}</p>
+
+                        {/* Score - Right aligned */}
+                        <div className="flex-shrink-0 text-right">
+                          <p className="text-base font-bold font-mono text-foreground">{user.totalScore.toLocaleString()}</p>
                         </div>
                       </Card>
                     </div>
@@ -259,7 +332,7 @@ export function RankingSection() {
                           {user.tier}
                         </span>
                           </td>
-                          <td className="p-4 text-right font-mono font-bold text-lg text-foreground/80 group-hover:text-primary transition-colors duration-150">
+                          <td className="p-4 text-right font-mono font-bold text-lg text-foreground group-hover:text-primary transition-colors duration-150">
                             {user.totalScore.toLocaleString()}
                           </td>
                         </tr>
@@ -271,30 +344,74 @@ export function RankingSection() {
           </div>
         </div>
 
-        {/* Pagination */}
-        <div className="mt-8 flex items-center justify-center gap-4">
-          <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setPage((p) => Math.max(0, p - 1))}
-              disabled={page === 0 || isLoading}
-              className="rounded-full w-10 h-10 shadow-sm"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-sm font-semibold text-muted-foreground min-w-[3rem] text-center">
-          {page + 1} / {pageInfo?.totalPages || 1}
-        </span>
-          <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setPage((p) => p + 1)}
-              disabled={!pageInfo || pageInfo.isLast || isLoading}
-              className="rounded-full w-10 h-10 shadow-sm"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
+        {/* Pagination - Toss Style */}
+        {totalPages > 1 && (
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex items-center gap-2">
+              {/* First Page */}
+              <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handlePageChange(0)}
+                  disabled={page === 0 || isLoading}
+                  className="rounded-xl w-9 h-9 text-muted-foreground hover:text-foreground disabled:opacity-30"
+                  title="첫 페이지"
+              >
+                <ChevronsLeft className="h-4 w-4" />
+              </Button>
+
+              {/* Previous Page */}
+              <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handlePageChange(page - 1)}
+                  disabled={page === 0 || isLoading}
+                  className="rounded-xl w-9 h-9 shadow-sm disabled:opacity-30"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+
+              {/* Page Info with Input */}
+              <form onSubmit={handlePageInputSubmit} className="flex items-center gap-2 px-2">
+                <Input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={pageInput}
+                    onChange={(e) => setPageInput(e.target.value.replace(/[^0-9]/g, ''))}
+                    placeholder={String(page + 1)}
+                    className="w-12 h-9 text-center font-semibold rounded-xl border-border/50 focus:border-primary text-sm"
+                    disabled={isLoading}
+                />
+                <span className="text-sm text-muted-foreground font-medium">/</span>
+                <span className="text-sm font-semibold text-foreground min-w-[2rem]">{totalPages}</span>
+              </form>
+
+              {/* Next Page */}
+              <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handlePageChange(page + 1)}
+                  disabled={page >= totalPages - 1 || isLoading}
+                  className="rounded-xl w-9 h-9 shadow-sm disabled:opacity-30"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+
+              {/* Last Page */}
+              <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handlePageChange(totalPages - 1)}
+                  disabled={page >= totalPages - 1 || isLoading}
+                  className="rounded-xl w-9 h-9 text-muted-foreground hover:text-foreground disabled:opacity-30"
+                  title="마지막 페이지"
+              >
+                <ChevronsRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* ✅ Conditional rendering: only render modal when open to reduce DOM nodes */}
         {modalOpen && (

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LogOut, User, Trophy, Loader2, DoorOpen } from "lucide-react"
+import { LogOut, User, Flame, Loader2, DoorOpen } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useAuthStore } from "@/features/auth/store/auth-store"
 import { useLogout } from "@/features/auth/api/auth-service"
@@ -78,7 +78,7 @@ export function Header() {
                                 pathname === "/ranking" ? "text-foreground" : "text-muted-foreground"
                             )}
                         >
-                            <Trophy className="h-4 w-4" />
+                            <Flame className="h-4 w-4" />
                             Ranking
                         </Link>
                     </nav>
@@ -87,7 +87,7 @@ export function Header() {
                 {/* Right Actions */}
                 <div className="flex items-center gap-3">
                     <Link href="/ranking" className="md:hidden p-2 text-muted-foreground hover:text-primary">
-                        <Trophy className="h-5 w-5" />
+                        <Flame className="h-5 w-5" />
                     </Link>
 
                     <ThemeToggle />

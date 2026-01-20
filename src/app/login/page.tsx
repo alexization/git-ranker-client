@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Zap, Trophy, GitCommit } from "lucide-react"
+import { Zap, Sparkles, GitCommit } from "lucide-react"
 import { Button } from "@/shared/components/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/shared/components/card"
 import { cn } from "@/shared/lib/utils"
@@ -53,7 +53,7 @@ export default function LoginPage() {
                     <CardHeader className="text-center space-y-2 pb-6 pt-10">
                         <motion.div variants={itemVariants} className="mx-auto mb-4">
                             <div className="inline-flex items-center justify-center p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-purple-500/10 ring-1 ring-black/5 dark:ring-white/10 shadow-inner">
-                                <Trophy className="w-10 h-10 text-primary fill-primary/20" />
+                                <Sparkles className="w-10 h-10 text-primary" />
                             </div>
                         </motion.div>
 

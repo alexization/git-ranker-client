@@ -69,7 +69,7 @@ function ActivityItem({ label, value, diff, icon, colorClass, delay = 0, fullWid
 
             {/* Label */}
             <div className="relative z-10">
-                <span className="text-xs font-bold uppercase tracking-wider text-foreground/60">{label}</span>
+                <span className="text-xs font-semibold tracking-wide text-foreground/60">{label}</span>
             </div>
 
             {/* Value */}
@@ -134,7 +134,7 @@ export function ActivityGrid({ user }: ActivityGridProps) {
             />
             {/* Full Width */}
             <ActivityItem
-                label="Total Commits"
+                label="Commits"
                 value={user.commitCount}
                 diff={user.diffCommitCount}
                 icon={<GitCommit className="h-5 w-5 text-slate-600 dark:text-slate-400" />}

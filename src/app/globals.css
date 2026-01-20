@@ -281,4 +281,12 @@
       background-color: rgba(var(--background), 0.95);
     }
   }
+
+  /* Remove focus outline from Recharts SVG elements */
+  .recharts-wrapper,
+  .recharts-wrapper *,
+  .recharts-surface,
+  .recharts-surface * {
+    outline: none !important;
+  }
 }

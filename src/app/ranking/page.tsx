@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect, Suspense, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import { useRankingList } from "@/features/ranking/api/ranking-service"
@@ -8,8 +8,9 @@ import { Tier } from "@/shared/types/api"
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/avatar"
 import { Skeleton } from "@/shared/components/skeleton"
 import { Button } from "@/shared/components/button"
+import { Input } from "@/shared/components/input"
 import { UserDetailModal } from "@/features/user/components/user-detail-modal"
-import { ChevronLeft, ChevronRight, Search } from "lucide-react"
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, Crown, Award } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 
 const TIERS: (Tier | 'ALL')[] = [
@@ -17,20 +18,37 @@ const TIERS: (Tier | 'ALL')[] = [
     'PLATINUM', 'GOLD', 'SILVER', 'BRONZE', 'IRON'
 ]
 
+// ✅ 티어별 배지 스타일 - 챌린저는 레드
 const TIER_BADGE_STYLES: Record<string, string> = {
-    'CHALLENGER': "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-    'MASTER': "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
-    'DIAMOND': "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300",
-    'EMERALD': "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
-    'PLATINUM': "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300",
-    'GOLD': "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300",
-    'SILVER': "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
-    'BRONZE': "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300",
-    'IRON': "bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300",
+    'CHALLENGER': "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 border-red-200 dark:border-red-800",
+    'MASTER': "bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400 border-purple-200 dark:border-purple-800",
+    'DIAMOND': "bg-sky-100 text-sky-600 dark:bg-sky-900/40 dark:text-sky-400 border-sky-200 dark:border-sky-800",
+    'EMERALD': "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
+    'PLATINUM': "bg-cyan-100 text-cyan-600 dark:bg-cyan-900/40 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800",
+    'GOLD': "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
+    'SILVER': "bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-slate-300 dark:border-slate-700",
+    'BRONZE': "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400 border-orange-200 dark:border-orange-800",
+    'IRON': "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 border-stone-200 dark:border-stone-700",
+}
+
+// ✅ 모바일용 티어 도트 색상
+const TIER_DOT_COLORS: Record<string, string> = {
+    'CHALLENGER': "bg-red-500",
+    'MASTER': "bg-purple-500",
+    'DIAMOND': "bg-sky-500",
+    'EMERALD': "bg-emerald-500",
+    'PLATINUM': "bg-cyan-500",
+    'GOLD': "bg-yellow-500",
+    'SILVER': "bg-slate-400",
+    'BRONZE': "bg-orange-500",
+    'IRON': "bg-stone-500",
 }
 
 const getTierBadgeStyle = (tier: string) =>
     TIER_BADGE_STYLES[tier] || TIER_BADGE_STYLES['IRON']
+
+const getTierDotColor = (tier: string) =>
+    TIER_DOT_COLORS[tier] || TIER_DOT_COLORS['IRON']
 
 // [Component] Toolbar
 function RankingToolbar({
@@ -64,13 +82,20 @@ function RankingToolbar({
     )
 }
 
-// [Modified] 아이콘 제거 -> 순수 숫자 표기
+// ✅ 순위 렌더링 - 1~3위는 아이콘, 나머지는 검은 숫자
 const renderRankIcon = (rank: number) => {
+    if (rank === 1) {
+        return (
+            <div className="relative">
+                <Crown className="h-6 w-6 text-yellow-500 fill-yellow-500/30" />
+                <div className="absolute -top-1 -right-1 animate-ping h-2 w-2 rounded-full bg-yellow-400 opacity-75" />
+            </div>
+        )
+    }
+    if (rank === 2) return <Award className="h-6 w-6 text-slate-400" />
+    if (rank === 3) return <Award className="h-6 w-6 text-amber-600" />
     return (
-        <span className={cn(
-            "font-mono font-black text-lg inline-block w-8 text-center",
-            rank <= 3 ? "text-primary text-2xl scale-110" : "text-muted-foreground"
-        )}>
+        <span className="font-mono font-bold text-base text-foreground/70 w-8 text-center">
             {rank}
         </span>
     )
@@ -80,9 +105,11 @@ function RankingContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [page, setPage] = useState(0)
+    const [pageInput, setPageInput] = useState("")
     const [selectedTier, setSelectedTier] = useState<Tier | 'ALL'>('ALL')
     const [selectedUsername, setSelectedUsername] = useState<string | null>(null)
     const [modalOpen, setModalOpen] = useState(false)
+    const listRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         const userParam = searchParams.get('user')
@@ -99,7 +126,33 @@ function RankingContent() {
 
     const rankings = data?.rankings || [];
     const pageInfo = data?.pageInfo;
+    const totalPages = pageInfo?.totalPages || 1;
     const startRank = (page * 20) + 1;
+
+    // ✅ 페이지 변경 시 리스트 상단으로 스크롤
+    const scrollToList = () => {
+        if (listRef.current) {
+            const offset = 180;
+            const top = listRef.current.getBoundingClientRect().top + window.scrollY - offset;
+            window.scrollTo({ top, behavior: 'smooth' });
+        }
+    }
+
+    const handlePageChange = (newPage: number) => {
+        const validPage = Math.max(0, Math.min(newPage, totalPages - 1));
+        setPage(validPage);
+        setPageInput("");
+        scrollToList();
+    }
+
+    const handlePageInputSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const inputPage = parseInt(pageInput, 10);
+        if (!isNaN(inputPage) && inputPage >= 1 && inputPage <= totalPages) {
+            handlePageChange(inputPage - 1);
+        }
+        setPageInput("");
+    }
 
     const handleUserClick = (username: string) => {
         if(!username) return;
@@ -137,14 +190,26 @@ function RankingContent() {
 
                 <RankingToolbar
                     selectedTier={selectedTier}
-                    onTierChange={(tier) => { setSelectedTier(tier as Tier | 'ALL'); setPage(0); }}
+                    onTierChange={(tier) => { setSelectedTier(tier as Tier | 'ALL'); setPage(0); setPageInput(""); }}
                 />
 
-                <div className="container max-w-5xl px-4">
-                    {/* Header Row */}
+                <div className="container max-w-5xl px-4" ref={listRef}>
+                    {/* Page Info Header */}
+                    {totalPages > 1 && !isLoading && rankings.length > 0 && (
+                        <div className="flex items-center justify-between mb-4 px-2">
+                            <p className="text-sm text-muted-foreground">
+                                총 <span className="font-semibold text-foreground">{pageInfo?.totalElements?.toLocaleString() || 0}</span>명
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                                <span className="font-semibold text-foreground">{page + 1}</span> / {totalPages} 페이지
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Header Row - Desktop Only */}
                     <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 mb-2 text-xs font-bold text-muted-foreground/60 uppercase tracking-widest select-none bg-muted/20 rounded-xl">
-                        <div className="col-span-2 md:col-span-1 text-center">#</div>
-                        <div className="col-span-7 md:col-span-5 pl-2">User</div>
+                        <div className="col-span-1 text-center">#</div>
+                        <div className="col-span-5 pl-2">User</div>
                         <div className="col-span-3 text-center">Tier</div>
                         <div className="col-span-3 text-right pr-2">Score</div>
                     </div>
@@ -152,7 +217,7 @@ function RankingContent() {
                     <div className="space-y-2 min-h-[500px]">
                         {isLoading ? (
                             Array.from({ length: 15 }).map((_, i) => (
-                                <Skeleton key={i} className="h-20 w-full rounded-2xl bg-secondary/20" />
+                                <Skeleton key={i} className="h-16 md:h-20 w-full rounded-2xl bg-secondary/20" />
                             ))
                         ) : rankings.length === 0 ? (
                             <div className="py-32 text-center bg-secondary/10 rounded-3xl border border-dashed border-border/50">
@@ -171,39 +236,46 @@ function RankingContent() {
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.2, delay: index * 0.02 }}
                                         onClick={() => handleUserClick(user.username)}
-                                        className="group grid grid-cols-12 gap-4 items-center p-4 rounded-2xl border border-transparent bg-white/50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 hover:border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all cursor-pointer backdrop-blur-sm"
+                                        className="group grid grid-cols-12 gap-2 md:gap-4 items-center px-3 py-3 md:p-4 rounded-2xl border border-transparent bg-white/50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 hover:border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all cursor-pointer backdrop-blur-sm"
                                     >
                                         {/* Rank Number */}
                                         <div className="col-span-2 md:col-span-1 text-center flex justify-center items-center">
                                             {renderRankIcon(rank)}
                                         </div>
 
-                                        {/* User Info */}
-                                        <div className="col-span-7 md:col-span-5 flex items-center gap-4 overflow-hidden">
-                                            <Avatar className="h-10 w-10 md:h-12 md:w-12 border-2 border-background shadow-sm group-hover:border-primary/20 transition-colors">
-                                                <AvatarImage src={user.profileImage} />
-                                                <AvatarFallback>{user.username[0]}</AvatarFallback>
-                                            </Avatar>
+                                        {/* User Info - Mobile: Avatar with Tier Dot */}
+                                        <div className="col-span-7 md:col-span-5 flex items-center gap-3 md:gap-4 overflow-hidden">
+                                            <div className="relative flex-shrink-0">
+                                                <Avatar className="h-10 w-10 md:h-12 md:w-12 border-2 border-background shadow-sm group-hover:border-primary/20 transition-colors">
+                                                    <AvatarImage src={user.profileImage} />
+                                                    <AvatarFallback>{user.username[0]}</AvatarFallback>
+                                                </Avatar>
+                                                {/* Mobile Tier Dot */}
+                                                <div
+                                                    className={cn(
+                                                        "md:hidden absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-background",
+                                                        getTierDotColor(user.tier)
+                                                    )}
+                                                    title={user.tier}
+                                                />
+                                            </div>
                                             <div className="flex flex-col min-w-0">
-                                                <span className="font-bold text-base md:text-lg truncate text-foreground group-hover:text-primary transition-colors">
+                                                <span className="font-bold text-sm md:text-lg truncate text-foreground group-hover:text-primary transition-colors">
                                                     {user.username}
-                                                </span>
-                                                <span className={cn("md:hidden text-[10px] w-fit px-1.5 py-0.5 rounded font-bold mt-1", getTierBadgeStyle(user.tier))}>
-                                                    {user.tier}
                                                 </span>
                                             </div>
                                         </div>
 
                                         {/* Desktop Tier Badge */}
                                         <div className="col-span-3 hidden md:flex justify-center">
-                                            <span className={cn("px-3 py-1 rounded-full text-[11px] font-extrabold tracking-widest border border-current/10 shadow-sm", getTierBadgeStyle(user.tier))}>
+                                            <span className={cn("px-3 py-1 rounded-full text-[11px] font-extrabold tracking-widest border shadow-sm", getTierBadgeStyle(user.tier))}>
                                                 {user.tier}
                                             </span>
                                         </div>
 
                                         {/* Score */}
                                         <div className="col-span-3 text-right">
-                                            <span className="font-mono font-black text-lg md:text-xl text-foreground/90 tabular-nums tracking-tight">
+                                            <span className="font-mono font-bold text-base md:text-xl text-foreground tabular-nums tracking-tight">
                                                 {user.totalScore.toLocaleString()}
                                             </span>
                                         </div>
@@ -213,30 +285,72 @@ function RankingContent() {
                         )}
                     </div>
 
-                    {/* Pagination */}
-                    {pageInfo && pageInfo.totalPages > 1 && (
-                        <div className="py-16 flex justify-center items-center gap-6">
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => { setPage(p => Math.max(0, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                disabled={page === 0 || isLoading}
-                                className="w-12 h-12 rounded-full shadow-sm hover:bg-secondary border-border/50"
-                            >
-                                <ChevronLeft className="h-5 w-5 opacity-60" />
-                            </Button>
-                            <span className="text-sm font-mono font-bold text-muted-foreground select-none bg-secondary/30 px-4 py-2 rounded-full">
-                                {page + 1} / {pageInfo.totalPages}
-                            </span>
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                disabled={pageInfo.isLast || isLoading}
-                                className="w-12 h-12 rounded-full shadow-sm hover:bg-secondary border-border/50"
-                            >
-                                <ChevronRight className="h-5 w-5 opacity-60" />
-                            </Button>
+                    {/* Pagination - Enhanced (항상 표시) */}
+                    {!isLoading && rankings.length > 0 && (
+                        <div className="py-12 flex flex-col items-center gap-4">
+                            <div className="flex items-center gap-2">
+                                {/* First Page */}
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handlePageChange(0)}
+                                    disabled={page === 0 || isLoading}
+                                    className="rounded-xl w-10 h-10 text-muted-foreground hover:text-foreground disabled:opacity-30"
+                                    title="첫 페이지"
+                                >
+                                    <ChevronsLeft className="h-4 w-4" />
+                                </Button>
+
+                                {/* Previous Page */}
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => handlePageChange(page - 1)}
+                                    disabled={page === 0 || isLoading}
+                                    className="rounded-xl w-10 h-10 shadow-sm disabled:opacity-30"
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                </Button>
+
+                                {/* Page Input */}
+                                <form onSubmit={handlePageInputSubmit} className="flex items-center gap-2 px-3">
+                                    <Input
+                                        type="text"
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
+                                        value={pageInput}
+                                        onChange={(e) => setPageInput(e.target.value.replace(/[^0-9]/g, ''))}
+                                        placeholder={String(page + 1)}
+                                        className="w-14 h-10 text-center font-bold rounded-xl border-border/50 focus:border-primary text-sm"
+                                        disabled={isLoading}
+                                    />
+                                    <span className="text-muted-foreground font-medium">/</span>
+                                    <span className="font-bold text-foreground min-w-[2rem]">{totalPages}</span>
+                                </form>
+
+                                {/* Next Page */}
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => handlePageChange(page + 1)}
+                                    disabled={page >= totalPages - 1 || isLoading}
+                                    className="rounded-xl w-10 h-10 shadow-sm disabled:opacity-30"
+                                >
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
+
+                                {/* Last Page */}
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handlePageChange(totalPages - 1)}
+                                    disabled={page >= totalPages - 1 || isLoading}
+                                    className="rounded-xl w-10 h-10 text-muted-foreground hover:text-foreground disabled:opacity-30"
+                                    title="마지막 페이지"
+                                >
+                                    <ChevronsRight className="h-4 w-4" />
+                                </Button>
+                            </div>
                         </div>
                     )}
                 </div>

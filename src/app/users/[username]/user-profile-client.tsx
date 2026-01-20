@@ -6,10 +6,11 @@ import {
     RefreshCcw,
     Share2,
     Copy,
-    Trophy,
+    Sparkles,
     SearchX,
     HelpCircle,
-    ArrowLeft
+    ArrowLeft,
+    Zap
 } from "lucide-react"
 import { GithubIcon } from "@/shared/components/icons/github-icon"
 import { useUser, useRefreshUser } from "@/features/user/api/user-service"
@@ -337,7 +338,7 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
                                     "flex items-center gap-2 px-5 py-1.5 rounded-full text-sm font-extrabold tracking-widest uppercase shadow-md mb-8 hover:scale-105 transition-transform cursor-default z-10 mt-2",
                                     style.badgeBg
                                 )}>
-                                    <Trophy className="h-4 w-4 fill-current" />
+                                    <Sparkles className="h-4 w-4" />
                                     {user.tier}
                                 </div>
 
@@ -378,19 +379,50 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
                                 </div>
 
                                 <div className="w-full mt-6 pt-6 border-t border-border/50 relative z-20">
-                                    <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-secondary/50 text-[11px] font-medium text-muted-foreground mb-3">
-                                        {canRefresh ? "✨ 지금 바로 갱신 가능" : `⏳ ${getTimeRemaining()}`}
-                                    </div>
                                     <Button
                                         onClick={handleRefresh}
                                         disabled={!canRefresh || refreshMutation.isPending}
-                                        variant="outline"
-                                        className="w-full rounded-2xl border-dashed border-border hover:bg-accent/50 h-11 text-sm font-medium disabled:opacity-50 transition-all active:scale-[0.98]"
+                                        variant="ghost"
+                                        className={cn(
+                                            "w-full rounded-2xl h-14 text-sm font-medium transition-all active:scale-[0.98] flex flex-col items-center justify-center gap-0.5 group",
+                                            canRefresh
+                                                ? "bg-emerald-500/5 hover:bg-emerald-500/10 border border-emerald-500/20"
+                                                : "bg-secondary/30 hover:bg-secondary/50 border border-transparent"
+                                        )}
                                     >
-                                        <div className={cn("mr-2", refreshMutation.isPending && "animate-spin")}>
-                                            <RefreshCcw className="h-4 w-4" />
+                                        <div className="flex items-center gap-2">
+                                            <div className={cn(
+                                                "transition-transform duration-300",
+                                                refreshMutation.isPending && "animate-spin"
+                                            )}>
+                                                <RefreshCcw className={cn(
+                                                    "h-4 w-4 transition-colors",
+                                                    canRefresh ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"
+                                                )} />
+                                            </div>
+                                            <span className={cn(
+                                                "font-semibold transition-colors",
+                                                canRefresh ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"
+                                            )}>
+                                                {refreshMutation.isPending ? "동기화 중..." : "최신 데이터 불러오기"}
+                                            </span>
                                         </div>
-                                        {refreshMutation.isPending ? "동기화 중..." : "최신 데이터 불러오기"}
+                                        <span className={cn(
+                                            "text-[10px] font-medium flex items-center gap-1.5 transition-colors",
+                                            canRefresh ? "text-emerald-600/70 dark:text-emerald-400/70" : "text-muted-foreground/60"
+                                        )}>
+                                            {canRefresh ? (
+                                                <>
+                                                    <span className="relative flex h-1.5 w-1.5">
+                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                                                    </span>
+                                                    지금 갱신 가능
+                                                </>
+                                            ) : (
+                                                getTimeRemaining()
+                                            )}
+                                        </span>
                                     </Button>
                                 </div>
                             </Card>
@@ -403,7 +435,7 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
                             <CardContent className="p-0 h-full relative">
                                 <div className="absolute top-8 left-8 z-10 pointer-events-none">
                                     <CardTitle className="text-xl font-bold text-foreground/80 flex items-center gap-2">
-                                        <Trophy className={cn("h-5 w-5", style.text)} />
+                                        <Zap className={cn("h-5 w-5", style.text)} />
                                         Stats Radar
                                     </CardTitle>
                                     <CardDescription className="text-xs font-medium mt-1 ml-7">
