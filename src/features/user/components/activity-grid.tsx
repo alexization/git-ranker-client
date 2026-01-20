@@ -110,8 +110,8 @@ export function ActivityGrid({ user }: ActivityGridProps) {
             />
             <ActivityItem
                 label="Open PRs"
-                value={Math.max(0, (user.prCount || 0) - user.mergedPrCount)}
-                diff={(user.diffPrCount || 0) - user.diffMergedPrCount}
+                value={user.prCount || 0}
+                diff={user.diffPrCount || 0}
                 icon={<GitPullRequest className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
                 colorClass="bg-purple-50 dark:bg-purple-500/10 border-purple-100 dark:border-purple-500/20"
                 delay={0.1}
