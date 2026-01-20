@@ -63,9 +63,9 @@ export function Header() {
 
                 {/* Left Side: Logo & Navigation */}
                 <div className="flex items-center gap-8">
-                    <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-80">
-                        <GithubIcon className="h-8 w-8 text-foreground" />
-                        <span className="text-xl font-bold tracking-tight text-foreground">
+                    <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+                        <GithubIcon className="h-6 w-6 text-foreground" />
+                        <span className="text-base font-bold tracking-tight text-foreground">
               Git Ranker
             </span>
                     </Link>
