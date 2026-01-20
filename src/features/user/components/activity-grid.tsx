@@ -23,8 +23,8 @@ function AnimatedCounter({ value, delay = 0 }: { value: number; delay?: number }
 
     const motionValue = useMotionValue(0)
     const springValue = useSpring(motionValue, {
-        stiffness: 100,
-        damping: 30,
+        stiffness: 300,
+        damping: 35,
         restDelta: 0.001
     })
     const displayValue = useTransform(springValue, (v) => Math.floor(v).toLocaleString())
@@ -106,7 +106,7 @@ export function ActivityGrid({ user }: ActivityGridProps) {
                 diff={user.diffMergedPrCount}
                 icon={<GitMerge className="h-5 w-5 text-blue-600 dark:text-blue-400" />}
                 colorClass="bg-blue-50 dark:bg-blue-500/10 border-blue-100 dark:border-blue-500/20"
-                delay={0.1}
+                delay={0.05}
             />
             <ActivityItem
                 label="Open PRs"
@@ -114,7 +114,7 @@ export function ActivityGrid({ user }: ActivityGridProps) {
                 diff={(user.diffPrCount || 0) - user.diffMergedPrCount}
                 icon={<GitPullRequest className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
                 colorClass="bg-purple-50 dark:bg-purple-500/10 border-purple-100 dark:border-purple-500/20"
-                delay={0.2}
+                delay={0.1}
             />
             <ActivityItem
                 label="Reviews"
@@ -122,7 +122,7 @@ export function ActivityGrid({ user }: ActivityGridProps) {
                 diff={user.diffReviewCount}
                 icon={<MessageSquare className="h-5 w-5 text-teal-600 dark:text-teal-400" />}
                 colorClass="bg-teal-50 dark:bg-teal-500/10 border-teal-100 dark:border-teal-500/20"
-                delay={0.3}
+                delay={0.15}
             />
             <ActivityItem
                 label="Issues"
@@ -130,7 +130,7 @@ export function ActivityGrid({ user }: ActivityGridProps) {
                 diff={user.diffIssueCount}
                 icon={<AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />}
                 colorClass="bg-amber-50 dark:bg-amber-500/10 border-amber-100 dark:border-amber-500/20"
-                delay={0.4}
+                delay={0.2}
             />
             {/* Full Width */}
             <ActivityItem
@@ -139,7 +139,7 @@ export function ActivityGrid({ user }: ActivityGridProps) {
                 diff={user.diffCommitCount}
                 icon={<GitCommit className="h-5 w-5 text-slate-600 dark:text-slate-400" />}
                 colorClass="bg-slate-50 dark:bg-slate-500/10 border-slate-100 dark:border-slate-500/20"
-                delay={0.5}
+                delay={0.25}
                 fullWidth={true}
             />
         </div>

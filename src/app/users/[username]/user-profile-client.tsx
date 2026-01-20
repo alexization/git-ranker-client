@@ -14,7 +14,6 @@ import {
 import { GithubIcon } from "@/shared/components/icons/github-icon"
 import { useUser, useRefreshUser } from "@/features/user/api/user-service"
 import { StatsChart } from "@/features/user/components/stats-chart"
-import { BadgeGenerator } from "@/features/user/components/badge-generator"
 import { ActivityGrid } from "@/features/user/components/activity-grid"
 import { ScoreInfoModal } from "@/features/user/components/score-info-modal"
 import { TiltCard } from "@/shared/components/ui/tilt-card"
@@ -418,10 +417,6 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
                         </Card>
 
                         <ActivityGrid user={user} />
-
-                        <div className="mt-2">
-                            <BadgeGenerator nodeId={user.nodeId} />
-                        </div>
                     </div>
                 </div>
             </div>
