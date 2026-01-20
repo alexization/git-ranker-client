@@ -7,7 +7,7 @@ import {
     Share2,
     Copy,
     Sparkles,
-    SearchX,
+    UserX,
     HelpCircle,
     ArrowLeft,
     Zap
@@ -216,30 +216,37 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
                     transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                     className="w-full max-w-md"
                 >
-                    <Card className="relative overflow-hidden border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl p-8 text-center shadow-2xl rounded-[2rem]">
-                        <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-                        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+                    <Card className="relative overflow-hidden border border-border/50 bg-card p-8 text-center shadow-2xl rounded-[2rem]">
+                        <div className="absolute -top-24 -right-24 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
 
                         <motion.div
-                            initial={{ scale: 0.5, opacity: 0 }}
+                            initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            transition={{ delay: 0.1, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                            transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.1 }}
                             className="relative z-10 mb-6 w-full flex justify-center"
                         >
-                            <motion.div
-                                animate={{ y: [0, -6, 0] }}
-                                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                                className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-full flex items-center justify-center shadow-lg"
-                            >
-                                <SearchX className="h-12 w-12 text-muted-foreground" />
-                            </motion.div>
+                            <div className="w-20 h-20 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
+                                <motion.div
+                                    initial={{ rotate: 0 }}
+                                    animate={{ rotate: [0, -10, 10, -10, 0] }}
+                                    transition={{ duration: 0.5, delay: 0.4, ease: "easeInOut" }}
+                                >
+                                    <motion.div
+                                        animate={{ y: [0, -3, 0] }}
+                                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                                    >
+                                        <UserX className="w-10 h-10 text-orange-500 dark:text-orange-400" />
+                                    </motion.div>
+                                </motion.div>
+                            </div>
                         </motion.div>
 
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: 0.2, duration: 0.3 }}
-                            className="relative z-10 inline-flex items-center gap-2 px-4 py-2 bg-secondary/50 rounded-full mb-4"
+                            className="relative z-10 inline-flex items-center gap-2 px-4 py-2 bg-secondary rounded-full mb-4"
                         >
                             <GithubIcon className="w-4 h-4" />
                             <span className="font-mono font-semibold text-sm">@{username}</span>
@@ -268,7 +275,7 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
                         >
                             <Button
                                 onClick={handleGithubRegister}
-                                className="w-full h-12 rounded-2xl font-semibold bg-[#24292F] hover:bg-[#24292F]/90 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200"
+                                className="w-full h-12 rounded-2xl font-semibold bg-[#24292F] hover:bg-[#24292F]/90 text-white dark:bg-white dark:text-[#24292F] dark:hover:bg-gray-100 shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200"
                             >
                                 <GithubIcon className="mr-2 h-5 w-5" />
                                 GitHub로 등록하기
@@ -276,7 +283,7 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
                             <Button
                                 variant="ghost"
                                 onClick={() => router.push('/')}
-                                className="w-full h-11 rounded-2xl font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 active:scale-[0.98] transition-all duration-200"
+                                className="w-full h-11 rounded-2xl font-medium text-muted-foreground hover:text-foreground hover:bg-secondary active:scale-[0.98] transition-all duration-200"
                             >
                                 홈으로 돌아가기
                             </Button>

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Zap, Sparkles, GitCommit, X, ScrollText, Shield } from "lucide-react"
+import { Zap, Rocket, GitCommit, X, ScrollText, Shield } from "lucide-react"
 import { Button } from "@/shared/components/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/shared/components/card"
 import { cn } from "@/shared/lib/utils"
@@ -141,9 +141,25 @@ export default function LoginPage() {
                 >
                     <Card className="border-white/20 bg-white/70 dark:bg-black/40 backdrop-blur-2xl shadow-2xl overflow-hidden rounded-[2rem]">
                         <CardHeader className="text-center space-y-2 pb-6 pt-10">
-                            <motion.div variants={itemVariants} className="mx-auto mb-4">
-                                <div className="inline-flex items-center justify-center p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-purple-500/10 ring-1 ring-black/5 dark:ring-white/10 shadow-inner">
-                                    <Sparkles className="w-10 h-10 text-primary" />
+                            <motion.div
+                                initial={{ scale: 0.8, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.1 }}
+                                className="mx-auto mb-4"
+                            >
+                                <div className="w-20 h-20 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center">
+                                    <motion.div
+                                        initial={{ rotate: -45, y: 0 }}
+                                        animate={{
+                                            rotate: -45,
+                                            y: [0, -6, 0]
+                                        }}
+                                        transition={{
+                                            y: { duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }
+                                        }}
+                                    >
+                                        <Rocket className="w-10 h-10 text-primary" />
+                                    </motion.div>
                                 </div>
                             </motion.div>
 
