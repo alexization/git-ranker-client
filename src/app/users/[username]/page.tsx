@@ -2,6 +2,9 @@ import type { Metadata } from "next"
 import { getUser } from "@/features/user/api/user-service"
 import { UserProfileClient } from "./user-profile-client"
 
+// ISR: 1시간마다 페이지 재검증
+export const revalidate = 3600
+
 interface Props {
     params: Promise<{ username: string }>
 }

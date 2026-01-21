@@ -15,8 +15,8 @@ import { LiveTicker } from "@/shared/components/ui/live-ticker"
 
 // [Add] UX 개선을 위한 추천 검색어 (Quick Chips)
 const FAMOUS_DEVS = [
+  { name: "alexization", label: "Backend Developer" },
   { name: "torvalds", label: "Linux Creator" },
-  { name: "shadcn", label: "UI Master" },
   { name: "leerob", label: "Vercel VP" },
 ];
 

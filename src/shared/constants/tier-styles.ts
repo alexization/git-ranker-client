@@ -107,6 +107,19 @@ export const TIER_COLOR_STYLES: Record<Tier | string, string> = {
     IRON: "bg-stone-500/10 text-stone-500 border-stone-500/30",
 } as const
 
+// Badge styles for ranking list (light/dark mode support)
+export const TIER_BADGE_STYLES: Record<Tier | string, string> = {
+    CHALLENGER: "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 border-red-200 dark:border-red-800",
+    MASTER: "bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400 border-purple-200 dark:border-purple-800",
+    DIAMOND: "bg-sky-100 text-sky-600 dark:bg-sky-900/40 dark:text-sky-400 border-sky-200 dark:border-sky-800",
+    EMERALD: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
+    PLATINUM: "bg-cyan-100 text-cyan-600 dark:bg-cyan-900/40 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800",
+    GOLD: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
+    SILVER: "bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-slate-300 dark:border-slate-700",
+    BRONZE: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400 border-orange-200 dark:border-orange-800",
+    IRON: "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 border-stone-200 dark:border-stone-700",
+} as const
+
 // Tier dot colors for mobile view and indicators
 export const TIER_DOT_COLORS: Record<Tier | string, string> = {
     CHALLENGER: "bg-red-500",
@@ -151,3 +164,6 @@ export const getTierDotColor = (tier: Tier | string) =>
 
 export const getTierTextColor = (tier: Tier | string) =>
     TIER_TEXT_COLORS[tier] || TIER_TEXT_COLORS['IRON']
+
+export const getTierBadgeStyle = (tier: Tier | string) =>
+    TIER_BADGE_STYLES[tier] || TIER_BADGE_STYLES['IRON']

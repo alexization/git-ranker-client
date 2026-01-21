@@ -22,8 +22,10 @@ const jetbrainsMono = JetBrains_Mono({
     display: "swap",
 });
 
-// [FIX] favicon.ico 명시적 지정
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.git-ranker.com"
+
 export const metadata: Metadata = {
+    metadataBase: new URL(BASE_URL),
     title: {
         default: "Git Ranker | 개발자 전투력 측정",
         template: "%s | Git Ranker"
@@ -34,7 +36,7 @@ export const metadata: Metadata = {
     openGraph: {
         type: "website",
         locale: "ko_KR",
-        url: "https://www.git-ranker.com",
+        url: BASE_URL,
         title: "Git Ranker | 개발자 전투력 측정",
         description: "GitHub 활동 기반 개발자 전투력 측정 및 티어 랭킹 서비스.",
         siteName: "Git Ranker",
@@ -43,9 +45,6 @@ export const metadata: Metadata = {
         card: "summary_large_image",
         title: "Git Ranker | 개발자 전투력 측정",
         description: "GitHub 활동 기반 개발자 전투력 측정 및 티어 랭킹 서비스.",
-    },
-    icons: {
-        icon: "/favicon.ico",
     },
 };
 

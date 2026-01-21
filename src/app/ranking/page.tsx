@@ -2,9 +2,10 @@
 
 import { useState, useEffect, Suspense, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { motion } from "framer-motion"
+import { LazyMotion, domAnimation, m } from "framer-motion"
 import { useRankingList } from "@/features/ranking/api/ranking-service"
 import { Tier } from "@/shared/types/api"
+import { getTierBadgeStyle, getTierDotColor } from "@/shared/constants/tier-styles"
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/avatar"
 import { Skeleton } from "@/shared/components/skeleton"
 import { Button } from "@/shared/components/button"
@@ -17,38 +18,6 @@ const TIERS: (Tier | 'ALL')[] = [
     'ALL', 'CHALLENGER', 'MASTER', 'DIAMOND', 'EMERALD',
     'PLATINUM', 'GOLD', 'SILVER', 'BRONZE', 'IRON'
 ]
-
-// ✅ 티어별 배지 스타일 - 챌린저는 레드
-const TIER_BADGE_STYLES: Record<string, string> = {
-    'CHALLENGER': "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 border-red-200 dark:border-red-800",
-    'MASTER': "bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400 border-purple-200 dark:border-purple-800",
-    'DIAMOND': "bg-sky-100 text-sky-600 dark:bg-sky-900/40 dark:text-sky-400 border-sky-200 dark:border-sky-800",
-    'EMERALD': "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
-    'PLATINUM': "bg-cyan-100 text-cyan-600 dark:bg-cyan-900/40 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800",
-    'GOLD': "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
-    'SILVER': "bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-slate-300 dark:border-slate-700",
-    'BRONZE': "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400 border-orange-200 dark:border-orange-800",
-    'IRON': "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 border-stone-200 dark:border-stone-700",
-}
-
-// ✅ 모바일용 티어 도트 색상
-const TIER_DOT_COLORS: Record<string, string> = {
-    'CHALLENGER': "bg-red-500",
-    'MASTER': "bg-purple-500",
-    'DIAMOND': "bg-sky-500",
-    'EMERALD': "bg-emerald-500",
-    'PLATINUM': "bg-cyan-500",
-    'GOLD': "bg-yellow-500",
-    'SILVER': "bg-slate-400",
-    'BRONZE': "bg-orange-500",
-    'IRON': "bg-stone-500",
-}
-
-const getTierBadgeStyle = (tier: string) =>
-    TIER_BADGE_STYLES[tier] || TIER_BADGE_STYLES['IRON']
-
-const getTierDotColor = (tier: string) =>
-    TIER_DOT_COLORS[tier] || TIER_DOT_COLORS['IRON']
 
 // [Component] Toolbar
 function RankingToolbar({
@@ -226,11 +195,12 @@ function RankingContent() {
                                 <p className="text-sm text-muted-foreground/60 mt-1">아직 등록된 유저가 없거나 필터 조건에 맞는 결과가 없습니다.</p>
                             </div>
                         ) : (
-                            rankings.map((user, index) => {
+                            <LazyMotion features={domAnimation}>
+                            {rankings.map((user, index) => {
                                 const rank = startRank + index;
 
                                 return (
-                                    <motion.div
+                                    <m.div
                                         key={user.username}
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
@@ -279,9 +249,10 @@ function RankingContent() {
                                                 {user.totalScore.toLocaleString()}
                                             </span>
                                         </div>
-                                    </motion.div>
+                                    </m.div>
                                 )
-                            })
+                            })}
+                            </LazyMotion>
                         )}
                     </div>
 
