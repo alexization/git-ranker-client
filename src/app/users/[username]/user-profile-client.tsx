@@ -76,7 +76,7 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
     }
 
     const handleCopyBadge = () => {
-        const badgeUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/badges/${user?.nodeId}`
+        const badgeUrl = `${process.env.NEXT_PUBLIC_API_URL || 'https://www.git-ranker.com'}/api/v1/badges/${user?.nodeId}`
         const markdown = `[![Git Ranker](${badgeUrl})](https://www.git-ranker.com)`
         navigator.clipboard.writeText(markdown)
         toast.success("배지 마크다운이 복사되었습니다!")

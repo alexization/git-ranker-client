@@ -17,7 +17,7 @@ type CopyType = "markdown" | "html" | "link" | null
 export function BadgeGenerator({ nodeId, username }: BadgeGeneratorProps) {
     const [copied, setCopied] = useState<CopyType>(null)
 
-    const badgeUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/badges/${nodeId}`
+    const badgeUrl = `${process.env.NEXT_PUBLIC_API_URL || 'https://www.git-ranker.com'}/api/v1/badges/${nodeId}`
     const profileUrl = `https://www.git-ranker.com/users/${username}`
 
     const markdownCode = `[![Git Ranker](${badgeUrl})](${profileUrl})`
