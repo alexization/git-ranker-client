@@ -270,10 +270,10 @@ export default function LoginPage() {
                             initial="hidden"
                             animate="visible"
                             exit="exit"
-                            className="relative w-full max-w-lg max-h-[80vh] bg-background border border-border rounded-2xl shadow-2xl overflow-hidden"
+                            className="relative w-[calc(100%-2rem)] sm:w-full max-w-lg max-h-[75vh] sm:max-h-[80vh] bg-background border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col"
                         >
                             {/* Header */}
-                            <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-background/95 backdrop-blur-sm border-b border-border">
+                            <div className="shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 bg-background/95 backdrop-blur-sm border-b border-border">
                                 <div className="flex items-center gap-3">
                                     <div className={cn(
                                         "p-2 rounded-xl",
@@ -300,19 +300,19 @@ export default function LoginPage() {
                             </div>
 
                             {/* Body */}
-                            <div className="p-6 overflow-y-auto max-h-[calc(80vh-80px)]">
+                            <div className="p-4 sm:p-6 overflow-y-auto flex-1 min-h-0">
                                 <div className="prose prose-sm dark:prose-invert max-w-none">
-                                    <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-muted-foreground bg-transparent p-0 m-0">
+                                    <pre className="whitespace-pre-wrap font-sans text-[13px] sm:text-sm leading-relaxed text-muted-foreground bg-transparent p-0 m-0">
                                         {openModal === "terms" ? TERMS_OF_SERVICE.trim() : PRIVACY_POLICY.trim()}
                                     </pre>
                                 </div>
                             </div>
 
                             {/* Footer */}
-                            <div className="sticky bottom-0 px-6 py-4 bg-background/95 backdrop-blur-sm border-t border-border">
+                            <div className="shrink-0 px-4 sm:px-6 py-3 sm:py-4 pb-4 sm:pb-4 bg-background/95 backdrop-blur-sm border-t border-border">
                                 <Button
                                     onClick={() => setOpenModal(null)}
-                                    className="w-full h-11 font-semibold rounded-xl"
+                                    className="w-full h-10 sm:h-11 font-semibold rounded-xl text-sm sm:text-base"
                                 >
                                     확인
                                 </Button>

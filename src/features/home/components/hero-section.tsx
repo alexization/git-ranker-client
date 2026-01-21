@@ -10,6 +10,7 @@ import { cn } from "@/shared/lib/utils"
 // [Change] 기존 HeroSpotlight 대신 새로 만든 HeatmapBackground 사용
 import { HeatmapBackground } from "@/shared/components/ui/heatmap-background"
 import { useTypingEffect } from "@/shared/hooks/use-typing-effect"
+import { useIsMobile } from "@/shared/hooks/use-media-query"
 import { LiveTicker } from "@/shared/components/ui/live-ticker"
 
 // [Add] UX 개선을 위한 추천 검색어 (Quick Chips)
@@ -28,11 +29,17 @@ export function HeroSection() {
   const [mounted, setMounted] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const inputRef = useRef<HTMLInputElement>(null)
+  const isMobile = useIsMobile()
 
   const placeholderText = useTypingEffect(
       ["torvalds", "shadcn", "leerob", "alexization"],
       100, 50, 2500
   )
+
+  // Mobile: short, PC/Tablet: full
+  const placeholder = isMobile
+      ? `e.g. ${placeholderText}`
+      : `GitHub 유저 검색... (e.g. ${placeholderText})`
 
   useEffect(() => {
     setMounted(true)
@@ -148,13 +155,13 @@ export function HeroSection() {
                 "relative flex items-center rounded-2xl border transition-all duration-300 overflow-hidden bg-background/80 backdrop-blur-sm shadow-2xl",
                 isFocused ? "border-primary ring-4 ring-primary/10 scale-105" : "border-border/50 hover:border-primary/50"
             )}>
-              <div className="pl-5 pr-2">
-                <Search className={cn("h-6 w-6 transition-colors", isFocused ? "text-primary" : "text-muted-foreground")} />
+              <div className="pl-3 sm:pl-5 pr-1 sm:pr-2">
+                <Search className={cn("h-5 w-5 sm:h-6 sm:w-6 transition-colors", isFocused ? "text-primary" : "text-muted-foreground")} />
               </div>
               <input
                   ref={inputRef}
-                  className="h-16 w-full bg-transparent px-2 text-lg font-medium outline-none placeholder:text-muted-foreground/40 font-sans"
-                  placeholder={`GitHub 유저 검색... (e.g. ${placeholderText})`}
+                  className="h-14 sm:h-16 w-full bg-transparent px-2 text-base sm:text-lg font-medium outline-none placeholder:text-muted-foreground/40 font-sans"
+                  placeholder={placeholder}
                   value={query}
                   onChange={(e) => {
                     setQuery(e.target.value)
@@ -169,7 +176,7 @@ export function HeroSection() {
               <div className="pr-2">
                 <Button
                     size="lg"
-                    className="h-12 rounded-xl px-6 font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg"
+                    className="h-10 sm:h-12 rounded-xl px-4 sm:px-6 text-sm sm:text-base font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg"
                     onClick={() => handleSearch(query)}
                 >
                   검색

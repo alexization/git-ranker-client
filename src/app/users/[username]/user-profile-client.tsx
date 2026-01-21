@@ -362,18 +362,18 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
 
                     <div className="lg:col-span-8 flex flex-col gap-6">
 
-                        <Card className="rounded-[2.5rem] shadow-sm border-0 bg-white/60 dark:bg-black/20 backdrop-blur-xl p-0 overflow-hidden min-h-[420px]">
+                        <Card className="rounded-[2rem] sm:rounded-[2.5rem] shadow-sm border-0 bg-white/60 dark:bg-black/20 backdrop-blur-xl p-0 overflow-hidden min-h-[360px] sm:min-h-[420px]">
                             <CardContent className="p-0 h-full relative">
-                                <div className="absolute top-8 left-8 z-10 pointer-events-none">
-                                    <CardTitle className="text-xl font-bold text-foreground/80 flex items-center gap-2">
-                                        <Zap className={cn("h-5 w-5", style.text)} />
+                                <div className="absolute top-5 left-5 sm:top-8 sm:left-8 z-10 pointer-events-none">
+                                    <CardTitle className="text-lg sm:text-xl font-bold text-foreground/80 flex items-center gap-2">
+                                        <Zap className={cn("h-4 w-4 sm:h-5 sm:w-5", style.text)} />
                                         Stats Radar
                                     </CardTitle>
-                                    <CardDescription className="text-xs font-medium mt-1 ml-7">
+                                    <CardDescription className="text-[10px] sm:text-xs font-medium mt-1 ml-6 sm:ml-7">
                                         활동 유형별 기여도 분포
                                     </CardDescription>
                                 </div>
-                                <div className="w-full h-[420px] mt-4">
+                                <div className="w-full h-[360px] sm:h-[420px]">
                                     <StatsChart user={user} />
                                 </div>
                             </CardContent>
