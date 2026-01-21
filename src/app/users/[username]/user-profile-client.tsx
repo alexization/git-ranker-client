@@ -17,6 +17,7 @@ import { useUser, useRefreshUser } from "@/features/user/api/user-service"
 import { StatsChart } from "@/features/user/components/stats-chart"
 import { ActivityGrid } from "@/features/user/components/activity-grid"
 import { ScoreInfoModal } from "@/features/user/components/score-info-modal"
+import { BadgeGenerator } from "@/features/user/components/badge-generator"
 import { TiltCard } from "@/shared/components/ui/tilt-card"
 import { OptimizedAvatar } from "@/shared/components/optimized-avatar"
 import { Button } from "@/shared/components/button"
@@ -380,6 +381,8 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
                         </Card>
 
                         <ActivityGrid user={user} />
+
+                        <BadgeGenerator nodeId={user.nodeId} username={user.username} />
                     </div>
                 </div>
             </div>
