@@ -68,8 +68,6 @@ export default function RootLayout({
             {/* Preconnect to external origins for faster resource loading */}
             <link rel="preconnect" href="https://avatars.githubusercontent.com" />
             <link rel="dns-prefetch" href="https://avatars.githubusercontent.com" />
-            <link rel="preconnect" href="https://api.git-ranker.com" />
-            <link rel="dns-prefetch" href="https://api.git-ranker.com" />
             <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         </head>
         <body

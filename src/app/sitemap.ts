@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next"
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.git-ranker.com"
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.git-ranker.com/api/v1"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://www.git-ranker.com"
 
 interface RankingUser {
     username: string
@@ -16,7 +16,7 @@ async function getTopUsers(): Promise<RankingUser[]> {
         const pages = [0, 1, 2, 3, 4]
         const responses = await Promise.all(
             pages.map(page =>
-                fetch(`${API_URL}/ranking?page=${page}`, {
+                fetch(`${API_URL}/api/v1/ranking?page=${page}`, {
                     next: { revalidate: 3600 } // 1시간마다 갱신
                 }).then(res => res.ok ? res.json() : null)
             )
