@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LogOut, User, Flame, Loader2, DoorOpen } from "lucide-react"
+import { LogOut, User, Flame, Loader2, DoorOpen, Settings } from "lucide-react"
 import { motion } from "framer-motion"
 import { useAuthStore } from "@/features/auth/store/auth-store"
 import { useLogout } from "@/features/auth/api/auth-service"
@@ -130,13 +130,21 @@ export function Header() {
                                 </div>
 
                                 {/* Menu Items */}
-                                <div className="p-2">
+                                <div className="p-2 space-y-1">
                                     <DropdownMenuItem asChild className="rounded-xl h-11 px-3 cursor-pointer transition-colors duration-150">
                                         <Link href={`/users/${user.username}`} className="flex items-center gap-3">
                                             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
                                                 <User className="h-4 w-4 text-primary" />
                                             </div>
                                             <span className="text-[14px] font-medium">내 프로필</span>
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild className="rounded-xl h-11 px-3 cursor-pointer transition-colors duration-150">
+                                        <Link href="/settings" className="flex items-center gap-3">
+                                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted">
+                                                <Settings className="h-4 w-4 text-muted-foreground" />
+                                            </div>
+                                            <span className="text-[14px] font-medium">설정</span>
                                         </Link>
                                     </DropdownMenuItem>
                                 </div>

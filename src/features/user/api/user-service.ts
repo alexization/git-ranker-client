@@ -53,3 +53,21 @@ export const usePrefetchUser = () => {
     }
   }
 }
+
+/**
+ * 회원탈퇴 API mutation
+ * DELETE /api/v1/users/me
+ */
+export const useDeleteAccount = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async () => {
+      await apiClient.delete('/users/me')
+    },
+    onSuccess: () => {
+      // 모든 쿼리 캐시 무효화
+      queryClient.clear()
+    },
+  })
+}
