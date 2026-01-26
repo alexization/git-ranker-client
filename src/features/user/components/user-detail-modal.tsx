@@ -40,10 +40,10 @@ export function UserDetailModal({ username, open, onOpenChange }: UserDetailModa
             onSwipeClose={handleSwipeClose}
             className={cn(
               "p-0 overflow-hidden bg-background border-none shadow-2xl ring-1 ring-black/5 dark:ring-white/10 flex flex-col outline-none [&>button]:hidden",
-              // Mobile: bottom sheet with max height
-              "max-h-[90vh] rounded-t-[32px]",
+              // Mobile: bottom sheet with dynamic viewport height (accounts for browser UI)
+              "max-h-[85dvh] rounded-t-[32px]",
               // Desktop: centered modal
-              "sm:max-w-xl sm:max-h-[85vh] sm:rounded-[32px]"
+              "sm:max-w-xl sm:max-h-[85dvh] sm:rounded-[32px]"
             )}
         >
           {/* [Fix] 닫기 버튼: 위치 조정 (right-6, top-6) 및 배경 추가로 시인성 확보 */}
@@ -77,8 +77,8 @@ export function UserDetailModal({ username, open, onOpenChange }: UserDetailModa
               </div>
           ) : (
               <>
-                {/* [Fix] Scrollable Content Area: 컨텐츠 영역만 스크롤되도록 분리 */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar overscroll-contain">
+                {/* [Fix] Scrollable Content Area: 컨텐츠 영역만 스크롤되도록 분리 + safe-area 상단 여백 */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar overscroll-contain modal-scroll-container">
 
                   {/* Header Section */}
                   <div className="relative pt-16 pb-8 px-6 flex flex-col items-center text-center bg-gradient-to-b from-secondary/50 to-background shrink-0">
@@ -133,8 +133,8 @@ export function UserDetailModal({ username, open, onOpenChange }: UserDetailModa
                   </div>
                 </div>
 
-                {/* [Fix] Fixed Footer: 스크롤 영역 밖에 배치하여 항상 보이게 함 */}
-                <div className="p-6 pt-4 bg-background/95 backdrop-blur-xl border-t border-border/50 z-20 shrink-0">
+                {/* [Fix] Fixed Footer: 스크롤 영역 밖에 배치 + safe-area 패딩으로 하단 UI와 겹침 방지 */}
+                <div className="p-6 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] bg-background/95 backdrop-blur-xl border-t border-border/50 z-20 shrink-0">
                   <div className="grid grid-cols-2 gap-3">
                     <Button
                         asChild

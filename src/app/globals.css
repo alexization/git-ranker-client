@@ -270,4 +270,37 @@
   .recharts-surface * {
     outline: none !important;
   }
+
+  /* Mobile Modal Safe Area Utilities */
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-bottom-auto {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  /* Modal scrollable content with safe area */
+  .modal-scroll-container {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Custom scrollbar for modals */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 2px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
 }

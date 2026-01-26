@@ -49,7 +49,7 @@ export function DeleteAccountModal({ open, onOpenChange }: DeleteAccountModalPro
 
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
-            <AlertDialogContent className="max-w-[400px] !p-0 !overflow-y-auto">
+            <AlertDialogContent className="max-w-[400px] !p-0 overflow-y-auto">
                 {/* Close button */}
                 <button
                     onClick={() => onOpenChange(false)}
@@ -124,8 +124,8 @@ export function DeleteAccountModal({ open, onOpenChange }: DeleteAccountModalPro
                     </p>
                 </motion.div>
 
-                {/* Footer - 취소 왼쪽, 탈퇴 오른쪽 */}
-                <AlertDialogFooter className="px-5 pb-5 pt-1">
+                {/* Footer - 취소 왼쪽, 탈퇴 오른쪽 + safe-area 하단 패딩 */}
+                <AlertDialogFooter className="px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-1">
                     <AlertDialogCancel
                         disabled={deleteAccountMutation.isPending}
                         className="flex-1 min-w-0 h-10"

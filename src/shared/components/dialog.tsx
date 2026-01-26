@@ -61,7 +61,14 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-2xl translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg max-h-[90vh] overflow-y-auto",
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-2xl translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+        "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+        "data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]",
+        "data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
+        "sm:rounded-lg",
+        // Use dvh for dynamic viewport height on mobile
+        "max-h-[85dvh] overflow-y-auto modal-scroll-container",
         className
       )}
       {...props}
@@ -90,11 +97,18 @@ const DialogContent = React.forwardRef<
             animate={controls}
             initial={{ y: 0, opacity: 1 }}
             className={cn(
-              // Mobile: bottom sheet style (fixed to bottom, dynamic viewport height for browser toolbar)
-              "fixed z-50 grid w-full gap-4 border bg-background p-6 shadow-lg overflow-y-auto",
-              "inset-x-0 bottom-0 rounded-t-[32px] max-h-[70dvh]",
+              // Mobile: bottom sheet style with safe area support
+              "fixed z-50 grid w-full gap-4 border bg-background shadow-lg",
+              "inset-x-0 bottom-0 rounded-t-[32px]",
+              // dvh for dynamic viewport height (accounts for mobile browser UI)
+              "max-h-[85dvh]",
+              // Safe area padding for home indicator
+              "pb-[max(1.5rem,env(safe-area-inset-bottom))]",
+              // Scrollable content
+              "overflow-y-auto modal-scroll-container",
               // Desktop: centered modal style
-              "sm:inset-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:max-w-2xl sm:rounded-lg sm:max-h-[85vh]",
+              "sm:inset-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%]",
+              "sm:max-w-2xl sm:rounded-lg sm:max-h-[85dvh] sm:pb-6",
               isDragging && "cursor-grabbing",
               className
             )}
