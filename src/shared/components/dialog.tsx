@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
+import { motion, useAnimation, PanInfo } from "framer-motion"
 import { X } from "lucide-react"
 
 import { cn } from "@/shared/lib/utils"
@@ -29,12 +30,34 @@ const DialogOverlay = React.forwardRef<
 ))
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
+interface DialogContentProps extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
+  /** Enable swipe-to-close gesture on mobile */
+  enableSwipeClose?: boolean
+  /** Callback when close is requested via swipe */
+  onSwipeClose?: () => void
+}
+
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-  <DialogPortal>
-    <DialogOverlay />
+  DialogContentProps
+>(({ className, children, enableSwipeClose = false, onSwipeClose, ...props }, ref) => {
+  const controls = useAnimation()
+  const [isDragging, setIsDragging] = React.useState(false)
+
+  const handleDragEnd = async (_: unknown, info: PanInfo) => {
+    setIsDragging(false)
+    const shouldClose = info.velocity.y > 500 || info.offset.y > 100
+
+    if (shouldClose && onSwipeClose) {
+      await controls.start({ y: "100%", opacity: 0 })
+      onSwipeClose()
+    } else {
+      controls.start({ y: 0, opacity: 1 })
+    }
+  }
+
+  // Base content without gesture support
+  const baseContent = (
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
@@ -49,8 +72,53 @@ const DialogContent = React.forwardRef<
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
-  </DialogPortal>
-))
+  )
+
+  // Content with swipe gesture support for mobile (bottom sheet style)
+  if (enableSwipeClose) {
+    return (
+      <DialogPortal>
+        <DialogOverlay />
+        <DialogPrimitive.Content asChild {...props}>
+          <motion.div
+            ref={ref as React.Ref<HTMLDivElement>}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.5 }}
+            onDragStart={() => setIsDragging(true)}
+            onDragEnd={handleDragEnd}
+            animate={controls}
+            initial={{ y: 0, opacity: 1 }}
+            className={cn(
+              // Mobile: bottom sheet style (fixed to bottom)
+              "fixed z-50 grid w-full gap-4 border bg-background p-6 shadow-lg overflow-hidden",
+              "inset-x-0 bottom-0 rounded-t-[32px]",
+              // Desktop: centered modal style
+              "sm:inset-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:max-w-2xl sm:rounded-lg sm:max-h-[90vh]",
+              isDragging && "cursor-grabbing",
+              className
+            )}
+          >
+            {/* Drag indicator for mobile */}
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full bg-muted-foreground/30 sm:hidden" />
+            {children}
+            <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </DialogPrimitive.Close>
+          </motion.div>
+        </DialogPrimitive.Content>
+      </DialogPortal>
+    )
+  }
+
+  return (
+    <DialogPortal>
+      <DialogOverlay />
+      {baseContent}
+    </DialogPortal>
+  )
+})
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
 const DialogHeader = ({

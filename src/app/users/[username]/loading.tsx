@@ -3,53 +3,101 @@ import { Skeleton } from "@/shared/components/skeleton"
 export default function UserProfileLoading() {
     return (
         <div className="min-h-screen bg-background pb-20">
-            <main className="pt-20 px-4">
-                <div className="container max-w-4xl mx-auto">
-                    {/* Profile Header */}
-                    <div className="flex flex-col items-center gap-6 mb-12">
-                        {/* Avatar */}
-                        <Skeleton className="h-32 w-32 md:h-40 md:w-40 rounded-full" />
+            <main className="pt-12 px-4">
+                <div className="container max-w-6xl mx-auto">
+                    <div className="grid lg:grid-cols-12 gap-6">
+                        {/* Left Column - Profile Card */}
+                        <div className="lg:col-span-4">
+                            <div className="rounded-[2.5rem] border border-border/50 bg-card/50 backdrop-blur-xl p-8 flex flex-col items-center">
+                                {/* Avatar */}
+                                <Skeleton
+                                    className="h-36 w-36 rounded-full mb-5"
+                                    style={{ animationDelay: '0s' }}
+                                />
 
-                        {/* Username & Tier */}
-                        <div className="text-center space-y-3">
-                            <Skeleton className="h-10 w-48 mx-auto" />
-                            <Skeleton className="h-8 w-32 mx-auto rounded-full" />
-                        </div>
+                                {/* Username */}
+                                <Skeleton
+                                    className="h-8 w-40 mb-2 rounded-xl"
+                                    style={{ animationDelay: '0.1s' }}
+                                />
 
-                        {/* Stats Row */}
-                        <div className="flex gap-8 mt-4">
-                            <div className="text-center">
-                                <Skeleton className="h-8 w-20 mb-2" />
-                                <Skeleton className="h-4 w-16" />
-                            </div>
-                            <div className="text-center">
-                                <Skeleton className="h-8 w-16 mb-2" />
-                                <Skeleton className="h-4 w-12" />
-                            </div>
-                            <div className="text-center">
-                                <Skeleton className="h-8 w-24 mb-2" />
-                                <Skeleton className="h-4 w-16" />
-                            </div>
-                        </div>
-                    </div>
+                                {/* Tier Badge */}
+                                <Skeleton
+                                    className="h-8 w-28 rounded-full mb-8"
+                                    style={{ animationDelay: '0.15s' }}
+                                />
 
-                    {/* Score Breakdown Card */}
-                    <div className="bg-card border border-border/50 rounded-3xl p-6 mb-8">
-                        <Skeleton className="h-6 w-32 mb-6" />
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {Array.from({ length: 4 }).map((_, i) => (
-                                <div key={i} className="text-center p-4">
-                                    <Skeleton className="h-10 w-16 mx-auto mb-2" />
-                                    <Skeleton className="h-4 w-20 mx-auto" />
+                                {/* Score Section */}
+                                <div className="w-full p-4 rounded-2xl bg-secondary/30 mb-8">
+                                    <Skeleton
+                                        className="h-4 w-24 mx-auto mb-2 rounded-lg"
+                                        style={{ animationDelay: '0.2s' }}
+                                    />
+                                    <Skeleton
+                                        className="h-14 w-48 mx-auto mb-2 rounded-xl"
+                                        style={{ animationDelay: '0.25s' }}
+                                    />
+                                    <Skeleton
+                                        className="h-4 w-20 mx-auto rounded-lg"
+                                        style={{ animationDelay: '0.3s' }}
+                                    />
                                 </div>
-                            ))}
-                        </div>
-                    </div>
 
-                    {/* Activity Chart */}
-                    <div className="bg-card border border-border/50 rounded-3xl p-6">
-                        <Skeleton className="h-6 w-40 mb-6" />
-                        <Skeleton className="h-64 w-full rounded-xl" />
+                                {/* Action Buttons */}
+                                <div className="w-full space-y-3">
+                                    <Skeleton
+                                        className="h-12 w-full rounded-2xl"
+                                        style={{ animationDelay: '0.35s' }}
+                                    />
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <Skeleton
+                                            className="h-11 rounded-2xl"
+                                            style={{ animationDelay: '0.4s' }}
+                                        />
+                                        <Skeleton
+                                            className="h-11 rounded-2xl"
+                                            style={{ animationDelay: '0.45s' }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Column - Stats & Activity */}
+                        <div className="lg:col-span-8 space-y-6">
+                            {/* Stats Radar Chart */}
+                            <div className="rounded-[2.5rem] border border-border/50 bg-card/50 backdrop-blur-xl p-6">
+                                <Skeleton
+                                    className="h-6 w-32 mb-2 rounded-xl"
+                                    style={{ animationDelay: '0.5s' }}
+                                />
+                                <Skeleton
+                                    className="h-4 w-48 mb-6 rounded-lg"
+                                    style={{ animationDelay: '0.55s' }}
+                                />
+                                <Skeleton
+                                    className="h-[350px] w-full rounded-2xl"
+                                    style={{ animationDelay: '0.6s' }}
+                                />
+                            </div>
+
+                            {/* Activity Grid */}
+                            <div className="grid grid-cols-2 gap-4">
+                                {Array.from({ length: 6 }).map((_, i) => (
+                                    <Skeleton
+                                        key={i}
+                                        className="h-32 rounded-[1.5rem]"
+                                        style={{ animationDelay: `${0.7 + i * 0.05}s` }}
+                                    />
+                                ))}
+                            </div>
+
+                            {/* Badge Generator */}
+                            <Skeleton
+                                className="h-40 rounded-[1.5rem]"
+                                style={{ animationDelay: '1s' }}
+                            />
+                        </div>
                     </div>
                 </div>
             </main>

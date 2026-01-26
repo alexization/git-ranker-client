@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/shared/providers/theme-provider";
 import { AuthProvider } from "@/shared/providers/auth-provider";
 import { Toaster } from "@/shared/components/toaster";
 import { Header } from "@/shared/components/layout/header";
+import { WebVitalsReporter } from "@/shared/components/web-vitals-reporter";
 import { cn } from "@/shared/lib/utils";
 
 const pretendard = localFont({
@@ -90,6 +91,7 @@ export default function RootLayout({
                         {children}
                     </div>
                     <Toaster />
+                    <WebVitalsReporter />
                 </AuthProvider>
             </QueryProvider>
         </ThemeProvider>

@@ -1,17 +1,20 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { Search, History, X, BookOpen, TrendingUp, User } from "lucide-react"
 import { useSearchStore } from "../store/search-store"
 import { Button } from "@/shared/components/button"
 import { cn } from "@/shared/lib/utils"
+import { validateGithubUsername } from "@/shared/lib/validations"
 // [Change] 기존 HeroSpotlight 대신 새로 만든 HeatmapBackground 사용
 import { HeatmapBackground } from "@/shared/components/ui/heatmap-background"
 import { useTypingEffect } from "@/shared/hooks/use-typing-effect"
 import { useIsMobile } from "@/shared/hooks/use-media-query"
+import { useReducedMotion } from "@/shared/hooks/use-reduced-motion"
 import { LiveTicker } from "@/shared/components/ui/live-ticker"
+import { toast } from "sonner"
 
 // [Add] UX 개선을 위한 추천 검색어 (Quick Chips)
 const FAMOUS_DEVS = [
@@ -29,7 +32,21 @@ export function HeroSection() {
   const [mounted, setMounted] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const inputRef = useRef<HTMLInputElement>(null)
+  const sectionRef = useRef<HTMLElement>(null)
   const isMobile = useIsMobile()
+  const prefersReducedMotion = useReducedMotion()
+
+  // Scroll parallax effect
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"]
+  })
+
+  // Parallax transforms - subtle for better UX
+  const titleY = useTransform(scrollYProgress, [0, 1], [0, prefersReducedMotion ? 0 : 100])
+  const titleOpacity = useTransform(scrollYProgress, [0, 0.5], [1, prefersReducedMotion ? 1 : 0])
+  const backgroundY = useTransform(scrollYProgress, [0, 1], [0, prefersReducedMotion ? 0 : 50])
+  const searchBarScale = useTransform(scrollYProgress, [0, 0.3], [1, prefersReducedMotion ? 1 : 0.95])
 
   const placeholderText = useTypingEffect(
       ["torvalds", "shadcn", "leerob", "alexization"],
@@ -58,14 +75,23 @@ export function HeroSection() {
   }, [])
 
   const handleSearch = useCallback((username: string) => {
-    if (!username.trim()) return
-    addSearch(username)
+    const trimmedUsername = username.trim()
+    if (!trimmedUsername) return
+
+    // Validate GitHub username
+    const validation = validateGithubUsername(trimmedUsername)
+    if (!validation.success) {
+      toast.error(validation.error || "유효한 GitHub 사용자 이름을 입력해주세요.")
+      return
+    }
+
+    addSearch(trimmedUsername)
     setOpen(false)
     setIsFocused(false)
     setQuery("")
     setSelectedIndex(-1)
     inputRef.current?.blur()
-    router.push(`/users/${username}`)
+    router.push(`/users/${trimmedUsername}`)
   }, [addSearch, router])
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -103,7 +129,10 @@ export function HeroSection() {
   }, [selectedIndex, recentSearches])
 
   return (
-      <section className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden pt-10 pb-20">
+      <section
+          ref={sectionRef}
+          className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden pt-10 pb-20"
+      >
 
         {/* [Change] Focus Mode Backdrop - optimized: removed backdrop-blur for better perf on low-spec devices */}
         <AnimatePresence>
@@ -121,17 +150,20 @@ export function HeroSection() {
           )}
         </AnimatePresence>
 
-        {/* [Change] 새로운 히트맵 배경 적용 */}
-        <HeatmapBackground />
+        {/* [Change] 새로운 히트맵 배경 적용 - with parallax */}
+        <motion.div style={{ y: backgroundY }} className="absolute inset-0">
+          <HeatmapBackground />
+        </motion.div>
 
         <div className="container relative z-50 max-w-5xl px-6 flex flex-col items-center transition-all duration-500">
 
-          {/* Main Title Area */}
+          {/* Main Title Area - with scroll parallax */}
           <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className={cn("text-center mb-10", isFocused && "opacity-20 blur-sm scale-95")}
+              style={{ y: titleY, opacity: isFocused ? 0.2 : titleOpacity }}
+              className={cn("text-center mb-10", isFocused && "blur-sm scale-95")}
           >
             <h1 className="mb-6 text-6xl font-extrabold tracking-tight sm:text-7xl md:text-8xl">
             <span className="bg-gradient-to-b from-foreground to-foreground/50 bg-clip-text text-transparent">
@@ -144,11 +176,12 @@ export function HeroSection() {
             </p>
           </motion.div>
 
-          {/* Search Bar */}
+          {/* Search Bar - with scroll parallax scale */}
           <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
+              style={{ scale: searchBarScale }}
               className="relative mx-auto w-full max-w-2xl"
           >
             <div className={cn(
@@ -172,7 +205,16 @@ export function HeroSection() {
                   onBlur={handleBlur}
                   autoComplete="off"
                   spellCheck="false"
+                  aria-label="GitHub 사용자 검색"
+                  aria-describedby="search-description"
+                  role="combobox"
+                  aria-expanded={open}
+                  aria-controls="recent-searches"
+                  aria-autocomplete="list"
               />
+              <span id="search-description" className="sr-only">
+                GitHub 사용자 이름을 입력하세요. Enter 키를 눌러 검색합니다.
+              </span>
               <div className="pr-2">
                 <Button
                     size="lg"
@@ -192,8 +234,11 @@ export function HeroSection() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       className="absolute top-full z-50 mt-2 w-full overflow-hidden rounded-2xl border bg-background/95 backdrop-blur-sm p-2 shadow-xl"
+                      id="recent-searches"
+                      role="listbox"
+                      aria-label="최근 검색 기록"
                   >
-                    <div className="flex items-center justify-between px-3 py-2 text-[11px] font-bold text-muted-foreground uppercase">
+                    <div className="flex items-center justify-between px-3 py-2 text-[11px] font-bold text-muted-foreground uppercase" aria-hidden="true">
                       <span>최근 검색 기록</span>
                     </div>
                     {recentSearches.map((term, index) => (
@@ -205,9 +250,12 @@ export function HeroSection() {
                             )}
                             onClick={() => handleSearch(term)}
                             onMouseEnter={() => setSelectedIndex(index)}
+                            role="option"
+                            aria-selected={selectedIndex === index}
+                            tabIndex={-1}
                         >
                           <div className="flex items-center gap-3">
-                            <History className="h-4 w-4 opacity-50" />
+                            <History className="h-4 w-4 opacity-50" aria-hidden="true" />
                             <span className="font-medium">{term}</span>
                           </div>
                           <Button
@@ -215,6 +263,7 @@ export function HeroSection() {
                               size="icon"
                               className="h-6 w-6 opacity-0 group-hover:opacity-100"
                               onClick={(e) => { e.stopPropagation(); removeSearch(term); }}
+                              aria-label={`${term} 검색 기록 삭제`}
                           >
                             <X className="h-3 w-3" />
                           </Button>

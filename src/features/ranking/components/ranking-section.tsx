@@ -12,6 +12,7 @@ import { Button } from "@/shared/components/button"
 import { Input } from "@/shared/components/input"
 import { ChevronLeft, ChevronRight, Crown, Award, Flame, ChevronsLeft, ChevronsRight } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
+import { validatePageNumber } from "@/shared/lib/validations"
 import { UserDetailModal } from "@/features/user/components/user-detail-modal"
 import { Card } from "@/shared/components/card"
 import { TIER_ORDER, getTierColorClass, getTierDotColor } from "@/shared/constants/tier-styles"
@@ -38,13 +39,21 @@ interface RankingItemProps {
 
 const MobileRankingCard = memo(function MobileRankingCard({ user, onUserClick, onPrefetch }: RankingItemProps) {
   return (
-    <div
+    <motion.div
       onClick={() => onUserClick(user.username)}
       onMouseEnter={() => onPrefetch(user.username)}
       onFocus={() => onPrefetch(user.username)}
+      onKeyDown={(e) => e.key === 'Enter' && onUserClick(user.username)}
       className="ranking-card"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.2 }}
+      role="listitem"
+      tabIndex={0}
+      aria-label={`${user.username}, ${user.tier} 티어, ${user.totalScore.toLocaleString()}점, ${user.ranking}위`}
     >
-      <Card className="flex items-center px-3 py-3 gap-3 cursor-pointer active:scale-[0.98] transition-all duration-200 border-none bg-secondary/10 hover:bg-secondary/20">
+      <Card className="flex items-center px-3 py-3 gap-3 cursor-pointer transition-all duration-200 border-none bg-secondary/10 hover:bg-secondary/20">
         <div className="flex-shrink-0 w-8 flex items-center justify-center">
           {user.ranking <= 3 ? renderRankIcon(user.ranking) : (
             <span className="text-sm font-bold text-foreground/60">{user.ranking}</span>
@@ -55,12 +64,13 @@ const MobileRankingCard = memo(function MobileRankingCard({ user, onUserClick, o
             <AvatarImage src={user.profileImage} alt={`${user.username}의 프로필 이미지`} />
             <AvatarFallback className="text-sm">{user.username[0].toUpperCase()}</AvatarFallback>
           </Avatar>
-          <div
+          <motion.div
             className={cn(
               "absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-background",
               tierDotColor(user.tier)
             )}
             title={user.tier}
+            whileHover={{ scale: 1.2 }}
           />
         </div>
         <div className="flex-1 min-w-0">
@@ -70,18 +80,30 @@ const MobileRankingCard = memo(function MobileRankingCard({ user, onUserClick, o
           <p className="text-base font-bold font-mono text-foreground">{user.totalScore.toLocaleString()}</p>
         </div>
       </Card>
-    </div>
+    </motion.div>
   )
 })
 
-// ✅ Memoized Desktop Ranking Row - prevents unnecessary re-renders
+// ✅ Memoized Desktop Ranking Row - with enhanced micro-interactions
 const DesktopRankingRow = memo(function DesktopRankingRow({ user, onUserClick, onPrefetch }: RankingItemProps) {
   return (
-    <tr
-      className="border-b transition-colors duration-150 hover:bg-muted/50 cursor-pointer group ranking-row"
+    <motion.tr
+      className="border-b cursor-pointer group ranking-row"
       onClick={() => onUserClick(user.username)}
       onMouseEnter={() => onPrefetch(user.username)}
       onFocus={() => onPrefetch(user.username)}
+      onKeyDown={(e) => e.key === 'Enter' && onUserClick(user.username)}
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      whileHover={{
+        backgroundColor: "hsl(var(--muted) / 0.5)",
+        scale: 1.005,
+        transition: { duration: 0.15 }
+      }}
+      whileTap={{ scale: 0.995 }}
+      transition={{ duration: 0.2 }}
+      tabIndex={0}
+      aria-label={`${user.username}, ${user.tier} 티어, ${user.totalScore.toLocaleString()}점, ${user.ranking}위`}
     >
       <td className="p-4 text-center">
         <div className="flex justify-center items-center">
@@ -90,25 +112,31 @@ const DesktopRankingRow = memo(function DesktopRankingRow({ user, onUserClick, o
       </td>
       <td className="p-4">
         <div className="flex items-center gap-4">
-          <Avatar className="h-10 w-10 border-2 border-background group-hover:border-primary/20 transition-colors duration-150">
-            <AvatarImage src={user.profileImage} alt={`${user.username}의 프로필 이미지`} />
-            <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
-          </Avatar>
+          <motion.div whileHover={{ scale: 1.1 }} transition={{ type: "spring", stiffness: 400 }}>
+            <Avatar className="h-10 w-10 border-2 border-background group-hover:border-primary/20 transition-colors duration-150">
+              <AvatarImage src={user.profileImage} alt={`${user.username}의 프로필 이미지`} />
+              <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
+            </Avatar>
+          </motion.div>
           <span className="font-bold text-base group-hover:text-primary transition-colors duration-150">{user.username}</span>
         </div>
       </td>
       <td className="p-4 text-center">
-        <span className={cn(
-          "inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide",
-          tierColorClass(user.tier)
-        )}>
+        <motion.span
+          className={cn(
+            "inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide",
+            tierColorClass(user.tier)
+          )}
+          whileHover={{ scale: 1.05 }}
+          transition={{ type: "spring", stiffness: 400 }}
+        >
           {user.tier}
-        </span>
+        </motion.span>
       </td>
       <td className="p-4 text-right font-mono font-bold text-lg text-foreground group-hover:text-primary transition-colors duration-150">
         {user.totalScore.toLocaleString()}
       </td>
-    </tr>
+    </motion.tr>
   )
 })
 
@@ -161,9 +189,15 @@ export function RankingSection() {
   const handlePageInputSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const inputPage = parseInt(pageInput, 10);
-    if (!isNaN(inputPage) && inputPage >= 1 && inputPage <= totalPages) {
-      handlePageChange(inputPage - 1);
+
+    // Validate page number
+    const validation = validatePageNumber(inputPage - 1); // Convert to 0-indexed
+    if (!validation.success || isNaN(inputPage) || inputPage < 1 || inputPage > totalPages) {
+      setPageInput("");
+      return;
     }
+
+    handlePageChange(inputPage - 1);
     setPageInput("");
   }
 
@@ -221,7 +255,11 @@ export function RankingSection() {
 
         {/* Tier Filter Tabs */}
         <div className="mb-8 flex justify-center overflow-x-auto scrollbar-hide py-2">
-          <div className="inline-flex gap-2 rounded-2xl bg-secondary/30 p-1.5 backdrop-blur-sm border border-white/10">
+          <div
+              className="inline-flex gap-2 rounded-2xl bg-secondary/30 p-1.5 backdrop-blur-sm border border-white/10"
+              role="tablist"
+              aria-label="티어별 필터"
+          >
             <button
                 onClick={() => handleTierChange('ALL')}
                 className={cn(
@@ -230,6 +268,9 @@ export function RankingSection() {
                         ? "bg-background text-foreground shadow-sm ring-1 ring-black/5"
                         : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
                 )}
+                role="tab"
+                aria-selected={selectedTier === 'ALL'}
+                aria-controls="ranking-list"
             >
               ALL
             </button>
@@ -243,6 +284,9 @@ export function RankingSection() {
                             ? "bg-background text-foreground shadow-sm ring-1 ring-black/5"
                             : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
                     )}
+                    role="tab"
+                    aria-selected={selectedTier === tier}
+                    aria-controls="ranking-list"
                 >
                   {tier}
                 </button>
@@ -262,9 +306,9 @@ export function RankingSection() {
           </div>
         )}
 
-        <div className="w-full" ref={listRef}>
+        <div className="w-full" ref={listRef} id="ranking-list" role="tabpanel" aria-label="랭킹 목록">
           {/* Mobile View: Card List - Optimized for narrow screens */}
-          <div className="md:hidden space-y-2">
+          <div className="md:hidden space-y-2" role="list" aria-label="랭킹 목록 (모바일)">
             {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                     <Skeleton key={i} className="h-[72px] w-full rounded-2xl" />
@@ -288,7 +332,7 @@ export function RankingSection() {
           {/* Desktop View: Table */}
           <div className="hidden md:block rounded-3xl border bg-card/80 backdrop-blur-sm shadow-sm overflow-hidden">
             <div className="relative w-full overflow-auto">
-              <table className="w-full caption-bottom text-sm">
+              <table className="w-full caption-bottom text-sm" aria-label="개발자 랭킹 테이블">
                 <thead>
                 <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                   <th className="h-14 px-6 text-center align-middle font-semibold text-muted-foreground w-[100px]">Rank</th>

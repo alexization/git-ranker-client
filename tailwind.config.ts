@@ -77,6 +77,11 @@ const config: Config = {
                     "0%": { backgroundPosition: "0 0" },
                     "100%": { backgroundPosition: "-200% 0" },
                 },
+                // Toss/Apple style shimmer effect
+                "shimmer": {
+                    "0%": { transform: "translateX(-100%)" },
+                    "100%": { transform: "translateX(100%)" },
+                },
             },
             animation: {
                 "accordion-down": "accordion-down 0.2s ease-out",
@@ -84,6 +89,8 @@ const config: Config = {
                 "infinite-scroll": "infinite-scroll 30s linear infinite",
                 // [Priority 3] 애니메이션 유틸리티 등록
                 "background-shine": "background-shine 3s linear infinite",
+                // Shimmer animation for skeleton loading
+                "shimmer": "shimmer 2s infinite",
             },
         },
     },

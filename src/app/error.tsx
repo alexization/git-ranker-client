@@ -14,8 +14,22 @@ interface ErrorPageProps {
 
 export default function ErrorPage({ error, reset }: ErrorPageProps) {
   useEffect(() => {
-    // 에러 로깅 (프로덕션에서는 Sentry 등의 서비스로 전송)
-    console.error("Application Error:", error)
+    // Log error for debugging
+    if (process.env.NODE_ENV === "development") {
+      console.error("Application Error:", error)
+    }
+
+    // TODO: To enable Sentry error tracking:
+    // 1. Install @sentry/nextjs: npm install @sentry/nextjs
+    // 2. Uncomment the following code:
+    // if (process.env.NODE_ENV === "production") {
+    //   import("@sentry/nextjs").then((Sentry) => {
+    //     Sentry.captureException(error, {
+    //       tags: { errorBoundary: "page" },
+    //       extra: { digest: error.digest },
+    //     })
+    //   })
+    // }
   }, [error])
 
   return (

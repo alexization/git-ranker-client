@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import { AlertTriangle, Home, RefreshCcw } from "lucide-react"
 
 interface GlobalErrorProps {
@@ -8,6 +9,25 @@ interface GlobalErrorProps {
 }
 
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
+  useEffect(() => {
+    // Log error for debugging
+    if (process.env.NODE_ENV === "development") {
+      console.error("Global Error:", error)
+    }
+
+    // TODO: To enable Sentry error tracking:
+    // 1. Install @sentry/nextjs: npm install @sentry/nextjs
+    // 2. Uncomment the following code:
+    // if (process.env.NODE_ENV === "production") {
+    //   import("@sentry/nextjs").then((Sentry) => {
+    //     Sentry.captureException(error, {
+    //       tags: { errorBoundary: "global" },
+    //       extra: { digest: error.digest },
+    //     })
+    //   })
+    // }
+  }, [error])
+
   return (
     <html lang="ko">
       <body className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4">

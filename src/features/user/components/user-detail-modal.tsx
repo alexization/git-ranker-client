@@ -13,6 +13,7 @@ import { motion } from "framer-motion"
 import { ActivityGrid } from "./activity-grid"
 import { GithubIcon } from "@/shared/components/icons/github-icon"
 import { getTierTextColor } from "@/shared/constants/tier-styles"
+import { useIsMobile } from "@/shared/hooks/use-media-query"
 
 interface UserDetailModalProps {
   username: string | null
@@ -22,14 +23,28 @@ interface UserDetailModalProps {
 
 export function UserDetailModal({ username, open, onOpenChange }: UserDetailModalProps) {
   const { data: user, isLoading, isError } = useUser(username || "", { enabled: !!username && open })
+  const isMobile = useIsMobile()
 
   const tierColor = user ? getTierTextColor(user.tier) : "text-muted-foreground"
+
+  const handleSwipeClose = () => {
+    onOpenChange(false)
+  }
 
   return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         {/* [Fix] flex-col 및 max-h 설정으로 내부 스크롤 구조 잡기 */}
+        {/* Mobile: enable swipe-to-close gesture */}
         <DialogContent
-            className="sm:max-w-xl p-0 overflow-hidden bg-background border-none shadow-2xl rounded-[32px] ring-1 ring-black/5 dark:ring-white/10 flex flex-col max-h-[85vh] outline-none [&>button]:hidden"
+            enableSwipeClose={isMobile}
+            onSwipeClose={handleSwipeClose}
+            className={cn(
+              "p-0 overflow-hidden bg-background border-none shadow-2xl ring-1 ring-black/5 dark:ring-white/10 flex flex-col outline-none [&>button]:hidden",
+              // Mobile: bottom sheet with max height
+              "max-h-[90vh] rounded-t-[32px]",
+              // Desktop: centered modal
+              "sm:max-w-xl sm:max-h-[85vh] sm:rounded-[32px]"
+            )}
         >
           {/* [Fix] 닫기 버튼: 위치 조정 (right-6, top-6) 및 배경 추가로 시인성 확보 */}
           {/* [Important] 닫기 버튼을 div로 감싸서 [&>button]:hidden 선택자를 피함 */}

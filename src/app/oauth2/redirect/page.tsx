@@ -62,14 +62,18 @@ function RedirectHandler() {
           toast.success(`환영합니다, ${user.username}님!`)
           router.replace(`/users/${user.username}`)
         }).catch((err) => {
-          console.error("Failed to fetch user info", err)
+          if (process.env.NODE_ENV === "development") {
+            console.error("Failed to fetch user info", err)
+          }
           const errorMessage = getErrorMessage(err, "사용자 정보를 불러오는데 실패했습니다.")
           setError(errorMessage)
           toast.error(errorMessage)
         })
 
       } catch (e) {
-        console.error("Invalid Token", e)
+        if (process.env.NODE_ENV === "development") {
+          console.error("Invalid Token", e)
+        }
         setError("로그인 토큰이 올바르지 않습니다.")
         toast.error("로그인 토큰이 올바르지 않습니다.")
       }

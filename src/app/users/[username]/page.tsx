@@ -13,6 +13,8 @@ interface PageProps {
     params: Promise<{ username: string }>
 }
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.git-ranker.com"
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { username } = await params
     const decodedUsername = decodeURIComponent(username)
@@ -23,33 +25,36 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         const title = `${user.username} - ${user.tier} 티어 | ${user.totalScore.toLocaleString()}점`
         const description = `${user.username}님의 개발자 전투력: ${user.tier} 티어, 총 ${user.totalScore.toLocaleString()}점, 상위 ${user.percentile.toFixed(2)}%. GitHub 활동 기반 개발자 랭킹을 확인하세요.`
 
+        // Use dynamic OG image route
+        const ogImageUrl = `${BASE_URL}/users/${username}/opengraph-image`
+
         return {
             title,
             description,
             openGraph: {
                 type: "profile",
                 locale: "ko_KR",
-                url: `https://www.git-ranker.com/users/${username}`,
+                url: `${BASE_URL}/users/${username}`,
                 title: `${user.username} | Git Ranker`,
                 description,
                 siteName: "Git Ranker",
                 images: [
                     {
-                        url: user.profileImage,
-                        width: 400,
-                        height: 400,
-                        alt: `${user.username}'s GitHub profile`,
+                        url: ogImageUrl,
+                        width: 1200,
+                        height: 630,
+                        alt: `${user.username}의 Git Ranker 프로필 - ${user.tier} 티어`,
                     },
                 ],
             },
             twitter: {
-                card: "summary",
+                card: "summary_large_image",
                 title: `${user.username} - ${user.tier} 티어 | Git Ranker`,
                 description,
-                images: [user.profileImage],
+                images: [ogImageUrl],
             },
             alternates: {
-                canonical: `https://www.git-ranker.com/users/${username}`,
+                canonical: `${BASE_URL}/users/${username}`,
             },
             robots: {
                 index: true,

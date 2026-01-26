@@ -1,13 +1,23 @@
 services:
   git-ranker-client:
-    image: hyooseok/git-ranker-client:latest
     container_name: git-ranker-client
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Build-time args (NEXT_PUBLIC_* are inlined during build)
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL}
     restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
+      # Runtime environment
       NODE_ENV: production
       TZ: Asia/Seoul
+      # Runtime vars (for middleware/server-side code)
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL}
     deploy:
       resources:
         limits:
@@ -18,3 +28,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

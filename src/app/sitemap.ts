@@ -10,15 +10,42 @@ interface RankingUser {
     profileImage: string
 }
 
+interface ApiResponse {
+    rankings?: RankingUser[]
+    pageInfo?: {
+        totalPages: number
+        totalElements: number
+    }
+}
+
 async function getTopUsers(): Promise<RankingUser[]> {
     try {
-        // 상위 100명의 사용자를 sitemap에 포함 (5페이지 x 20명)
-        const pages = [0, 1, 2, 3, 4]
+        // First, get the first page to understand total pages
+        const firstPageResponse = await fetch(`${API_URL}/api/v1/ranking?page=0&size=20`, {
+            next: { revalidate: 3600 },
+            headers: {
+                'Accept': 'application/json',
+            }
+        })
+
+        if (!firstPageResponse.ok) {
+            return []
+        }
+
+        const firstPageData: ApiResponse = await firstPageResponse.json()
+        const totalPages = Math.min(firstPageData.pageInfo?.totalPages || 1, 25) // Max 25 pages = 500 users
+
+        // Fetch up to 500 users (25 pages x 20 users per page)
+        const pages = Array.from({ length: totalPages }, (_, i) => i)
         const responses = await Promise.all(
             pages.map(page =>
-                fetch(`${API_URL}/api/v1/ranking?page=${page}`, {
-                    next: { revalidate: 3600 } // 1시간마다 갱신
-                }).then(res => res.ok ? res.json() : null)
+                fetch(`${API_URL}/api/v1/ranking?page=${page}&size=20`, {
+                    next: { revalidate: 3600 },
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                }).then(res => res.ok ? res.json() as Promise<ApiResponse> : null)
+                  .catch(() => null)
             )
         )
 
@@ -28,9 +55,15 @@ async function getTopUsers(): Promise<RankingUser[]> {
                 users.push(...response.rankings)
             }
         }
-        return users
-    } catch (error) {
-        console.error("Failed to fetch users for sitemap:", error)
+
+        // Deduplicate by username (just in case)
+        const uniqueUsers = Array.from(
+            new Map(users.map(user => [user.username, user])).values()
+        )
+
+        return uniqueUsers
+    } catch {
+        // Silent fail - return empty array on error
         return []
     }
 }
@@ -38,7 +71,7 @@ async function getTopUsers(): Promise<RankingUser[]> {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const currentDate = new Date().toISOString()
 
-    // 정적 라우트
+    // Static routes
     const staticRoutes: MetadataRoute.Sitemap = [
         {
             url: BASE_URL,
@@ -60,14 +93,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         },
     ]
 
-    // 동적 사용자 페이지
+    // Dynamic user pages
     const topUsers = await getTopUsers()
-    const userRoutes: MetadataRoute.Sitemap = topUsers.map(user => ({
-        url: `${BASE_URL}/users/${encodeURIComponent(user.username)}`,
-        lastModified: currentDate,
-        changeFrequency: "daily",
-        priority: 0.8,
-    }))
+
+    // Assign priority based on ranking (top users get higher priority)
+    const userRoutes: MetadataRoute.Sitemap = topUsers.map((user, index) => {
+        // Top 10: priority 0.9, Top 50: 0.85, Top 100: 0.8, rest: 0.7
+        let priority = 0.7
+        if (index < 10) priority = 0.9
+        else if (index < 50) priority = 0.85
+        else if (index < 100) priority = 0.8
+
+        return {
+            url: `${BASE_URL}/users/${encodeURIComponent(user.username)}`,
+            lastModified: currentDate,
+            changeFrequency: "daily" as const,
+            priority,
+        }
+    })
 
     return [...staticRoutes, ...userRoutes]
 }

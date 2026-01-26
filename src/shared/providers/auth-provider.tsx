@@ -34,7 +34,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // 토큰이 만료되었거나 1분 이내에 만료 예정인 경우
         if (decoded.exp < currentTime + 60) {
-          console.log("[AuthProvider] Token expired or expiring soon, refreshing...")
+          if (process.env.NODE_ENV === "development") {
+            console.log("[AuthProvider] Token expired or expiring soon, refreshing...")
+          }
 
           try {
             // refresh 토큰으로 새 access 토큰 획득
@@ -48,12 +50,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               const newAccessToken = response.data.data.accessToken
               setAccessToken(newAccessToken)
               apiClient.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`
-              console.log("[AuthProvider] Token refreshed successfully")
+              if (process.env.NODE_ENV === "development") {
+                console.log("[AuthProvider] Token refreshed successfully")
+              }
             } else {
               throw new Error("Invalid refresh response")
             }
           } catch (refreshError) {
-            console.error("[AuthProvider] Token refresh failed:", refreshError)
+            if (process.env.NODE_ENV === "development") {
+              console.error("[AuthProvider] Token refresh failed:", refreshError)
+            }
             logout()
           }
         } else {

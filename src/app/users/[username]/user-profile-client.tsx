@@ -82,15 +82,24 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
         toast.success("배지 마크다운이 복사되었습니다!")
     }
 
-    const handleShare = () => {
+    const handleShare = async () => {
+        const shareUrl = `${window.location.origin}/users/${username}`
+
         if (navigator.share) {
-            navigator.share({
-                title: `Git Ranker - ${username}`,
-                text: `${username}님의 개발자 전투력: ${user?.tier} (${user?.totalScore}점)`,
-                url: window.location.href,
-            })
+            try {
+                await navigator.share({
+                    title: `${username} - Git Ranker`,
+                    url: shareUrl,
+                })
+            } catch (err) {
+                // 사용자가 공유를 취소한 경우 무시
+                if ((err as Error).name !== 'AbortError') {
+                    navigator.clipboard.writeText(shareUrl)
+                    toast.success("프로필 링크가 복사되었습니다!")
+                }
+            }
         } else {
-            navigator.clipboard.writeText(window.location.href)
+            navigator.clipboard.writeText(shareUrl)
             toast.success("프로필 링크가 복사되었습니다!")
         }
     }
@@ -296,7 +305,7 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
                                         className="w-full h-12 rounded-2xl text-[15px] font-bold bg-[#191919] hover:bg-black text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 shadow-md active:scale-[0.98] transition-transform"
                                     >
                                         <Share2 className="mr-2 h-4 w-4" />
-                                        이미지 공유/저장
+                                        프로필 공유
                                     </Button>
                                     <div className="grid grid-cols-2 gap-3">
                                         <Button onClick={handleCopyBadge} variant="secondary" className="h-11 rounded-2xl font-semibold bg-secondary/80 hover:bg-secondary active:scale-[0.98]">

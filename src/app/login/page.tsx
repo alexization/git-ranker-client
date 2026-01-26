@@ -101,7 +101,7 @@ Git Ranker 서비스 이용약관
 
 제13조 (기타)
 ① 본 약관에서 정하지 아니한 사항과 본 약관의 해석에 관하여는 관련 법령 및 상관례에 따릅니다.
-② 서비스 이용에 관한 문의사항은 GitHub Issues(https://github.com/git-ranker/git-ranker)를 통해 접수받습니다.
+② 서비스 이용에 관한 문의사항은 GitHub Issues(https://github.com/alexization/git-ranker)를 통해 접수받습니다.
 
 부칙
 본 약관은 2026년 1월 21일부터 시행됩니다.
@@ -178,7 +178,7 @@ Git Ranker(이하 "서비스")는 개인정보보호법, 정보통신망 이용�
    - 개인정보 삭제 요청
    - 개인정보 처리정지 요청
 
-2. 권리 행사는 GitHub Issues(https://github.com/git-ranker/git-ranker)를 통해 요청할 수 있으며, 서비스는 이에 대해 지체 없이 조치하겠습니다.
+2. 권리 행사는 GitHub Issues(https://github.com/alexization/git-ranker)를 통해 요청할 수 있으며, 서비스는 이에 대해 지체 없이 조치하겠습니다.
 
 3. 이용자가 개인정보의 삭제를 요청한 경우, 서비스는 지체 없이 해당 개인정보를 파기하고 회원 탈퇴 처리합니다.
 
@@ -207,7 +207,7 @@ Git Ranker(이하 "서비스")는 개인정보보호법, 정보통신망 이용�
 서비스는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 개인정보 처리와 관련한 이용자의 불만처리 및 피해구제 등을 위하여 아래와 같이 개인정보 보호책임자를 지정하고 있습니다.
 
 개인정보 보호책임자
-- 문의 방법: GitHub Issues (https://github.com/git-ranker/git-ranker)
+- 문의 방법: GitHub Issues (https://github.com/alexization/git-ranker)
 
 이용자는 서비스를 이용하면서 발생한 모든 개인정보 보호 관련 문의, 불만처리, 피해구제 등에 관한 사항을 위 연락처로 문의하실 수 있습니다.
 
