@@ -90,11 +90,11 @@ const DialogContent = React.forwardRef<
             animate={controls}
             initial={{ y: 0, opacity: 1 }}
             className={cn(
-              // Mobile: bottom sheet style (fixed to bottom)
-              "fixed z-50 grid w-full gap-4 border bg-background p-6 shadow-lg overflow-hidden",
-              "inset-x-0 bottom-0 rounded-t-[32px]",
+              // Mobile: bottom sheet style (fixed to bottom, dynamic viewport height for browser toolbar)
+              "fixed z-50 grid w-full gap-4 border bg-background p-6 shadow-lg overflow-y-auto",
+              "inset-x-0 bottom-0 rounded-t-[32px] max-h-[70dvh]",
               // Desktop: centered modal style
-              "sm:inset-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:max-w-2xl sm:rounded-lg sm:max-h-[90vh]",
+              "sm:inset-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:max-w-2xl sm:rounded-lg sm:max-h-[85vh]",
               isDragging && "cursor-grabbing",
               className
             )}

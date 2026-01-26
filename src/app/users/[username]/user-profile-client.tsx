@@ -222,7 +222,7 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
             <div className="container py-12 max-w-6xl px-4">
 
                 <div className="mb-6 lg:hidden">
-                    <Button variant="ghost" size="sm" onClick={() => router.push('/')} className="gap-2 text-muted-foreground hover:text-foreground pl-0">
+                    <Button variant="ghost" size="sm" onClick={() => router.back()} className="gap-2 text-muted-foreground hover:text-foreground pl-0">
                         <ArrowLeft className="h-4 w-4" /> 뒤로가기
                     </Button>
                 </div>

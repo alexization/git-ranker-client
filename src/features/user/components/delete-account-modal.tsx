@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { AlertTriangle, Loader2 } from "lucide-react"
+import { AlertTriangle, Loader2, X } from "lucide-react"
 import {
     AlertDialog,
     AlertDialogAction,
@@ -49,13 +49,23 @@ export function DeleteAccountModal({ open, onOpenChange }: DeleteAccountModalPro
 
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
-            <AlertDialogContent className="max-w-[400px] p-0 overflow-hidden">
+            <AlertDialogContent className="max-w-[400px] !p-0 !overflow-y-auto">
+                {/* Close button */}
+                <button
+                    onClick={() => onOpenChange(false)}
+                    className="absolute right-3 top-3 z-10 p-1.5 rounded-full bg-background/80 hover:bg-secondary transition-colors"
+                    disabled={deleteAccountMutation.isPending}
+                >
+                    <X className="w-4 h-4 text-muted-foreground" />
+                    <span className="sr-only">닫기</span>
+                </button>
+
                 {/* Header with gradient background */}
-                <div className="relative px-6 pt-8 pb-6 bg-gradient-to-b from-red-50 to-transparent dark:from-red-950/30 dark:to-transparent">
-                    <AlertDialogHeader className="space-y-4">
+                <div className="relative px-5 pt-6 pb-4 bg-gradient-to-b from-red-50 to-transparent dark:from-red-950/30 dark:to-transparent">
+                    <AlertDialogHeader className="space-y-3">
                         {/* Animated Warning Icon */}
                         <motion.div
-                            className="mx-auto w-20 h-20 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center shadow-lg shadow-red-500/10"
+                            className="mx-auto w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center shadow-lg shadow-red-500/10"
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.1 }}
@@ -65,15 +75,15 @@ export function DeleteAccountModal({ open, onOpenChange }: DeleteAccountModalPro
                                 animate={{ rotate: [0, -8, 8, -8, 8, 0] }}
                                 transition={{ duration: 0.6, delay: 0.3, ease: "easeInOut" }}
                             >
-                                <AlertTriangle className="w-10 h-10 text-red-500 dark:text-red-400" />
+                                <AlertTriangle className="w-8 h-8 text-red-500 dark:text-red-400" />
                             </motion.div>
                         </motion.div>
 
-                        <div className="space-y-2 text-center">
-                            <AlertDialogTitle className="text-xl font-bold text-foreground">
+                        <div className="space-y-1.5 text-center">
+                            <AlertDialogTitle className="text-lg font-bold text-foreground">
                                 정말 탈퇴하시겠습니까?
                             </AlertDialogTitle>
-                            <AlertDialogDescription className="text-[15px] leading-relaxed text-muted-foreground">
+                            <AlertDialogDescription className="text-sm leading-relaxed text-muted-foreground">
                                 회원 정보를 삭제하면 다음 데이터가<br />
                                 모두 <span className="font-semibold text-red-500 dark:text-red-400">영구적으로 삭제</span>됩니다
                             </AlertDialogDescription>
@@ -82,16 +92,16 @@ export function DeleteAccountModal({ open, onOpenChange }: DeleteAccountModalPro
                 </div>
 
                 {/* Data list */}
-                <div className="px-6 pb-4">
-                    <div className="bg-secondary/50 rounded-2xl p-4 border border-border/50">
-                        <ul className="space-y-2">
+                <div className="px-5 pb-3">
+                    <div className="bg-secondary/50 rounded-xl p-3 border border-border/50">
+                        <ul className="space-y-1.5">
                             {deletedDataList.map((item, index) => (
                                 <motion.li
                                     key={item}
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: 0.4 + index * 0.05, duration: 0.3 }}
-                                    className="flex items-center gap-3 text-[14px] text-muted-foreground"
+                                    className="flex items-center gap-2.5 text-[13px] text-muted-foreground"
                                 >
                                     <span className="w-1.5 h-1.5 rounded-full bg-red-400 dark:bg-red-500 shrink-0" />
                                     {item}
@@ -106,32 +116,30 @@ export function DeleteAccountModal({ open, onOpenChange }: DeleteAccountModalPro
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.6, duration: 0.3 }}
-                    className="mx-6 mb-4 px-4 py-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/50"
+                    className="mx-5 mb-3 px-3 py-2.5 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/50"
                 >
-                    <p className="text-[13px] font-medium text-red-600 dark:text-red-400 text-center flex items-center justify-center gap-2">
-                        <AlertTriangle className="w-4 h-4" />
+                    <p className="text-xs font-medium text-red-600 dark:text-red-400 text-center flex items-center justify-center gap-1.5">
+                        <AlertTriangle className="w-3.5 h-3.5" />
                         이 작업은 되돌릴 수 없습니다
                     </p>
                 </motion.div>
 
-                {/* Footer */}
-                <AlertDialogFooter className="px-6 pb-6 pt-2">
+                {/* Footer - 취소 왼쪽, 탈퇴 오른쪽 */}
+                <AlertDialogFooter className="px-5 pb-5 pt-1">
                     <AlertDialogCancel
                         disabled={deleteAccountMutation.isPending}
-                        className="flex-1 sm:flex-1"
+                        className="flex-1 min-w-0 h-10"
                     >
                         취소
                     </AlertDialogCancel>
                     <AlertDialogAction
                         onClick={handleDeleteConfirm}
-                        className="flex-1 sm:flex-1 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white"
+                        className="flex-1 min-w-0 h-10 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white"
                         disabled={deleteAccountMutation.isPending}
                     >
                         {deleteAccountMutation.isPending ? (
                             <>
-                                <div className="mr-2 animate-spin">
-                                    <Loader2 className="h-4 w-4" />
-                                </div>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 탈퇴 중...
                             </>
                         ) : (

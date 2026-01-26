@@ -20,14 +20,14 @@ interface UserData {
 }
 
 const tierColors: Record<string, string> = {
-    CHALLENGER: '#ff3b5c',
-    MASTER: '#b06aff',
-    DIAMOND: '#00d4ff',
-    PLATINUM: '#00e8c6',
-    GOLD: '#ffc93c',
-    SILVER: '#c0c7d0',
-    BRONZE: '#ff8c42',
-    IRON: '#8b9298',
+    CHALLENGER: '#dc2626',
+    MASTER: '#7c3aed',
+    DIAMOND: '#0ea5e9',
+    PLATINUM: '#06b6d4',
+    GOLD: '#eab308',
+    SILVER: '#64748b',
+    BRONZE: '#ea580c',
+    IRON: '#71717a',
 }
 
 export default async function Image({ params }: { params: Promise<{ username: string }> }) {
@@ -48,8 +48,9 @@ export default async function Image({ params }: { params: Promise<{ username: st
         // Fall back to default
     }
 
-    const accent = tierColors[user?.tier || ''] || '#8b5cf6'
+    const accent = tierColors[user?.tier || ''] || '#6366f1'
 
+    // User not found fallback
     if (!user) {
         return new ImageResponse(
             (
@@ -60,30 +61,30 @@ export default async function Image({ params }: { params: Promise<{ username: st
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: '#000',
+                    background: 'linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%)',
                 }}>
                     <div style={{
                         display: 'flex',
-                        fontSize: 28,
-                        fontWeight: 600,
-                        color: '#404040',
-                        letterSpacing: 3,
+                        fontSize: 24,
+                        fontWeight: 700,
+                        color: '#a3a3a3',
+                        letterSpacing: 4,
                     }}>
                         GIT RANKER
                     </div>
                     <div style={{
                         display: 'flex',
-                        fontSize: 56,
-                        fontWeight: 700,
-                        color: '#fff',
-                        marginTop: 20,
+                        fontSize: 64,
+                        fontWeight: 800,
+                        color: '#171717',
+                        marginTop: 24,
                     }}>
                         {username}
                     </div>
                     <div style={{
                         display: 'flex',
-                        fontSize: 18,
-                        color: '#525252',
+                        fontSize: 20,
+                        color: '#a3a3a3',
                         marginTop: 16,
                     }}>
                         User not found
@@ -95,11 +96,11 @@ export default async function Image({ params }: { params: Promise<{ username: st
     }
 
     const stats = [
-        { label: 'COMMITS', value: user.commitCount },
-        { label: 'PRS', value: user.prCount },
-        { label: 'MERGED', value: user.mergedPrCount },
-        { label: 'REVIEWS', value: user.reviewCount },
-        { label: 'ISSUES', value: user.issueCount },
+        { label: 'Commits', value: user.commitCount },
+        { label: 'PRs', value: user.prCount },
+        { label: 'Merged', value: user.mergedPrCount },
+        { label: 'Reviews', value: user.reviewCount },
+        { label: 'Issues', value: user.issueCount },
     ]
 
     return new ImageResponse(
@@ -109,177 +110,181 @@ export default async function Image({ params }: { params: Promise<{ username: st
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
-                background: '#000',
-                padding: '60px 70px',
+                background: '#ffffff',
+                position: 'relative',
             }}>
-                {/* Top bar */}
+                {/* Top accent bar */}
                 <div style={{
                     display: 'flex',
                     position: 'absolute',
                     top: 0,
                     left: 0,
                     right: 0,
-                    height: 4,
+                    height: 6,
                     background: accent,
                 }} />
 
-                {/* Header */}
+                {/* Main content */}
                 <div style={{
                     display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
+                    flexDirection: 'column',
+                    flex: 1,
+                    padding: '48px 64px',
                 }}>
+                    {/* Header row */}
                     <div style={{
                         display: 'flex',
-                        alignItems: 'center',
-                        gap: 20,
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start',
                     }}>
-                        <img
-                            src={user.profileImage}
-                            width={72}
-                            height={72}
-                            style={{
-                                borderRadius: 36,
-                                border: `3px solid ${accent}`,
-                            }}
-                        />
+                        {/* User info */}
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 24,
+                        }}>
+                            <img
+                                src={user.profileImage}
+                                width={80}
+                                height={80}
+                                style={{
+                                    borderRadius: 40,
+                                    border: `4px solid ${accent}`,
+                                }}
+                            />
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                            }}>
+                                <div style={{
+                                    display: 'flex',
+                                    fontSize: 48,
+                                    fontWeight: 800,
+                                    color: '#171717',
+                                    letterSpacing: -1,
+                                }}>
+                                    {user.username}
+                                </div>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 16,
+                                    marginTop: 8,
+                                }}>
+                                    <div style={{
+                                        display: 'flex',
+                                        fontSize: 18,
+                                        fontWeight: 700,
+                                        color: accent,
+                                        letterSpacing: 2,
+                                    }}>
+                                        {user.tier}
+                                    </div>
+                                    <div style={{
+                                        display: 'flex',
+                                        width: 6,
+                                        height: 6,
+                                        borderRadius: 3,
+                                        background: '#d4d4d4',
+                                    }} />
+                                    <div style={{
+                                        display: 'flex',
+                                        fontSize: 18,
+                                        fontWeight: 600,
+                                        color: '#737373',
+                                    }}>
+                                        Rank #{user.ranking?.toLocaleString()}
+                                    </div>
+                                    <div style={{
+                                        display: 'flex',
+                                        width: 6,
+                                        height: 6,
+                                        borderRadius: 3,
+                                        background: '#d4d4d4',
+                                    }} />
+                                    <div style={{
+                                        display: 'flex',
+                                        fontSize: 18,
+                                        fontWeight: 600,
+                                        color: '#737373',
+                                    }}>
+                                        Top {user.percentile?.toFixed(1)}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Git Ranker branding */}
                         <div style={{
                             display: 'flex',
                             flexDirection: 'column',
+                            alignItems: 'flex-end',
                         }}>
                             <div style={{
                                 display: 'flex',
-                                fontSize: 44,
-                                fontWeight: 700,
-                                color: '#fff',
-                                letterSpacing: -1,
+                                fontSize: 36,
+                                fontWeight: 800,
+                                color: '#171717',
+                                letterSpacing: -0.5,
                             }}>
-                                {user.username}
+                                Git Ranker
                             </div>
                             <div style={{
                                 display: 'flex',
-                                alignItems: 'center',
-                                gap: 12,
-                                marginTop: 4,
+                                fontSize: 16,
+                                fontWeight: 500,
+                                color: '#a3a3a3',
+                                marginTop: 6,
                             }}>
-                                <div style={{
-                                    display: 'flex',
-                                    fontSize: 16,
-                                    fontWeight: 700,
-                                    color: accent,
-                                    letterSpacing: 2,
-                                }}>
-                                    {user.tier}
-                                </div>
-                                <div style={{
-                                    display: 'flex',
-                                    fontSize: 16,
-                                    color: '#525252',
-                                }}>
-                                    •
-                                </div>
-                                <div style={{
-                                    display: 'flex',
-                                    fontSize: 16,
-                                    color: '#737373',
-                                }}>
-                                    Rank #{user.ranking?.toLocaleString()}
-                                </div>
+                                git-ranker.com
                             </div>
                         </div>
                     </div>
-                    <div style={{
-                        display: 'flex',
-                        fontSize: 18,
-                        fontWeight: 600,
-                        color: '#404040',
-                        letterSpacing: 2,
-                    }}>
-                        GIT RANKER
-                    </div>
-                </div>
 
-                {/* Stats */}
-                <div style={{
-                    display: 'flex',
-                    flex: 1,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 16,
-                    marginTop: 20,
-                }}>
-                    {stats.map((stat, i) => (
-                        <div
-                            key={i}
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                flex: 1,
-                                height: 200,
-                                background: '#0a0a0a',
-                                borderRadius: 16,
-                                border: '1px solid #1a1a1a',
-                            }}
-                        >
-                            <div style={{
-                                display: 'flex',
-                                fontSize: 52,
-                                fontWeight: 700,
-                                color: '#fff',
-                                letterSpacing: -1,
-                            }}>
-                                {stat.value?.toLocaleString() || '0'}
-                            </div>
-                            <div style={{
-                                display: 'flex',
-                                fontSize: 13,
-                                fontWeight: 600,
-                                color: '#525252',
-                                letterSpacing: 2,
-                                marginTop: 12,
-                            }}>
-                                {stat.label}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* Footer */}
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginTop: 20,
-                }}>
+                    {/* Stats section */}
                     <div style={{
                         display: 'flex',
-                        fontSize: 15,
-                        color: '#404040',
-                    }}>
-                        git-ranker.com
-                    </div>
-                    <div style={{
-                        display: 'flex',
+                        flex: 1,
                         alignItems: 'center',
-                        gap: 8,
+                        justifyContent: 'center',
+                        gap: 20,
+                        marginTop: 32,
                     }}>
-                        <div style={{
-                            display: 'flex',
-                            fontSize: 15,
-                            color: '#525252',
-                        }}>
-                            Top
-                        </div>
-                        <div style={{
-                            display: 'flex',
-                            fontSize: 18,
-                            fontWeight: 700,
-                            color: accent,
-                        }}>
-                            {user.percentile?.toFixed(1)}%
-                        </div>
+                        {stats.map((stat, i) => (
+                            <div
+                                key={i}
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flex: 1,
+                                    height: 180,
+                                    background: '#fafafa',
+                                    borderRadius: 20,
+                                    border: '2px solid #f0f0f0',
+                                }}
+                            >
+                                <div style={{
+                                    display: 'flex',
+                                    fontSize: 56,
+                                    fontWeight: 800,
+                                    color: '#171717',
+                                    letterSpacing: -2,
+                                }}>
+                                    {stat.value?.toLocaleString() || '0'}
+                                </div>
+                                <div style={{
+                                    display: 'flex',
+                                    fontSize: 18,
+                                    fontWeight: 600,
+                                    color: '#737373',
+                                    marginTop: 12,
+                                }}>
+                                    {stat.label}
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
