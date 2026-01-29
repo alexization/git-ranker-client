@@ -120,11 +120,11 @@ jobs:
 
             # 최신 이미지 Pull
             echo "[1/3] Pulling latest image..."
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/git-ranker-client:latest
+            docker compose pull git-ranker-client
 
             # 컨테이너 재시작
             echo "[2/3] Restarting container..."
-            docker-compose up -d --no-deps --force-recreate git-ranker-client
+            docker compose up -d --no-deps --force-recreate git-ranker-client
 
             # 사용하지 않는 이미지 정리
             echo "[3/3] Cleaning up old images..."
