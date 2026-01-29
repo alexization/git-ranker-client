@@ -1,0 +1,95 @@
+# =============================================================================
+# Frontend CI Pipeline
+# =============================================================================
+#
+# 브랜치 전략: main (운영) ← develop (개발) ← feature/* (기능)
+#
+# 실행 시점:
+#   - feature/* → develop PR 생성 시: 코드 품질 검사
+#   - develop → main PR 생성 시: 코드 품질 검사
+#   - develop, main 브랜치 push 시: 코드 품질 검사
+#
+# 파이프라인 흐름:
+#   Checkout → Setup Node.js → Install → Lint → Build
+#
+# =============================================================================
+
+name: Frontend CI
+
+on:
+  # 브랜치 push 시 실행
+  push:
+    branches:
+      - main
+      - develop
+
+  # PR 생성/업데이트 시 실행
+  pull_request:
+    branches:
+      - main      # develop → main PR
+      - develop   # feature/* → develop PR
+
+jobs:
+  # =========================================
+  # Job 1: 코드 품질 검사 (Lint)
+  # =========================================
+  lint:
+    name: Lint Check
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: 코드 체크아웃
+      # - GitHub 저장소의 코드를 runner 서버로 가져옴
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Node.js 환경 설정
+      # - node-version: package.json의 engines와 맞춤
+      # - cache: node_modules 캐싱으로 설치 시간 단축
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # Step 3: 의존성 설치
+      # - npm ci: package-lock.json 기준 정확한 버전 설치 (CI 환경에 적합)
+      # - npm install과 달리 lock 파일 수정 안 함
+      - name: Install dependencies
+        run: npm ci
+
+      # Step 4: ESLint 실행
+      # - 코드 스타일, 잠재적 버그 검사
+      # - 실패 시 PR merge 불가
+      - name: Run ESLint
+        run: npm run lint
+
+  # =========================================
+  # Job 2: 빌드 검사
+  # =========================================
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: lint  # lint 성공 후 실행
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Next.js 빌드
+      # - 빌드 성공 = TypeScript 타입 오류 없음 + 코드 문법 정상
+      # - 환경변수: 빌드 시점에 필요 (NEXT_PUBLIC_* 변수는 빌드 시 인라인됨)
+      - name: Build Next.js
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8080
+          NEXT_PUBLIC_BASE_URL: http://localhost:3000
