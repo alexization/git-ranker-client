@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { User } from '@/shared/types/api';
@@ -22,3 +23,18 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
+
+export const useAuthHydrated = () => {
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    if (useAuthStore.persist?.hasHydrated?.()) {
+      setHydrated(true);
+      return;
+    }
+    const unsub = useAuthStore.persist?.onFinishHydration?.(() => setHydrated(true));
+    return () => unsub?.();
+  }, []);
+
+  return hydrated;
+};

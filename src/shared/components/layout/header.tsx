@@ -4,7 +4,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { LogOut, User, Flame, Loader2, DoorOpen, Settings } from "lucide-react"
 import { motion } from "framer-motion"
-import { useAuthStore } from "@/features/auth/store/auth-store"
+import { useAuthStore, useAuthHydrated } from "@/features/auth/store/auth-store"
 import { useLogout } from "@/features/auth/api/auth-service"
 import { Button } from "@/shared/components/button"
 import { ThemeToggle } from "@/shared/components/theme-toggle"
@@ -26,20 +26,16 @@ import {
     AlertDialogTitle,
 } from "@/shared/components/alert-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/avatar"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { cn } from "@/shared/lib/utils"
 
 export function Header() {
     const { user, isAuthenticated } = useAuthStore()
+    const hydrated = useAuthHydrated()
     const logoutMutation = useLogout()
     const router = useRouter()
-    const [mounted, setMounted] = useState(false)
     const [showLogoutDialog, setShowLogoutDialog] = useState(false)
     const pathname = usePathname()
-
-    useEffect(() => {
-        setMounted(true)
-    }, [])
 
     const handleLogin = () => {
         window.location.href = '/login'
@@ -94,7 +90,9 @@ export function Header() {
 
                     <ThemeToggle />
 
-                    {mounted && isAuthenticated && user ? (
+                    {!hydrated ? (
+                        <div className="w-8 h-8" />
+                    ) : isAuthenticated && user ? (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <button className="flex items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-3 transition-all duration-200 hover:bg-secondary/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">

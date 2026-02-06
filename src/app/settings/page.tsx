@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { ArrowLeft, User, Trash2, ChevronRight, Shield } from "lucide-react"
-import { useAuthStore } from "@/features/auth/store/auth-store"
+import { useAuthStore, useAuthHydrated } from "@/features/auth/store/auth-store"
 import { DeleteAccountModal } from "@/features/user/components/delete-account-modal"
 import { Avatar, AvatarImage, AvatarFallback } from "@/shared/components/avatar"
 import { Button } from "@/shared/components/button"
@@ -14,21 +14,17 @@ import { Skeleton } from "@/shared/components/skeleton"
 export default function SettingsPage() {
     const router = useRouter()
     const { user, isAuthenticated } = useAuthStore()
-    const [mounted, setMounted] = useState(false)
+    const hydrated = useAuthHydrated()
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
 
     useEffect(() => {
-        setMounted(true)
-    }, [])
-
-    useEffect(() => {
-        if (mounted && !isAuthenticated) {
+        if (hydrated && !isAuthenticated) {
             router.push('/login')
         }
-    }, [mounted, isAuthenticated, router])
+    }, [hydrated, isAuthenticated, router])
 
     // Loading state
-    if (!mounted) {
+    if (!hydrated) {
         return (
             <div className="min-h-screen bg-background">
                 <div className="container max-w-2xl py-8 px-4">
