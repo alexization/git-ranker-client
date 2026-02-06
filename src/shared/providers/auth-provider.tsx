@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react"
 import { useAuthStore } from "@/features/auth/store/auth-store"
 import { apiClient } from "@/shared/lib/api-client"
-import { RegisterUserResponse } from "@/shared/types/api"
+import { getUser } from "@/features/user/api/user-service"
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user, login, logout } = useAuthStore()
@@ -17,7 +17,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const verifyAuth = async () => {
       try {
-        const freshUser = await apiClient.get<void, RegisterUserResponse>(`/users/${user.username}`)
+        // /auth/me로 쿠키 유효성 확인 후 전체 사용자 정보 조회
+        const me = await apiClient.get<void, { username: string }>('/auth/me')
+        const freshUser = await getUser(me.username)
         login(freshUser)
       } catch {
         if (process.env.NODE_ENV === "development") {

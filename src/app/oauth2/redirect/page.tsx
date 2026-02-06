@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, Suspense } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/features/auth/store/auth-store"
 import { apiClient, getErrorMessage } from "@/shared/lib/api-client"
-import { RegisterUserResponse } from "@/shared/types/api"
+import { getUser } from "@/features/user/api/user-service"
 import { toast } from "sonner"
 import { Card } from "@/shared/components/card"
 import { Button } from "@/shared/components/button"
@@ -43,8 +43,9 @@ function RedirectHandler() {
     if (hasCalledRef.current) return
     hasCalledRef.current = true
 
-    // 쿠키는 이미 Set-Cookie로 설정되어 있으므로, /users/me로 사용자 정보 조회
-    apiClient.get<void, RegisterUserResponse>('/users/me')
+    // 쿠키는 이미 Set-Cookie로 설정되어 있으므로, /auth/me로 사용자 식별 후 전체 정보 조회
+    apiClient.get<void, { username: string }>('/auth/me')
+      .then(({ username }) => getUser(username))
       .then((user) => {
         login(user)
         toast.success(`환영합니다, ${user.username}님!`)
