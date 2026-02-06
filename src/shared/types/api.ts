@@ -80,6 +80,3 @@ export interface RankingListResponse {
   pageInfo: PageInfo;
 }
 
-export interface TokenResponse {
-  accessToken: string;
-}

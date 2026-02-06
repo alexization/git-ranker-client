@@ -1,11 +1,10 @@
 "use client"
 
-import { useEffect, useState, Suspense } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useRef, useState, Suspense } from "react"
+import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/features/auth/store/auth-store"
 import { apiClient, getErrorMessage } from "@/shared/lib/api-client"
-import { getUser } from "@/features/user/api/user-service"
-import { jwtDecode } from "jwt-decode"
+import { RegisterUserResponse } from "@/shared/types/api"
 import { toast } from "sonner"
 import { Card } from "@/shared/components/card"
 import { Button } from "@/shared/components/button"
@@ -13,13 +12,6 @@ import { Skeleton } from "@/shared/components/skeleton"
 import { Loader2, AlertCircle, RefreshCcw } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
-
-interface JwtPayload {
-  sub: string;
-  role: string;
-  iat: number;
-  exp: number;
-}
 
 const LOADING_STEPS = [
   "GitHub 계정을 확인하고 있습니다...",
@@ -31,11 +23,11 @@ const LOADING_STEPS = [
 
 function RedirectHandler() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { login } = useAuthStore()
 
   const [currentStep, setCurrentStep] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const hasCalledRef = useRef(false)
 
   // Fake Progress Logic
   useEffect(() => {
@@ -48,39 +40,26 @@ function RedirectHandler() {
   }, [error]);
 
   useEffect(() => {
-    const accessToken = searchParams.get("accessToken")
+    if (hasCalledRef.current) return
+    hasCalledRef.current = true
 
-    if (accessToken) {
-      apiClient.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`
-
-      try {
-        const decoded = jwtDecode<JwtPayload>(accessToken)
-        const username = decoded.sub
-
-        getUser(username).then((user) => {
-          login(user, accessToken)
-          toast.success(`환영합니다, ${user.username}님!`)
-          router.replace(`/users/${user.username}`)
-        }).catch((err) => {
-          if (process.env.NODE_ENV === "development") {
-            console.error("Failed to fetch user info", err)
-          }
-          const errorMessage = getErrorMessage(err, "사용자 정보를 불러오는데 실패했습니다.")
-          setError(errorMessage)
-          toast.error(errorMessage)
-        })
-
-      } catch (e) {
+    // 쿠키는 이미 Set-Cookie로 설정되어 있으므로, /users/me로 사용자 정보 조회
+    apiClient.get<void, RegisterUserResponse>('/users/me')
+      .then((user) => {
+        login(user)
+        toast.success(`환영합니다, ${user.username}님!`)
+        router.replace(`/users/${user.username}`)
+      })
+      .catch((err) => {
         if (process.env.NODE_ENV === "development") {
-          console.error("Invalid Token", e)
+          console.error("Failed to fetch user info", err)
         }
-        setError("로그인 토큰이 올바르지 않습니다.")
-        toast.error("로그인 토큰이 올바르지 않습니다.")
-      }
-    } else {
-      router.replace("/login")
-    }
-  }, [searchParams, router, login])
+        const errorMessage = getErrorMessage(err, "사용자 정보를 불러오는데 실패했습니다.")
+        setError(errorMessage)
+        toast.error(errorMessage)
+      })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Error State UI
   if (error) {
