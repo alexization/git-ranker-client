@@ -73,12 +73,16 @@ const renderRankIcon = (rank: number) => {
 function RankingContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
-    const [page, setPage] = useState(0)
     const [pageInput, setPageInput] = useState("")
-    const [selectedTier, setSelectedTier] = useState<Tier | 'ALL'>('ALL')
     const [selectedUsername, setSelectedUsername] = useState<string | null>(null)
     const [modalOpen, setModalOpen] = useState(false)
     const listRef = useRef<HTMLDivElement>(null)
+
+    // URL search params에서 page, tier 상태를 파생
+    const pageParam = searchParams.get('page')
+    const page = pageParam ? Math.max(0, parseInt(pageParam, 10) - 1) : 0
+    const tierParam = searchParams.get('tier')
+    const selectedTier: Tier | 'ALL' = tierParam && TIERS.includes(tierParam as Tier) ? tierParam as Tier : 'ALL'
 
     useEffect(() => {
         const userParam = searchParams.get('user')
@@ -96,7 +100,7 @@ function RankingContent() {
     const rankings = data?.rankings || [];
     const pageInfo = data?.pageInfo;
     const totalPages = pageInfo?.totalPages || 1;
-    const startRank = (page * 20) + 1;
+    const startRank = (page * (pageInfo?.pageSize || 20)) + 1;
 
     // ✅ 페이지 변경 시 리스트 상단으로 스크롤
     const scrollToList = () => {
@@ -107,10 +111,26 @@ function RankingContent() {
         }
     }
 
+    const updateURL = (newPage: number, newTier: Tier | 'ALL') => {
+        const params = new URLSearchParams(searchParams.toString())
+        if (newPage > 0) {
+            params.set('page', String(newPage + 1))
+        } else {
+            params.delete('page')
+        }
+        if (newTier !== 'ALL') {
+            params.set('tier', newTier)
+        } else {
+            params.delete('tier')
+        }
+        const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname
+        router.push(newUrl, { scroll: false })
+    }
+
     const handlePageChange = (newPage: number) => {
         const validPage = Math.max(0, Math.min(newPage, totalPages - 1));
-        setPage(validPage);
         setPageInput("");
+        updateURL(validPage, selectedTier);
         scrollToList();
     }
 
@@ -124,7 +144,7 @@ function RankingContent() {
     }
 
     const handleUserClick = (username: string) => {
-        if(!username) return;
+        if (!username) return;
         setSelectedUsername(username)
         setModalOpen(true)
         const params = new URLSearchParams(searchParams.toString())
@@ -159,7 +179,7 @@ function RankingContent() {
 
                 <RankingToolbar
                     selectedTier={selectedTier}
-                    onTierChange={(tier) => { setSelectedTier(tier as Tier | 'ALL'); setPage(0); setPageInput(""); }}
+                    onTierChange={(tier) => { setPageInput(""); updateURL(0, tier as Tier | 'ALL'); }}
                 />
 
                 <div className="container max-w-5xl px-4" ref={listRef}>
