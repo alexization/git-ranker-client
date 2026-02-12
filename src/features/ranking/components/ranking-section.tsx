@@ -159,8 +159,6 @@ export function RankingSection() {
   const pageInfo = data?.pageInfo;
   const totalPages = pageInfo?.totalPages || 1;
 
-
-
   // ✅ Scroll to list top when page changes
   const scrollToList = () => {
     if (listRef.current) {
