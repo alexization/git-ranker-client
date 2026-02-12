@@ -75,5 +75,34 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function UserDetailPage({ params }: PageProps) {
     const { username } = await params
-    return <UserProfileClient username={username} />
+
+    let jsonLd = null
+    try {
+        const user = await getUser(username)
+        jsonLd = {
+            "@context": "https://schema.org",
+            "@type": "ProfilePage",
+            mainEntity: {
+                "@type": "Person",
+                name: user.username,
+                url: `${BASE_URL}/users/${username}`,
+                image: user.profileImage,
+                sameAs: [`https://github.com/${user.username}`],
+            },
+        }
+    } catch {
+        // no JSON-LD for users not found
+    }
+
+    return (
+        <>
+            {jsonLd && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+                />
+            )}
+            <UserProfileClient username={username} />
+        </>
+    )
 }

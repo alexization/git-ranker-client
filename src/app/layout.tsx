@@ -47,6 +47,24 @@ export const metadata: Metadata = {
         title: "Git Ranker | 개발자 전투력 측정",
         description: "GitHub 활동 기반 개발자 전투력 측정 및 티어 랭킹 서비스.",
     },
+    robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+            'max-video-preview': -1,
+            'max-image-preview': 'large',
+            'max-snippet': -1,
+        },
+    },
+    alternates: {
+        canonical: BASE_URL,
+        languages: {
+            'ko-KR': BASE_URL,
+            'x-default': BASE_URL,
+        },
+    },
 };
 
 export const viewport: Viewport = {

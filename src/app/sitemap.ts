@@ -85,12 +85,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             changeFrequency: "hourly",
             priority: 0.9,
         },
-        {
-            url: `${BASE_URL}/login`,
-            lastModified: currentDate,
-            changeFrequency: "monthly",
-            priority: 0.5,
-        },
     ]
 
     // Dynamic user pages

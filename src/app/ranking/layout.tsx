@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.git-ranker.com"
+
 export const metadata: Metadata = {
     title: "개발자 랭킹 | 글로벌 리더보드",
     description: "GitHub 활동 기반 개발자 전투력 글로벌 랭킹. Challenger, Master, Diamond부터 Iron까지 전 세계 개발자들의 순위를 확인하세요.",
@@ -14,7 +16,7 @@ export const metadata: Metadata = {
     openGraph: {
         type: "website",
         locale: "ko_KR",
-        url: "https://www.git-ranker.com/ranking",
+        url: `${BASE_URL}/ranking`,
         title: "개발자 랭킹 | Git Ranker 글로벌 리더보드",
         description: "GitHub 활동 기반 개발자 전투력 글로벌 랭킹. 전 세계 개발자들의 순위를 확인하세요.",
         siteName: "Git Ranker",
@@ -25,7 +27,7 @@ export const metadata: Metadata = {
         description: "GitHub 활동 기반 개발자 전투력 글로벌 랭킹",
     },
     alternates: {
-        canonical: "https://www.git-ranker.com/ranking",
+        canonical: `${BASE_URL}/ranking`,
     },
 }
 
@@ -34,5 +36,27 @@ export default function RankingLayout({
 }: {
     children: React.ReactNode
 }) {
-    return children
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: "개발자 랭킹 | Git Ranker 글로벌 리더보드",
+        description: "GitHub 활동 기반 개발자 전투력 글로벌 랭킹. Challenger, Master, Diamond부터 Iron까지 전 세계 개발자들의 순위를 확인하세요.",
+        url: `${BASE_URL}/ranking`,
+        isPartOf: {
+            "@type": "WebSite",
+            "@id": `${BASE_URL}/#website`,
+            name: "Git Ranker",
+            url: BASE_URL,
+        },
+    }
+
+    return (
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            {children}
+        </>
+    )
 }

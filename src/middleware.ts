@@ -25,34 +25,20 @@ export function middleware(request: NextRequest) {
     "form-action 'self'",
   ].join("; ")
 
-  // Content Security Policy
+  // Content Security Policy (Nginx에서 설정하지 않는 헤더)
   response.headers.set("Content-Security-Policy", cspDirectives)
 
-  // Prevent clickjacking
-  response.headers.set("X-Frame-Options", "DENY")
-
-  // Prevent MIME type sniffing
-  response.headers.set("X-Content-Type-Options", "nosniff")
-
-  // Enable XSS protection
-  response.headers.set("X-XSS-Protection", "1; mode=block")
-
-  // Control referrer information
+  // Referrer Policy (Nginx에서 설정하지 않는 헤더)
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin")
 
-  // HSTS - Force HTTPS (프로덕션에서만)
-  if (!isDev) {
-    response.headers.set(
-      "Strict-Transport-Security",
-      "max-age=31536000; includeSubDomains; preload"
-    )
-  }
-
-  // Permissions Policy - Restrict browser features
+  // Permissions Policy (Nginx에서 설정하지 않는 헤더)
   response.headers.set(
     "Permissions-Policy",
     "camera=(), microphone=(), geolocation=(), interest-cohort=()"
   )
+
+  // X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, HSTS는
+  // Nginx에서 관리 (중복 방지)
 
   return response
 }

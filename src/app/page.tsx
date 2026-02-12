@@ -62,7 +62,7 @@ export default function Home() {
                 url: "https://www.git-ranker.com",
                 logo: {
                     "@type": "ImageObject",
-                    url: "https://www.git-ranker.com/logo.png",
+                    url: "https://www.git-ranker.com/og-image.png",
                 },
                 sameAs: ["https://github.com/alexization"],
             },
