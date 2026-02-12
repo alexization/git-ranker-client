@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, Suspense, useRef } from "react"
+import { useState, Suspense, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { LazyMotion, domAnimation, m } from "framer-motion"
 import { useRankingList } from "@/features/ranking/api/ranking-service"
@@ -84,13 +84,7 @@ function RankingContent() {
     const tierParam = searchParams.get('tier')
     const selectedTier: Tier | 'ALL' = tierParam && TIERS.includes(tierParam as Tier) ? tierParam as Tier : 'ALL'
 
-    useEffect(() => {
-        const userParam = searchParams.get('user')
-        if (userParam) {
-            setSelectedUsername(userParam)
-            setModalOpen(true)
-        }
-    }, [searchParams])
+
 
     const { data, isLoading } = useRankingList(
         page,
@@ -147,19 +141,12 @@ function RankingContent() {
         if (!username) return;
         setSelectedUsername(username)
         setModalOpen(true)
-        const params = new URLSearchParams(searchParams.toString())
-        params.set('user', username)
-        router.push(`?${params.toString()}`, { scroll: false })
     }
 
     const handleModalClose = (open: boolean) => {
         setModalOpen(open)
         if (!open) {
             setSelectedUsername(null)
-            const params = new URLSearchParams(searchParams.toString())
-            params.delete('user')
-            const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname
-            router.push(newUrl, { scroll: false })
         }
     }
 

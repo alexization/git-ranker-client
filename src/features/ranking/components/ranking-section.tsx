@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, memo, useCallback } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useState, useRef, memo, useCallback } from "react"
 import { motion } from "framer-motion"
 import { useRankingList } from "../api/ranking-service"
 import { usePrefetchUser } from "@/features/user/api/user-service"
@@ -141,8 +140,6 @@ const DesktopRankingRow = memo(function DesktopRankingRow({ user, onUserClick, o
 })
 
 export function RankingSection() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
   const [page, setPage] = useState(0)
   const [pageInput, setPageInput] = useState("")
   const [selectedTier, setSelectedTier] = useState<Tier | 'ALL'>('ALL')
@@ -162,13 +159,7 @@ export function RankingSection() {
   const pageInfo = data?.pageInfo;
   const totalPages = pageInfo?.totalPages || 1;
 
-  useEffect(() => {
-    const userParam = searchParams.get('user')
-    if (userParam) {
-      setSelectedUsername(userParam)
-      setModalOpen(true)
-    }
-  }, [searchParams])
+
 
   // ✅ Scroll to list top when page changes
   const scrollToList = () => {
@@ -211,19 +202,12 @@ export function RankingSection() {
   const handleUserClick = useCallback((username: string) => {
     setSelectedUsername(username)
     setModalOpen(true)
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('user', username)
-    router.push(`?${params.toString()}`, { scroll: false })
-  }, [router, searchParams])
+  }, [])
 
   const handleModalClose = (open: boolean) => {
     setModalOpen(open)
     if (!open) {
       setSelectedUsername(null)
-      const params = new URLSearchParams(searchParams.toString())
-      params.delete('user')
-      const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname
-      router.push(newUrl, { scroll: false })
     }
   }
 
