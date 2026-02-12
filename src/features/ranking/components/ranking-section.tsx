@@ -159,6 +159,10 @@ export function RankingSection() {
   const pageInfo = data?.pageInfo;
   const totalPages = pageInfo?.totalPages || 1;
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7fa3c00 (refactor: 상세 보기의 경우 url 추가 제거)
 
 
   // ✅ Scroll to list top when page changes
