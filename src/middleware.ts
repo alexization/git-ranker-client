@@ -1,18 +1,21 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import {
+  LOCALE_STORAGE_KEY,
+  getLocaleFromPathname,
+  localizePathname,
+  normalizeLocale,
+  stripLocaleFromPathname,
+} from "@/shared/i18n/config"
 
-export function middleware(request: NextRequest) {
-  const response = NextResponse.next()
-  const isDev = process.env.NODE_ENV === "development"
+const PUBLIC_FILE = /\.[^/]+$/
+const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365
 
-  // connect-src 구성
-  // - Production: 'self' (같은 도메인 www.git-ranker.com)
-  // - Development: 'self' + localhost:8080 (API 서버)
+function applySecurityHeaders(response: NextResponse, isDev: boolean): NextResponse {
   const connectSrc = isDev
     ? "'self' http://localhost:8080"
     : "'self'"
 
-  // Security Headers
   const cspDirectives = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
@@ -25,22 +28,102 @@ export function middleware(request: NextRequest) {
     "form-action 'self'",
   ].join("; ")
 
-  // Content Security Policy (Nginx에서 설정하지 않는 헤더)
   response.headers.set("Content-Security-Policy", cspDirectives)
-
-  // Referrer Policy (Nginx에서 설정하지 않는 헤더)
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin")
-
-  // Permissions Policy (Nginx에서 설정하지 않는 헤더)
   response.headers.set(
     "Permissions-Policy",
     "camera=(), microphone=(), geolocation=(), interest-cohort=()"
   )
 
-  // X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, HSTS는
-  // Nginx에서 관리 (중복 방지)
-
   return response
+}
+
+function shouldBypassLocaleRouting(pathname: string): boolean {
+  if (pathname.startsWith("/_next")) return true
+  if (pathname.startsWith("/api")) return true
+  if (pathname.startsWith("/oauth2")) return true
+  if (pathname.startsWith("/login/oauth2")) return true
+  if (pathname === "/favicon.ico") return true
+  if (pathname === "/robots.txt") return true
+  if (pathname === "/sitemap.xml") return true
+  if (pathname === "/manifest.webmanifest") return true
+  if (PUBLIC_FILE.test(pathname)) return true
+  return false
+}
+
+function resolveRequestLocale(request: NextRequest) {
+  const localeFromCookie = request.cookies.get(LOCALE_STORAGE_KEY)?.value
+  if (localeFromCookie) {
+    return normalizeLocale(localeFromCookie)
+  }
+
+  const localeFromHeader = request.headers.get("accept-language")
+  return normalizeLocale(localeFromHeader)
+}
+
+export function middleware(request: NextRequest) {
+  const isDev = process.env.NODE_ENV === "development"
+  const { pathname } = request.nextUrl
+
+  if (shouldBypassLocaleRouting(pathname)) {
+    return applySecurityHeaders(NextResponse.next(), isDev)
+  }
+
+  const pathLocale = getLocaleFromPathname(pathname)
+
+  if (pathLocale) {
+    const strippedPath = stripLocaleFromPathname(pathname)
+
+    // locale prefix가 붙은 백엔드 경로는 원본 경로로 돌려서
+    // nginx location(/api, /oauth2, /login/oauth2) 매칭을 보장한다.
+    if (
+      strippedPath.startsWith("/api") ||
+      strippedPath.startsWith("/oauth2") ||
+      strippedPath.startsWith("/login/oauth2")
+    ) {
+      const backendPathUrl = request.nextUrl.clone()
+      backendPathUrl.pathname = strippedPath
+      const response = NextResponse.redirect(backendPathUrl, 307)
+      response.cookies.set(LOCALE_STORAGE_KEY, pathLocale, {
+        path: "/",
+        maxAge: LOCALE_COOKIE_MAX_AGE,
+        sameSite: "lax",
+      })
+      return applySecurityHeaders(response, isDev)
+    }
+
+    const rewriteUrl = request.nextUrl.clone()
+    rewriteUrl.pathname = strippedPath
+
+    const requestHeaders = new Headers(request.headers)
+    requestHeaders.set("x-locale", pathLocale)
+
+    const response = NextResponse.rewrite(rewriteUrl, {
+      request: {
+        headers: requestHeaders,
+      },
+    })
+    response.cookies.set(LOCALE_STORAGE_KEY, pathLocale, {
+      path: "/",
+      maxAge: LOCALE_COOKIE_MAX_AGE,
+      sameSite: "lax",
+    })
+
+    return applySecurityHeaders(response, isDev)
+  }
+
+  const locale = resolveRequestLocale(request)
+  const redirectUrl = request.nextUrl.clone()
+  redirectUrl.pathname = localizePathname(pathname, locale)
+
+  const response = NextResponse.redirect(redirectUrl, 307)
+  response.cookies.set(LOCALE_STORAGE_KEY, locale, {
+    path: "/",
+    maxAge: LOCALE_COOKIE_MAX_AGE,
+    sameSite: "lax",
+  })
+
+  return applySecurityHeaders(response, isDev)
 }
 
 export const config = {

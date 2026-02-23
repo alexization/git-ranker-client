@@ -2,6 +2,7 @@ import { MetadataRoute } from "next"
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.git-ranker.com"
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://www.git-ranker.com"
+const SEO_LOCALES = ["en", "ko"] as const
 
 interface RankingUser {
     username: string
@@ -71,39 +72,38 @@ async function getTopUsers(): Promise<RankingUser[]> {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const currentDate = new Date().toISOString()
 
-    // Static routes
-    const staticRoutes: MetadataRoute.Sitemap = [
+    const staticRoutes: MetadataRoute.Sitemap = SEO_LOCALES.flatMap((locale) => [
         {
-            url: BASE_URL,
+            url: `${BASE_URL}/${locale}`,
             lastModified: currentDate,
-            changeFrequency: "daily",
+            changeFrequency: "daily" as const,
             priority: 1,
         },
         {
-            url: `${BASE_URL}/ranking`,
+            url: `${BASE_URL}/${locale}/ranking`,
             lastModified: currentDate,
-            changeFrequency: "hourly",
+            changeFrequency: "hourly" as const,
             priority: 0.9,
         },
-    ]
+    ])
 
     // Dynamic user pages
     const topUsers = await getTopUsers()
 
     // Assign priority based on ranking (top users get higher priority)
-    const userRoutes: MetadataRoute.Sitemap = topUsers.map((user, index) => {
+    const userRoutes: MetadataRoute.Sitemap = topUsers.flatMap((user, index) => {
         // Top 10: priority 0.9, Top 50: 0.85, Top 100: 0.8, rest: 0.7
         let priority = 0.7
         if (index < 10) priority = 0.9
         else if (index < 50) priority = 0.85
         else if (index < 100) priority = 0.8
 
-        return {
-            url: `${BASE_URL}/users/${encodeURIComponent(user.username)}`,
+        return SEO_LOCALES.map((locale) => ({
+            url: `${BASE_URL}/${locale}/users/${encodeURIComponent(user.username)}`,
             lastModified: currentDate,
             changeFrequency: "daily" as const,
             priority,
-        }
+        }))
     })
 
     return [...staticRoutes, ...userRoutes]

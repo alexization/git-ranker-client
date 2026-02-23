@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Check, ChevronDown, Languages } from "lucide-react";
 
 import { Button } from "@/shared/components/button";
@@ -9,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/dropdown-menu";
-import type { Locale } from "@/shared/i18n/config";
+import { localizePathname, type Locale } from "@/shared/i18n/config";
 import { useI18n } from "@/shared/providers/locale-provider";
 
 const localeOptions: Array<{ value: Locale; labelKey: "language.switcher.en" | "language.switcher.ko" }> = [
@@ -18,7 +19,20 @@ const localeOptions: Array<{ value: Locale; labelKey: "language.switcher.en" | "
 ];
 
 export function LanguageSwitcher() {
-  const { locale, setLocale, t } = useI18n();
+  const { locale, t } = useI18n();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const handleSelectLocale = (nextLocale: Locale) => {
+    if (nextLocale === locale) {
+      return;
+    }
+
+    const nextPath = localizePathname(pathname, nextLocale);
+    const nextQuery = searchParams.toString();
+    router.push(nextQuery ? `${nextPath}?${nextQuery}` : nextPath);
+  };
 
   return (
     <DropdownMenu>
@@ -40,7 +54,7 @@ export function LanguageSwitcher() {
           return (
             <DropdownMenuItem
               key={option.value}
-              onSelect={() => setLocale(option.value)}
+              onSelect={() => handleSelectLocale(option.value)}
               className="justify-between"
             >
               <span>{t(option.labelKey)}</span>

@@ -72,7 +72,7 @@ export function Header() {
                             href="/ranking"
                             className={cn(
                                 "text-sm font-medium transition-colors hover:text-primary flex items-center gap-1.5",
-                                pathname === "/ranking" ? "text-foreground" : "text-muted-foreground"
+                                pathname.endsWith("/ranking") ? "text-foreground" : "text-muted-foreground"
                             )}
                         >
                             <Flame className="h-4 w-4" />

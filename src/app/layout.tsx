@@ -10,6 +10,7 @@ import { Header } from "@/shared/components/layout/header";
 import { WebVitalsReporter } from "@/shared/components/web-vitals-reporter";
 import { cn } from "@/shared/lib/utils";
 import { LocaleProvider } from "@/shared/providers/locale-provider";
+import { getRequestLocale } from "@/shared/i18n/server-locale";
 
 const pretendard = localFont({
     src: "../fonts/PretendardVariable.woff2",
@@ -26,48 +27,60 @@ const jetbrainsMono = JetBrains_Mono({
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.git-ranker.com"
 
-export const metadata: Metadata = {
-    metadataBase: new URL(BASE_URL),
-    title: {
-        default: "Git Ranker | Developer Impact Score",
-        template: "%s | Git Ranker"
-    },
-    description: "Measure developer impact with GitHub activity and tier rankings. See your real contribution score.",
-    keywords: ["GitHub", "Developer Ranking", "Developer Impact", "GitHub Activity", "Tier Ranking"],
-    authors: [{ name: "Git Ranker Team" }],
-    openGraph: {
-        type: "website",
-        locale: "en_US",
-        url: BASE_URL,
-        title: "Git Ranker | Developer Impact Score",
-        description: "Measure developer impact with GitHub activity and tier rankings.",
-        siteName: "Git Ranker",
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: "Git Ranker | Developer Impact Score",
-        description: "Measure developer impact with GitHub activity and tier rankings.",
-    },
-    robots: {
-        index: true,
-        follow: true,
-        googleBot: {
+export async function generateMetadata(): Promise<Metadata> {
+    const locale = await getRequestLocale()
+    const isKo = locale === "ko"
+    const localizedHomeUrl = `${BASE_URL}/${locale}`
+    const title = isKo ? "Git Ranker | 개발자 전투력 점수" : "Git Ranker | Developer Impact Score"
+    const description = isKo
+        ? "GitHub 활동과 티어 순위를 기반으로 개발자 전투력을 측정합니다."
+        : "Measure developer impact with GitHub activity and tier rankings. See your real contribution score."
+
+    return {
+        metadataBase: new URL(BASE_URL),
+        title: {
+            default: title,
+            template: "%s | Git Ranker"
+        },
+        description,
+        keywords: isKo
+            ? ["GitHub", "개발자 순위", "개발자 전투력", "GitHub 활동", "티어 순위"]
+            : ["GitHub", "Developer Ranking", "Developer Impact", "GitHub Activity", "Tier Ranking"],
+        authors: [{ name: "Git Ranker Team" }],
+        openGraph: {
+            type: "website",
+            locale: isKo ? "ko_KR" : "en_US",
+            url: localizedHomeUrl,
+            title,
+            description,
+            siteName: "Git Ranker",
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+        },
+        robots: {
             index: true,
             follow: true,
-            'max-video-preview': -1,
-            'max-image-preview': 'large',
-            'max-snippet': -1,
+            googleBot: {
+                index: true,
+                follow: true,
+                'max-video-preview': -1,
+                'max-image-preview': 'large',
+                'max-snippet': -1,
+            },
         },
-    },
-    alternates: {
-        canonical: BASE_URL,
-        languages: {
-            'en-US': BASE_URL,
-            'ko-KR': BASE_URL,
-            'x-default': BASE_URL,
+        alternates: {
+            canonical: localizedHomeUrl,
+            languages: {
+                'en-US': `${BASE_URL}/en`,
+                'ko-KR': `${BASE_URL}/ko`,
+                'x-default': `${BASE_URL}/en`,
+            },
         },
-    },
-};
+    }
+}
 
 export const viewport: Viewport = {
     themeColor: [
@@ -78,13 +91,15 @@ export const viewport: Viewport = {
     initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
                                        children,
                                    }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const locale = await getRequestLocale()
+
     return (
-        <html lang="en" suppressHydrationWarning>
+        <html lang={locale} suppressHydrationWarning>
         <head>
             {/* Preconnect to external origins for faster resource loading */}
             <link rel="preconnect" href="https://avatars.githubusercontent.com" />
@@ -104,7 +119,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
-            <LocaleProvider>
+            <LocaleProvider initialLocale={locale}>
                 <QueryProvider>
                     <AuthProvider>
                         <Header />

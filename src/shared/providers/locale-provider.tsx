@@ -1,11 +1,11 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import {
-  DEFAULT_LOCALE,
   LOCALE_STORAGE_KEY,
-  normalizeLocale,
+  getLocaleFromPathname,
   type Locale,
 } from "@/shared/i18n/config";
 import { getMessages, type MessageKey, type Messages } from "@/shared/i18n/messages";
@@ -31,23 +31,30 @@ function interpolate(template: string, values?: TranslationValues): string {
   }, template);
 }
 
-export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
+type LocaleProviderProps = {
+  children: React.ReactNode;
+  initialLocale: Locale;
+};
+
+export function LocaleProvider({ children, initialLocale }: LocaleProviderProps) {
+  const pathname = usePathname();
+  const [locale, setLocaleState] = useState<Locale>(initialLocale);
 
   useEffect(() => {
-    const savedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY);
-    const initialLocale = savedLocale
-      ? normalizeLocale(savedLocale)
-      : normalizeLocale(navigator.language);
+    const localeFromPath = getLocaleFromPathname(pathname);
+    if (localeFromPath && localeFromPath !== locale) {
+      setLocaleState(localeFromPath);
+    }
+  }, [pathname, locale]);
 
-    setLocaleState(initialLocale);
-    document.documentElement.lang = initialLocale;
-  }, []);
+  useEffect(() => {
+    document.documentElement.lang = locale;
+    window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+    document.cookie = `${LOCALE_STORAGE_KEY}=${locale}; path=/; max-age=31536000; samesite=lax`;
+  }, [locale]);
 
   const setLocale = useCallback((nextLocale: Locale) => {
     setLocaleState(nextLocale);
-    window.localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale);
-    document.documentElement.lang = nextLocale;
   }, []);
 
   const messages = useMemo(() => getMessages(locale), [locale]);
