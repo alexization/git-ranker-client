@@ -3,28 +3,28 @@ import type { Metadata } from "next"
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.git-ranker.com"
 
 export const metadata: Metadata = {
-    title: "개발자 랭킹 | 글로벌 리더보드",
-    description: "GitHub 활동 기반 개발자 전투력 글로벌 랭킹. Challenger, Master, Diamond부터 Iron까지 전 세계 개발자들의 순위를 확인하세요.",
+    title: "Developer Ranking | Global Leaderboard",
+    description: "Global developer ranking based on GitHub activity. Check where you stand from Challenger to Iron.",
     keywords: [
-        "개발자 랭킹",
-        "GitHub 랭킹",
-        "글로벌 리더보드",
-        "프로그래머 순위",
+        "Developer Ranking",
+        "GitHub Ranking",
+        "Global Leaderboard",
+        "Programmer Ranking",
         "Developer Leaderboard",
         "GitHub Activity Ranking",
     ],
     openGraph: {
         type: "website",
-        locale: "ko_KR",
+        locale: "en_US",
         url: `${BASE_URL}/ranking`,
-        title: "개발자 랭킹 | Git Ranker 글로벌 리더보드",
-        description: "GitHub 활동 기반 개발자 전투력 글로벌 랭킹. 전 세계 개발자들의 순위를 확인하세요.",
+        title: "Developer Ranking | Git Ranker Global Leaderboard",
+        description: "Global developer ranking based on GitHub activity.",
         siteName: "Git Ranker",
     },
     twitter: {
         card: "summary_large_image",
-        title: "개발자 랭킹 | Git Ranker",
-        description: "GitHub 활동 기반 개발자 전투력 글로벌 랭킹",
+        title: "Developer Ranking | Git Ranker",
+        description: "Global developer ranking based on GitHub activity",
     },
     alternates: {
         canonical: `${BASE_URL}/ranking`,
@@ -39,8 +39,8 @@ export default function RankingLayout({
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "CollectionPage",
-        name: "개발자 랭킹 | Git Ranker 글로벌 리더보드",
-        description: "GitHub 활동 기반 개발자 전투력 글로벌 랭킹. Challenger, Master, Diamond부터 Iron까지 전 세계 개발자들의 순위를 확인하세요.",
+        name: "Developer Ranking | Git Ranker Global Leaderboard",
+        description: "Global developer ranking based on GitHub activity.",
         url: `${BASE_URL}/ranking`,
         isPartOf: {
             "@type": "WebSite",

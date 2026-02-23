@@ -29,24 +29,24 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.git-ranker.com
 export const metadata: Metadata = {
     metadataBase: new URL(BASE_URL),
     title: {
-        default: "Git Ranker | 개발자 전투력 측정",
+        default: "Git Ranker | Developer Impact Score",
         template: "%s | Git Ranker"
     },
-    description: "GitHub 활동 기반 개발자 전투력 측정 및 티어 랭킹 서비스. 당신의 진짜 기여도를 확인하세요.",
-    keywords: ["GitHub", "Ranking", "Developer", "Combat Power", "깃허브", "랭킹", "개발자", "전투력"],
+    description: "Measure developer impact with GitHub activity and tier rankings. See your real contribution score.",
+    keywords: ["GitHub", "Developer Ranking", "Developer Impact", "GitHub Activity", "Tier Ranking"],
     authors: [{ name: "Git Ranker Team" }],
     openGraph: {
         type: "website",
-        locale: "ko_KR",
+        locale: "en_US",
         url: BASE_URL,
-        title: "Git Ranker | 개발자 전투력 측정",
-        description: "GitHub 활동 기반 개발자 전투력 측정 및 티어 랭킹 서비스.",
+        title: "Git Ranker | Developer Impact Score",
+        description: "Measure developer impact with GitHub activity and tier rankings.",
         siteName: "Git Ranker",
     },
     twitter: {
         card: "summary_large_image",
-        title: "Git Ranker | 개발자 전투력 측정",
-        description: "GitHub 활동 기반 개발자 전투력 측정 및 티어 랭킹 서비스.",
+        title: "Git Ranker | Developer Impact Score",
+        description: "Measure developer impact with GitHub activity and tier rankings.",
     },
     robots: {
         index: true,
@@ -62,6 +62,7 @@ export const metadata: Metadata = {
     alternates: {
         canonical: BASE_URL,
         languages: {
+            'en-US': BASE_URL,
             'ko-KR': BASE_URL,
             'x-default': BASE_URL,
         },
