@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { useRouter } from "next/navigation"
-import { Search, History, X, BookOpen, TrendingUp, User } from "lucide-react"
+import { Search, History, X, BookOpen, TrendingUp } from "lucide-react"
 import { useSearchStore } from "../store/search-store"
 import { Button } from "@/shared/components/button"
 import { cn } from "@/shared/lib/utils"
@@ -16,13 +16,6 @@ import { useReducedMotion } from "@/shared/hooks/use-reduced-motion"
 import { LiveTicker } from "@/shared/components/ui/live-ticker"
 import { toast } from "sonner"
 import { useI18n } from "@/shared/providers/locale-provider"
-
-// [Add] UX 개선을 위한 추천 검색어 (Quick Chips)
-const FAMOUS_DEVS = [
-  { name: "alexization", label: "Backend Developer" },
-  { name: "torvalds", label: "Linux Creator" },
-  { name: "leerob", label: "Vercel VP" },
-];
 
 export function HeroSection() {
   const { t } = useI18n()
@@ -276,32 +269,11 @@ export function HeroSection() {
             </AnimatePresence>
           </motion.div>
 
-          {/* [Add] Quick Chips (추천 검색어) - UX 강화 포인트 */}
-          <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: isFocused ? 0 : 1 }}
-              transition={{ delay: 0.3 }}
-              className="mt-6 flex flex-wrap justify-center gap-2"
-          >
-            <span className="text-xs font-semibold text-muted-foreground self-center mr-1">{t("home.trending.label")}</span>
-            {FAMOUS_DEVS.map((dev) => (
-                <button
-                    key={dev.name}
-                    onClick={() => handleSearch(dev.name)}
-                    className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/50 hover:bg-primary/10 border border-transparent hover:border-primary/20 transition-all text-xs font-medium text-foreground/80 hover:text-primary active:scale-95"
-                >
-                  <User className="w-3 h-3 opacity-50" />
-                  {dev.name}
-                  {/* <span className="opacity-40 text-[10px]">· {dev.label}</span> */}
-                </button>
-            ))}
-          </motion.div>
-
           {/* Footer Links */}
           <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: isFocused ? 0 : 1 }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: 0.3 }}
               className={cn("mt-12 flex gap-6", isFocused && "pointer-events-none")}
           >
             <a href="https://github.com/alexization/git-ranker" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
