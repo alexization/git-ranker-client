@@ -1,33 +1,43 @@
 import { z } from "zod"
+import { translate } from "@/shared/i18n/translate"
 
 // GitHub username validation
 // Rules: alphanumeric, hyphens, 1-39 chars, no consecutive hyphens, no start/end with hyphen
-export const githubUsernameSchema = z
-  .string()
-  .min(1, "사용자 이름을 입력해주세요.")
-  .max(39, "GitHub 사용자 이름은 39자를 초과할 수 없습니다.")
-  .regex(
-    /^[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$/,
-    "유효한 GitHub 사용자 이름을 입력해주세요."
-  )
-  .refine(
-    (val) => !val.includes("--"),
-    "사용자 이름에 연속된 하이픈(--)을 사용할 수 없습니다."
-  )
+const createGithubUsernameSchema = () =>
+  z
+    .string()
+    .min(1, translate("validation.username.required"))
+    .max(39, translate("validation.username.max"))
+    .regex(
+      /^[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$/,
+      translate("validation.username.pattern")
+    )
+    .refine(
+      (val) => !val.includes("--"),
+      translate("validation.username.no-consecutive-hyphen")
+    )
+
+export const githubUsernameSchema = createGithubUsernameSchema()
 
 // Search query validation
-export const searchQuerySchema = z
-  .string()
-  .min(1, "검색어를 입력해주세요.")
-  .max(100, "검색어가 너무 깁니다.")
-  .transform((val) => val.trim())
+const createSearchQuerySchema = () =>
+  z
+    .string()
+    .min(1, translate("validation.search.required"))
+    .max(100, translate("validation.search.max"))
+    .transform((val) => val.trim())
+
+export const searchQuerySchema = createSearchQuerySchema()
 
 // Page number validation
-export const pageNumberSchema = z
-  .number()
-  .int("페이지 번호는 정수여야 합니다.")
-  .min(0, "페이지 번호는 0 이상이어야 합니다.")
-  .max(10000, "페이지 번호가 너무 큽니다.")
+const createPageNumberSchema = () =>
+  z
+    .number()
+    .int(translate("validation.page.int"))
+    .min(0, translate("validation.page.min"))
+    .max(10000, translate("validation.page.max"))
+
+export const pageNumberSchema = createPageNumberSchema()
 
 // Tier validation
 export const tierSchema = z.enum([
@@ -79,7 +89,7 @@ export function validateGithubUsername(username: string): {
   data?: string
   error?: string
 } {
-  const result = githubUsernameSchema.safeParse(username)
+  const result = createGithubUsernameSchema().safeParse(username)
   if (result.success) {
     return { success: true, data: result.data }
   }
@@ -91,7 +101,7 @@ export function validateSearchQuery(query: string): {
   data?: string
   error?: string
 } {
-  const result = searchQuerySchema.safeParse(query)
+  const result = createSearchQuerySchema().safeParse(query)
   if (result.success) {
     return { success: true, data: result.data }
   }
@@ -103,7 +113,7 @@ export function validatePageNumber(page: number): {
   data?: number
   error?: string
 } {
-  const result = pageNumberSchema.safeParse(page)
+  const result = createPageNumberSchema().safeParse(page)
   if (result.success) {
     return { success: true, data: result.data }
   }

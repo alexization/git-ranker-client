@@ -1,5 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { removeLocalStorage } from './storage-cache';
+import { translate } from '@/shared/i18n/translate';
 
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1`;
 
@@ -27,7 +28,7 @@ export class ApiError extends Error {
 }
 
 // 에러에서 메시지 추출하는 유틸리티 함수
-export const getErrorMessage = (error: unknown, fallback: string = '오류가 발생했습니다.'): string => {
+export const getErrorMessage = (error: unknown, fallback: string = translate('common.error')): string => {
   if (error instanceof ApiError) {
     return error.message;
   }
@@ -41,11 +42,11 @@ export const getErrorMessage = (error: unknown, fallback: string = '오류가 �
 
     // HTTP 상태 코드 기반 기본 메시지
     const status = error.response?.status;
-    if (status === 401) return '로그인이 필요합니다.';
-    if (status === 403) return '접근 권한이 없습니다.';
-    if (status === 404) return '요청한 리소스를 찾을 수 없습니다.';
-    if (status === 429) return '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
-    if (status && status >= 500) return '서버 오류가 발생했습니다.';
+    if (status === 401) return translate('error.401');
+    if (status === 403) return translate('error.403');
+    if (status === 404) return translate('error.404');
+    if (status === 429) return translate('error.429');
+    if (status && status >= 500) return translate('error.500');
 
     return error.message || fallback;
   }

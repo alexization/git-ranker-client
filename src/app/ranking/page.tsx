@@ -160,7 +160,7 @@ function RankingContent() {
                         </span>
                     </h1>
                     <p className="text-muted-foreground font-medium text-lg">
-                        전체 개발자 전투력 랭킹
+                        전체 개발자 전투력 순위
                     </p>
                 </div>
 

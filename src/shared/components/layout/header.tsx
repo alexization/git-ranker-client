@@ -28,8 +28,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/avatar"
 import { useState } from "react"
 import { cn } from "@/shared/lib/utils"
+import { useI18n } from "@/shared/providers/locale-provider"
 
 export function Header() {
+    const { t } = useI18n()
     const { user, isAuthenticated } = useAuthStore()
     const hydrated = useAuthHydrated()
     const logoutMutation = useLogout()
@@ -73,7 +75,7 @@ export function Header() {
                             )}
                         >
                             <Flame className="h-4 w-4" />
-                            Ranking
+                            {t("header.ranking.label")}
                         </Link>
                     </nav>
                 </div>
@@ -83,7 +85,7 @@ export function Header() {
                     <Link
                         href="/ranking"
                         className="md:hidden p-2 text-muted-foreground hover:text-primary"
-                        aria-label="랭킹 페이지로 이동"
+                        aria-label={t("header.ranking.aria")}
                     >
                         <Flame className="h-5 w-5" />
                     </Link>
@@ -134,7 +136,7 @@ export function Header() {
                                             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
                                                 <User className="h-4 w-4 text-primary" />
                                             </div>
-                                            <span className="text-[14px] font-medium">내 프로필</span>
+                                            <span className="text-[14px] font-medium">{t("common.profile")}</span>
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild className="rounded-xl h-11 px-3 cursor-pointer transition-colors duration-150">
@@ -142,7 +144,7 @@ export function Header() {
                                             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted">
                                                 <Settings className="h-4 w-4 text-muted-foreground" />
                                             </div>
-                                            <span className="text-[14px] font-medium">설정</span>
+                                            <span className="text-[14px] font-medium">{t("common.settings")}</span>
                                         </Link>
                                     </DropdownMenuItem>
                                 </div>
@@ -158,7 +160,7 @@ export function Header() {
                                             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-red-500/10">
                                                 <LogOut className="h-4 w-4" />
                                             </div>
-                                            <span className="text-[14px] font-medium">로그아웃</span>
+                                            <span className="text-[14px] font-medium">{t("common.logout")}</span>
                                         </div>
                                     </DropdownMenuItem>
                                 </div>
@@ -172,7 +174,7 @@ export function Header() {
                             className="gap-2 border-primary/20 hover:bg-secondary active:scale-95 transition-all"
                         >
                             <GithubIcon className="h-4 w-4" />
-                            로그인
+                            {t("common.login")}
                         </Button>
                     )}
                 </div>
@@ -198,11 +200,11 @@ export function Header() {
                         </motion.div>
                         <div className="space-y-2">
                             <AlertDialogTitle className="text-xl font-bold">
-                                로그아웃 할까요?
+                                {t("header.logout.confirm.title")}
                             </AlertDialogTitle>
                             <AlertDialogDescription className="text-[15px] leading-relaxed">
-                                다음에 다시 로그인하면<br />
-                                언제든지 돌아올 수 있어요
+                                {t("header.logout.confirm.description.line1")}<br />
+                                {t("header.logout.confirm.description.line2")}
                             </AlertDialogDescription>
                         </div>
                     </AlertDialogHeader>
@@ -211,7 +213,7 @@ export function Header() {
                             disabled={logoutMutation.isPending}
                             className="flex-1 sm:flex-1"
                         >
-                            취소
+                            {t("common.cancel")}
                         </AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleLogoutConfirm}
@@ -224,10 +226,10 @@ export function Header() {
                                     <div className="mr-2 animate-spin">
                                         <Loader2 className="h-4 w-4" />
                                     </div>
-                                    로그아웃 중...
+                                    {t("header.logout.pending")}
                                 </>
                             ) : (
-                                '로그아웃'
+                                t("common.logout")
                             )}
                         </AlertDialogAction>
                     </AlertDialogFooter>

@@ -15,6 +15,7 @@ import { useIsMobile } from "@/shared/hooks/use-media-query"
 import { useReducedMotion } from "@/shared/hooks/use-reduced-motion"
 import { LiveTicker } from "@/shared/components/ui/live-ticker"
 import { toast } from "sonner"
+import { useI18n } from "@/shared/providers/locale-provider"
 
 // [Add] UX 개선을 위한 추천 검색어 (Quick Chips)
 const FAMOUS_DEVS = [
@@ -24,6 +25,7 @@ const FAMOUS_DEVS = [
 ];
 
 export function HeroSection() {
+  const { t } = useI18n()
   const router = useRouter()
   const { recentSearches, addSearch, removeSearch } = useSearchStore()
   const [open, setOpen] = useState(false)
@@ -55,8 +57,8 @@ export function HeroSection() {
 
   // Mobile: short, PC/Tablet: full
   const placeholder = isMobile
-      ? `e.g. ${placeholderText}`
-      : `GitHub 유저 검색... (e.g. ${placeholderText})`
+      ? t("home.search.placeholder.mobile", { example: placeholderText })
+      : t("home.search.placeholder.desktop", { example: placeholderText })
 
   useEffect(() => {
     setMounted(true)
@@ -81,7 +83,7 @@ export function HeroSection() {
     // Validate GitHub username
     const validation = validateGithubUsername(trimmedUsername)
     if (!validation.success) {
-      toast.error(validation.error || "유효한 GitHub 사용자 이름을 입력해주세요.")
+      toast.error(validation.error || t("validation.username.pattern"))
       return
     }
 
@@ -171,8 +173,8 @@ export function HeroSection() {
             </span>
             </h1>
             <p className="mx-auto max-w-2xl text-xl text-muted-foreground leading-relaxed">
-              <span className="text-foreground font-bold">코드 품질</span>과 <span className="text-foreground font-bold">기여도</span>로 증명하는<br/>
-              진정한 개발자 전투력 측정 서비스
+              <span className="text-foreground font-bold">{t("home.hero.metric.quality")}</span> {t("home.hero.metric.and")} <span className="text-foreground font-bold">{t("home.hero.metric.contribution")}</span> {t("home.hero.metric.provenBy")}<br/>
+              {t("home.hero.subtitle.line2")}
             </p>
           </motion.div>
 
@@ -205,7 +207,7 @@ export function HeroSection() {
                   onBlur={handleBlur}
                   autoComplete="off"
                   spellCheck="false"
-                  aria-label="GitHub 사용자 검색"
+                  aria-label={t("home.search.aria")}
                   aria-describedby="search-description"
                   role="combobox"
                   aria-expanded={open}
@@ -213,7 +215,7 @@ export function HeroSection() {
                   aria-autocomplete="list"
               />
               <span id="search-description" className="sr-only">
-                GitHub 사용자 이름을 입력하세요. Enter 키를 눌러 검색합니다.
+                {t("home.search.description")}
               </span>
               <div className="pr-2">
                 <Button
@@ -221,7 +223,7 @@ export function HeroSection() {
                     className="h-10 sm:h-12 rounded-xl px-4 sm:px-6 text-sm sm:text-base font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg"
                     onClick={() => handleSearch(query)}
                 >
-                  검색
+                  {t("home.search.submit")}
                 </Button>
               </div>
             </div>
@@ -236,10 +238,10 @@ export function HeroSection() {
                       className="absolute top-full z-50 mt-2 w-full overflow-hidden rounded-2xl border bg-background/95 backdrop-blur-sm p-2 shadow-xl"
                       id="recent-searches"
                       role="listbox"
-                      aria-label="최근 검색 기록"
+                      aria-label={t("home.search.recent")}
                   >
                     <div className="flex items-center justify-between px-3 py-2 text-[11px] font-bold text-muted-foreground uppercase" aria-hidden="true">
-                      <span>최근 검색 기록</span>
+                      <span>{t("home.search.recent")}</span>
                     </div>
                     {recentSearches.map((term, index) => (
                         <div
@@ -263,7 +265,7 @@ export function HeroSection() {
                               size="icon"
                               className="h-6 w-6 opacity-0 group-hover:opacity-100"
                               onClick={(e) => { e.stopPropagation(); removeSearch(term); }}
-                              aria-label={`${term} 검색 기록 삭제`}
+                              aria-label={t("home.search.recent.remove", { term })}
                           >
                             <X className="h-3 w-3" />
                           </Button>
@@ -281,7 +283,7 @@ export function HeroSection() {
               transition={{ delay: 0.3 }}
               className="mt-6 flex flex-wrap justify-center gap-2"
           >
-            <span className="text-xs font-semibold text-muted-foreground self-center mr-1">Trending:</span>
+            <span className="text-xs font-semibold text-muted-foreground self-center mr-1">{t("home.trending.label")}</span>
             {FAMOUS_DEVS.map((dev) => (
                 <button
                     key={dev.name}
@@ -303,10 +305,10 @@ export function HeroSection() {
               className={cn("mt-12 flex gap-6", isFocused && "pointer-events-none")}
           >
             <a href="https://github.com/alexization/git-ranker" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
-              <BookOpen className="h-4 w-4" /> 사용 가이드
+              <BookOpen className="h-4 w-4" /> {t("home.links.guide")}
             </a>
             <a href="/ranking" className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors">
-              <TrendingUp className="h-4 w-4" /> 전체 랭킹
+              <TrendingUp className="h-4 w-4" /> {t("home.links.ranking")}
             </a>
           </motion.div>
         </div>
