@@ -9,6 +9,7 @@ import { Toaster } from "@/shared/components/toaster";
 import { Header } from "@/shared/components/layout/header";
 import { WebVitalsReporter } from "@/shared/components/web-vitals-reporter";
 import { cn } from "@/shared/lib/utils";
+import { LocaleProvider } from "@/shared/providers/locale-provider";
 
 const pretendard = localFont({
     src: "../fonts/PretendardVariable.woff2",
@@ -82,7 +83,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="ko" suppressHydrationWarning>
+        <html lang="en" suppressHydrationWarning>
         <head>
             {/* Preconnect to external origins for faster resource loading */}
             <link rel="preconnect" href="https://avatars.githubusercontent.com" />
@@ -102,16 +103,18 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
-            <QueryProvider>
-                <AuthProvider>
-                    <Header />
-                    <div className="flex-1">
-                        {children}
-                    </div>
-                    <Toaster />
-                    <WebVitalsReporter />
-                </AuthProvider>
-            </QueryProvider>
+            <LocaleProvider>
+                <QueryProvider>
+                    <AuthProvider>
+                        <Header />
+                        <div className="flex-1">
+                            {children}
+                        </div>
+                        <Toaster />
+                        <WebVitalsReporter />
+                    </AuthProvider>
+                </QueryProvider>
+            </LocaleProvider>
         </ThemeProvider>
         </body>
         </html>
