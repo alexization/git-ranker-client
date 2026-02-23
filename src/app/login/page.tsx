@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { cn } from "@/shared/lib/utils"
 import { LiveTicker, TickerUpdate } from "@/shared/components/ui/live-ticker"
 import { GithubIcon } from "@/shared/components/icons/github-icon"
+import { useI18n } from "@/shared/providers/locale-provider"
 
 // [Data] Action 필드 제거 (User + Tier)
 const MOCK_LIVE_UPDATES: TickerUpdate[] = [
@@ -20,7 +21,7 @@ const MOCK_LIVE_UPDATES: TickerUpdate[] = [
 ];
 
 // [Content] 이용약관
-const TERMS_OF_SERVICE = `
+const TERMS_OF_SERVICE_KO = `
 Git Ranker 서비스 이용약관
 
 시행일: 2026년 1월 21일
@@ -107,8 +108,96 @@ Git Ranker 서비스 이용약관
 본 약관은 2026년 1월 21일부터 시행됩니다.
 `;
 
+const TERMS_OF_SERVICE_EN = `
+Git Ranker Terms of Service
+
+Effective Date: January 21, 2026
+
+Article 1 (Purpose)
+These Terms and Conditions are intended to define the conditions and procedures for using the GitHub activity analysis and developer ranking service provided by Git Ranker (the "Service"), as well as the rights, obligations, and responsibilities between the Service provider and users.
+
+Article 2 (Definitions)
+1. "Service" means a web service that analyzes a user's public GitHub activity data, calculates scores and tiers, and provides rankings among other users.
+2. "User" means a person who uses the Service in accordance with these Terms.
+3. "GitHub OAuth" means the authentication method provided by GitHub, through which a user logs into the Service using a GitHub account.
+
+Article 3 (Effectiveness and Changes of Terms)
+1. These Terms become effective when posted on the Service or otherwise announced to users.
+2. The Service may amend these Terms to the extent not violating relevant laws and regulations, and amended Terms become effective when announced in the same manner as Paragraph 1.
+3. Users may discontinue use and withdraw from the Service if they do not agree to the amended Terms. If a user continues to use the Service after the effective date of amended Terms, the user is deemed to have agreed to the changes.
+
+Article 4 (Service Description)
+1. With the user's consent through GitHub OAuth, the Service collects and analyzes the following public data:
+   - Number of commits
+   - Number of Pull Requests created and merged
+   - Number of Issues created
+   - Number of Reviews
+2. Based on collected data, the Service calculates scores, assigns tiers, and provides rankings among all users.
+3. The Service provides badge images that users can display on their GitHub profiles.
+4. Scores, tiers, and rankings provided by the Service are based only on public GitHub activity data and do not evaluate or guarantee a user's actual development skills.
+
+Article 5 (Formation of Service Use Agreement)
+1. The service use agreement is formed when a user agrees to these Terms and logs in through GitHub OAuth.
+2. The Service may refuse approval of use or terminate the service use agreement afterward in any of the following cases:
+   - If another person's GitHub account is stolen or used without authorization
+   - If false information is provided or the Service is used improperly
+   - If normal operation of the Service is interfered with
+   - If relevant laws or these Terms are otherwise violated
+
+Article 6 (User Obligations)
+1. Users must comply with these Terms and relevant laws and regulations.
+2. Users must not engage in the following acts:
+   - Unauthorized use of another person's GitHub account or unauthorized collection of another person's personal information
+   - Falsifying or improperly using information provided by the Service
+   - Interfering with operation of the Service or causing excessive load to the Service
+   - Defaming others or infringing others' rights through use of the Service
+   - Other illegal or unfair acts
+
+Article 7 (Provision and Changes of Service)
+1. In principle, the Service is provided 24 hours a day, 365 days a year. However, service provision may be temporarily suspended when necessary for operation, such as system maintenance.
+2. The Service may change all or part of the provided service as necessary for operational or technical reasons.
+3. If the service content is changed, the Service will notify users through announcements within the Service.
+
+Article 8 (Restriction and Suspension of Service Use)
+1. The Service may restrict or suspend service provision in any of the following cases:
+   - When necessary for operation such as system inspection, maintenance, or replacement
+   - When normal service provision is difficult due to GitHub API policy changes, outages, or service interruption
+   - When force majeure events occur, such as natural disasters, war, or civil unrest
+   - Other cases causing significant disruption to Service operation
+2. In case of suspension under Paragraph 1, the Service will announce it to users in advance. However, if prior notice is difficult due to urgent or unavoidable reasons, notice may be provided afterward.
+
+Article 9 (Termination of Service Use Agreement)
+1. Users may terminate the service use agreement at any time through the withdrawal feature in the Service or customer support.
+2. When the service use agreement is terminated, the Service will process users' personal information in accordance with relevant laws and the Privacy Policy.
+
+Article 10 (Disclaimer)
+1. The Service is not affiliated with GitHub, Inc., and is not an official GitHub service.
+2. The Service uses only public data collected through the GitHub API and does not guarantee accuracy or completeness of data.
+3. Scores, tiers, and rankings provided by the Service are for reference only, and the Service is not responsible for any judgment or decision made based on them.
+4. The Service is not responsible for service usage issues caused by a user's fault.
+5. The Service is not responsible for service interruption or data loss caused by external factors such as GitHub API policy changes, outages, or service suspension.
+6. The Service is provided free of charge, and the Service bears no legal liability for any damages arising therefrom.
+
+Article 11 (Copyright and Intellectual Property Rights)
+1. Copyright and intellectual property rights for content created by the Service (design, logo, badges, etc.) belong to the Service.
+2. Users may use badges provided by the Service on their personal GitHub profiles, but may not use or modify them without authorization for commercial purposes.
+3. GitHub logos and trademarks are assets of GitHub, Inc., and the Service complies with GitHub brand guidelines.
+
+Article 12 (Dispute Resolution)
+1. Litigation regarding disputes between the Service and users shall be brought before courts in the Republic of Korea.
+2. Laws of the Republic of Korea shall apply to lawsuits filed between the Service and users.
+
+Article 13 (Miscellaneous)
+1. Matters not stipulated in these Terms and interpretation of these Terms shall follow relevant laws and commercial practices.
+2. Inquiries regarding Service use can be submitted through GitHub Issues:
+   https://github.com/alexization/git-ranker
+
+Supplementary Provision
+These Terms shall take effect on January 21, 2026.
+`;
+
 // [Content] 개인정보처리방침
-const PRIVACY_POLICY = `
+const PRIVACY_POLICY_KO = `
 Git Ranker 개인정보처리방침
 
 시행일: 2026년 1월 21일
@@ -233,10 +322,140 @@ Git Ranker(이하 "서비스")는 개인정보보호법, 정보통신망 이용�
 본 개인정보처리방침은 2026년 1월 21일부터 시행됩니다.
 `;
 
+const PRIVACY_POLICY_EN = `
+Git Ranker Privacy Policy
+
+Effective Date: January 21, 2026
+
+Git Ranker (the "Service") establishes and discloses this Privacy Policy as follows to protect users' personal information and to handle related complaints promptly and smoothly in accordance with applicable laws, including the Personal Information Protection Act and the Act on Promotion of Information and Communications Network Utilization and Information Protection.
+
+Article 1 (Purpose of Collection and Use of Personal Information)
+The Service collects and uses personal information for the following purposes. Collected personal information is not used for purposes other than those listed below, and if the purpose changes, necessary measures such as obtaining separate consent will be taken.
+
+1. Service Provision and Member Management
+   - User identification and authentication through GitHub OAuth
+   - Identity verification for service use
+   - Maintenance and management of membership status
+
+2. Provision of GitHub Activity Analysis Service
+   - Collection and analysis of public GitHub activity data
+   - Score calculation, tier assignment, and ranking provision
+   - Badge image generation and provision
+
+3. Service Improvement and Statistical Analysis
+   - Understanding service usage status and statistical analysis
+   - Service improvement and development of new features
+
+Article 2 (Items of Personal Information Collected and Collection Methods)
+1. Items of Personal Information Collected
+The Service collects the following information with users' consent through GitHub OAuth:
+
+[Required Items]
+- GitHub unique user ID (node_id)
+- GitHub username
+- Profile image URL
+- Public repository activity details: number of commits, Pull Requests, issues, and code reviews
+
+[Optional Item]
+- Email address (collected only if publicly available according to GitHub account settings)
+
+[Automatically Collected Items]
+- Service usage records, access logs, and access IP address
+
+2. Methods of Collection
+- Authentication and API integration through GitHub OAuth 2.0
+- Automatic generation and collection during service use
+
+Article 3 (Retention and Use Period of Personal Information)
+1. The Service destroys personal information without delay after the purpose of collection and use has been achieved.
+2. If a user requests account withdrawal, personal information is destroyed immediately.
+3. However, the following information is retained for the specified period for the following reasons:
+
+[Retention under Applicable Laws]
+- Preparation for disputes related to service use: 1 year (internal policy)
+- Records regarding access: 3 months (Protection of Communications Secrets Act)
+
+Article 4 (Provision of Personal Information to Third Parties)
+1. The Service processes users' personal information only within the scope specified in Article 1 and does not process beyond the original scope or provide to third parties without prior consent.
+2. However, the following cases are exceptions:
+   - When the user has given prior consent
+   - When required by law, or when requested by investigative agencies in accordance with legally prescribed procedures and methods for investigative purposes
+
+Article 5 (Outsourcing of Personal Information Processing)
+1. The Service currently does not outsource personal information processing tasks to external parties.
+2. If outsourcing occurs in the future, the entrusted party and details of outsourced tasks will be disclosed in this Privacy Policy.
+
+Article 6 (Rights and Obligations of Users and Legal Representatives, and How to Exercise Them)
+1. Users may exercise the following rights related to personal information protection at any time:
+   - Request access to personal information
+   - Request correction of personal information
+   - Request deletion of personal information
+   - Request suspension of personal information processing
+
+2. Requests can be made through GitHub Issues:
+   https://github.com/alexization/git-ranker
+   The Service will take action without delay.
+
+3. If a user requests deletion of personal information, the Service will destroy the information without delay and process account withdrawal.
+
+4. Users may exercise rights through a legal representative or an authorized agent.
+
+Article 7 (Destruction of Personal Information)
+1. Destruction Procedure
+When personal information becomes unnecessary due to expiration of retention period or achievement of processing purpose, the Service destroys it without delay.
+
+2. Destruction Method
+   - Information in electronic file form: deleted using technical methods that prevent recovery
+   - Personal information printed on paper: shredded or incinerated
+
+Article 8 (Measures to Ensure Safety of Personal Information)
+The Service takes the following measures to ensure safety of personal information:
+1. Administrative measures: minimizing personnel handling personal information, establishing and implementing a privacy policy
+2. Technical measures: access control for personal information processing systems, application of encryption technologies, installation of security programs
+3. Physical measures: control of server access
+
+Article 9 (Installation, Operation, and Refusal of Automatic Personal Information Collection Devices)
+1. The Service may use cookies to store and retrieve usage information to provide customized services.
+2. Users can configure browser options to allow or block cookies.
+3. If cookie storage is blocked, some service features may be difficult to use.
+
+Article 10 (Chief Privacy Officer)
+The Service designates the following contact for personal information processing and related complaint handling and relief:
+
+Chief Privacy Officer
+- Contact method: GitHub Issues (https://github.com/alexization/git-ranker)
+
+Users may inquire through the above contact regarding all matters related to personal information protection, complaint handling, and remedies while using the Service.
+
+Article 11 (Remedies for Infringement of Rights)
+Users may apply for dispute resolution or consultation with the following organizations regarding personal information infringement:
+
+- Personal Information Dispute Mediation Committee: 1833-6972 (www.kopico.go.kr)
+- Personal Information Infringement Report Center: 118 (privacy.kisa.or.kr)
+- Supreme Prosecutors' Office Cyber Investigation: 1301 (www.spo.go.kr)
+- National Police Agency Cyber Bureau: 182 (ecrm.cyber.go.kr)
+
+Article 12 (Use of GitHub API)
+1. The Service collects only users' public activity data through the GitHub API.
+2. The Service complies with GitHub, Inc.'s API Terms of Use and Privacy Policy.
+3. The Service is not affiliated with GitHub, Inc. and is not an official GitHub service.
+4. Access granted through GitHub OAuth is used only for service provision purposes, and users can revoke access at any time in GitHub settings (https://github.com/settings/applications).
+
+Article 13 (Changes to Privacy Policy)
+1. This Privacy Policy applies from the effective date. If changes are made due to laws or policies, additions/deletions/corrections will be announced in the Service at least 7 days before effective date.
+2. If there is a material change to users' rights, notice will be provided at least 30 days in advance.
+
+Supplementary Provision
+This Privacy Policy shall take effect on January 21, 2026.
+`;
+
 type ModalType = "terms" | "privacy" | null;
 
 export default function LoginPage() {
+    const { t, locale } = useI18n()
     const [openModal, setOpenModal] = useState<ModalType>(null)
+    const termsOfService = locale === "ko" ? TERMS_OF_SERVICE_KO : TERMS_OF_SERVICE_EN
+    const privacyPolicy = locale === "ko" ? PRIVACY_POLICY_KO : PRIVACY_POLICY_EN
 
     const handleGithubLogin = () => {
         window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/oauth2/authorization/github`
@@ -307,14 +526,14 @@ export default function LoginPage() {
 
                             <motion.div variants={itemVariants}>
                                 <CardTitle className="text-3xl font-black tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
-                                    Check Your Tier
+                                    {t("login.title")}
                                 </CardTitle>
                             </motion.div>
 
                             <motion.div variants={itemVariants}>
                                 <CardDescription className="text-base font-medium leading-relaxed">
-                                    내 깃허브 활동은 상위 몇 %일까요?<br/>
-                                    <span className="text-primary font-bold">3초</span>만에 분석 결과를 확인하세요.
+                                    {t("login.subtitle.line1")}<br/>
+                                    <span className="text-primary font-bold">{t("login.subtitle.highlight")}</span>{t("login.subtitle.line2")}
                                 </CardDescription>
                             </motion.div>
                         </CardHeader>
@@ -333,8 +552,8 @@ export default function LoginPage() {
                                         <GitCommit className="w-5 h-5" />
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-sm font-bold text-foreground">활동 정밀 분석</span>
-                                        <span className="text-xs text-muted-foreground">커밋, PR, 리뷰 등 기여도 기반 산정</span>
+                                        <span className="text-sm font-bold text-foreground">{t("login.feature.analysis.title")}</span>
+                                        <span className="text-xs text-muted-foreground">{t("login.feature.analysis.desc")}</span>
                                     </div>
                                 </div>
 
@@ -343,8 +562,8 @@ export default function LoginPage() {
                                         <Zap className="w-5 h-5" />
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-sm font-bold text-foreground">실시간 랭킹</span>
-                                        <span className="text-xs text-muted-foreground">전체 개발자 중 나의 전투력 순위</span>
+                                        <span className="text-sm font-bold text-foreground">{t("login.feature.ranking.title")}</span>
+                                        <span className="text-xs text-muted-foreground">{t("login.feature.ranking.desc")}</span>
                                     </div>
                                 </div>
                             </div>
@@ -362,27 +581,27 @@ export default function LoginPage() {
                                 >
                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:animate-[shimmer_1.5s_infinite]" />
                                     <GithubIcon className="mr-2 h-5 w-5" />
-                                    GitHub으로 시작하기
+                                    {t("login.start-github")}
                                 </Button>
                             </motion.div>
 
                             <motion.div variants={itemVariants} className="text-center">
                                 <p className="text-xs text-muted-foreground leading-relaxed">
-                                    로그인 시{" "}
+                                    {t("login.agreement.prefix")}{" "}
                                     <button
                                         onClick={() => setOpenModal("terms")}
                                         className="text-primary font-semibold hover:underline underline-offset-2 transition-colors"
                                     >
-                                        이용약관
+                                        {t("login.agreement.terms")}
                                     </button>
-                                    {" "}및{" "}
+                                    {" "}{t("login.agreement.and")}{" "}
                                     <button
                                         onClick={() => setOpenModal("privacy")}
                                         className="text-primary font-semibold hover:underline underline-offset-2 transition-colors"
                                     >
-                                        개인정보처리방침
+                                        {t("login.agreement.privacy")}
                                     </button>
-                                    에 동의하게 됩니다.
+                                    {" "}{t("login.agreement.suffix")}
                                 </p>
                             </motion.div>
                         </CardFooter>
@@ -430,7 +649,7 @@ export default function LoginPage() {
                                         )}
                                     </div>
                                     <h2 className="text-lg font-bold">
-                                        {openModal === "terms" ? "이용약관" : "개인정보처리방침"}
+                                        {openModal === "terms" ? t("login.agreement.terms") : t("login.agreement.privacy")}
                                     </h2>
                                 </div>
                                 <button
@@ -445,7 +664,7 @@ export default function LoginPage() {
                             <div className="p-4 sm:p-6 overflow-y-auto flex-1 min-h-0">
                                 <div className="prose prose-sm dark:prose-invert max-w-none">
                                     <pre className="whitespace-pre-wrap font-sans text-[13px] sm:text-sm leading-relaxed text-muted-foreground bg-transparent p-0 m-0">
-                                        {openModal === "terms" ? TERMS_OF_SERVICE.trim() : PRIVACY_POLICY.trim()}
+                                        {openModal === "terms" ? termsOfService.trim() : privacyPolicy.trim()}
                                     </pre>
                                 </div>
                             </div>
@@ -456,7 +675,7 @@ export default function LoginPage() {
                                     onClick={() => setOpenModal(null)}
                                     className="w-full h-10 sm:h-11 font-semibold rounded-xl text-sm sm:text-base"
                                 >
-                                    확인
+                                    {t("common.confirm")}
                                 </Button>
                             </div>
                         </motion.div>

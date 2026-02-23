@@ -12,18 +12,20 @@ import { Skeleton } from "@/shared/components/skeleton"
 import { Loader2, AlertCircle, RefreshCcw } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
-
-const LOADING_STEPS = [
-  "GitHub 계정을 확인하고 있습니다...",
-  "공개 레포지토리 데이터를 수집 중입니다...",
-  "커밋, PR, 이슈 활동을 분석 중입니다...",
-  "코드 품질과 기여도를 평가하고 있습니다...",
-  "개발자 전투력과 티어를 산정 중입니다..."
-];
+import { useI18n } from "@/shared/providers/locale-provider"
 
 function RedirectHandler() {
+  const { t } = useI18n()
   const router = useRouter()
   const { login } = useAuthStore()
+
+  const loadingSteps = [
+    t("auth.callback.step.1"),
+    t("auth.callback.step.2"),
+    t("auth.callback.step.3"),
+    t("auth.callback.step.4"),
+    t("auth.callback.step.5"),
+  ];
 
   const [currentStep, setCurrentStep] = useState(0)
   const [error, setError] = useState<string | null>(null)
@@ -33,11 +35,11 @@ function RedirectHandler() {
   useEffect(() => {
     if (error) return
     const interval = setInterval(() => {
-      setCurrentStep((prev) => (prev < LOADING_STEPS.length - 1 ? prev + 1 : prev));
+      setCurrentStep((prev) => (prev < loadingSteps.length - 1 ? prev + 1 : prev));
     }, 1500)
 
     return () => clearInterval(interval);
-  }, [error]);
+  }, [error, loadingSteps.length]);
 
   useEffect(() => {
     if (hasCalledRef.current) return
@@ -48,14 +50,14 @@ function RedirectHandler() {
       .then(({ username }) => getUser(username))
       .then((user) => {
         login(user)
-        toast.success(`환영합니다, ${user.username}님!`)
+        toast.success(t("auth.callback.welcome", { username: user.username }))
         router.replace(`/users/${user.username}`)
       })
       .catch((err) => {
         if (process.env.NODE_ENV === "development") {
           console.error("Failed to fetch user info", err)
         }
-        const errorMessage = getErrorMessage(err, "사용자 정보를 불러오는데 실패했습니다.")
+        const errorMessage = getErrorMessage(err, t("auth.callback.user-fetch-failed"))
         setError(errorMessage)
         toast.error(errorMessage)
       })
@@ -81,7 +83,7 @@ function RedirectHandler() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.4 }}
           >
-            <h2 className="text-xl font-bold mb-2 text-foreground">로그인 실패</h2>
+            <h2 className="text-xl font-bold mb-2 text-foreground">{t("auth.callback.failed-title")}</h2>
             <p className="text-sm text-muted-foreground mb-6">{error}</p>
           </motion.div>
 
@@ -97,10 +99,10 @@ function RedirectHandler() {
               className="flex-1 rounded-xl h-11"
             >
               <RefreshCcw className="mr-2 h-4 w-4" />
-              다시 시도
+              {t("common.retry")}
             </Button>
             <Button asChild className="flex-1 rounded-xl h-11">
-              <Link href="/login">로그인 페이지로</Link>
+              <Link href="/login">{t("auth.callback.go-login")}</Link>
             </Button>
           </motion.div>
         </Card>
@@ -146,7 +148,7 @@ function RedirectHandler() {
                     transition={{ duration: 0.3 }}
                     className="text-sm font-medium text-muted-foreground absolute inset-0 w-full"
                 >
-                  {LOADING_STEPS[currentStep]}
+                  {loadingSteps[currentStep]}
                 </motion.p>
               </AnimatePresence>
             </div>
@@ -156,7 +158,7 @@ function RedirectHandler() {
               <motion.div
                   className="h-full bg-primary"
                   initial={{ width: "0%" }}
-                  animate={{ width: `${((currentStep + 1) / LOADING_STEPS.length) * 100}%` }}
+                  animate={{ width: `${((currentStep + 1) / loadingSteps.length) * 100}%` }}
                   transition={{ duration: 0.5 }}
               />
             </div>

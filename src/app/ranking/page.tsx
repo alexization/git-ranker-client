@@ -13,6 +13,7 @@ import { Input } from "@/shared/components/input"
 import { UserDetailModal } from "@/features/user/components/user-detail-modal"
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, Crown, Award } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
+import { useI18n } from "@/shared/providers/locale-provider"
 
 const TIERS: (Tier | 'ALL')[] = [
     'ALL', 'CHALLENGER', 'MASTER', 'DIAMOND', 'EMERALD',
@@ -71,6 +72,7 @@ const renderRankIcon = (rank: number) => {
 }
 
 function RankingContent() {
+    const { t } = useI18n()
     const router = useRouter()
     const searchParams = useSearchParams()
     const [pageInput, setPageInput] = useState("")
@@ -156,11 +158,11 @@ function RankingContent() {
                 <div className="text-center mb-10 px-4">
                     <h1 className="text-5xl md:text-6xl font-black tracking-tight mb-3">
                         <span className="bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-transparent">
-                            Leaderboard
+                            {t("ranking.section.title")}
                         </span>
                     </h1>
                     <p className="text-muted-foreground font-medium text-lg">
-                        전체 개발자 전투력 순위
+                        {t("ranking.section.subtitle")}
                     </p>
                 </div>
 
@@ -174,10 +176,10 @@ function RankingContent() {
                     {totalPages > 1 && !isLoading && rankings.length > 0 && (
                         <div className="flex items-center justify-between mb-4 px-2">
                             <p className="text-sm text-muted-foreground">
-                                총 <span className="font-semibold text-foreground">{pageInfo?.totalElements?.toLocaleString() || 0}</span>명
+                                {t("ranking.page.total")} <span className="font-semibold text-foreground">{pageInfo?.totalElements?.toLocaleString() || 0}</span>{t("ranking.page.users")}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                                <span className="font-semibold text-foreground">{page + 1}</span> / {totalPages} 페이지
+                                <span className="font-semibold text-foreground">{page + 1}</span> / {totalPages} {t("ranking.page.unit")}
                             </p>
                         </div>
                     )}
@@ -185,9 +187,9 @@ function RankingContent() {
                     {/* Header Row - Desktop Only */}
                     <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3.5 mb-3 text-xs font-bold text-muted-foreground uppercase tracking-widest select-none bg-secondary/80 dark:bg-secondary/50 border border-border/50 rounded-xl">
                         <div className="col-span-1 text-center">#</div>
-                        <div className="col-span-5 pl-2">User</div>
-                        <div className="col-span-3 text-center">Tier</div>
-                        <div className="col-span-3 text-right pr-2">Score</div>
+                        <div className="col-span-5 pl-2">{t("ranking.table.user")}</div>
+                        <div className="col-span-3 text-center">{t("ranking.table.tier")}</div>
+                        <div className="col-span-3 text-right pr-2">{t("ranking.table.score")}</div>
                     </div>
 
                     <div className="space-y-2 min-h-[500px]">
@@ -198,8 +200,8 @@ function RankingContent() {
                         ) : rankings.length === 0 ? (
                             <div className="py-32 text-center bg-secondary/10 rounded-3xl border border-dashed border-border/50">
                                 <Search className="w-12 h-12 mx-auto mb-4 text-muted-foreground/20" />
-                                <p className="text-muted-foreground font-medium text-lg">랭킹 데이터가 없습니다.</p>
-                                <p className="text-sm text-muted-foreground/60 mt-1">아직 등록된 유저가 없거나 필터 조건에 맞는 결과가 없습니다.</p>
+                                <p className="text-muted-foreground font-medium text-lg">{t("ranking.empty")}</p>
+                                <p className="text-sm text-muted-foreground/60 mt-1">{t("ranking.empty.description")}</p>
                             </div>
                         ) : (
                             <LazyMotion features={domAnimation}>
@@ -274,7 +276,7 @@ function RankingContent() {
                                     onClick={() => handlePageChange(0)}
                                     disabled={page === 0 || isLoading}
                                     className="rounded-xl w-10 h-10 text-muted-foreground hover:text-foreground disabled:opacity-30"
-                                    title="첫 페이지"
+                                    title={t("ranking.pagination.first")}
                                 >
                                     <ChevronsLeft className="h-4 w-4" />
                                 </Button>
@@ -324,7 +326,7 @@ function RankingContent() {
                                     onClick={() => handlePageChange(totalPages - 1)}
                                     disabled={page >= totalPages - 1 || isLoading}
                                     className="rounded-xl w-10 h-10 text-muted-foreground hover:text-foreground disabled:opacity-30"
-                                    title="마지막 페이지"
+                                    title={t("ranking.pagination.last")}
                                 >
                                     <ChevronsRight className="h-4 w-4" />
                                 </Button>

@@ -16,25 +16,26 @@ import { useDeleteAccount } from "@/features/user/api/user-service"
 import { useAuthStore } from "@/features/auth/store/auth-store"
 import { getErrorMessage } from "@/shared/lib/api-client"
 import { toast } from "sonner"
+import { useI18n } from "@/shared/providers/locale-provider"
 
 interface DeleteAccountModalProps {
     open: boolean
     onOpenChange: (open: boolean) => void
 }
 
-const deletedDataList = [
-    "사용자 정보",
-    "일별 활동 증감 데이터",
-    "Commit 기록",
-    "Pull Request 기록",
-    "Code Review 기록",
-    "Issue 기록",
-    "랭킹 및 티어 정보",
-]
-
 export function DeleteAccountModal({ open, onOpenChange }: DeleteAccountModalProps) {
+    const { t } = useI18n()
     const deleteAccountMutation = useDeleteAccount()
     const logout = useAuthStore((state) => state.logout)
+    const deletedDataList = [
+        t("delete-modal.data.user"),
+        t("delete-modal.data.daily"),
+        t("delete-modal.data.commit"),
+        t("delete-modal.data.pr"),
+        t("delete-modal.data.review"),
+        t("delete-modal.data.issue"),
+        t("delete-modal.data.ranking"),
+    ]
 
     const handleDeleteConfirm = async () => {
         try {
@@ -43,7 +44,7 @@ export function DeleteAccountModal({ open, onOpenChange }: DeleteAccountModalPro
             onOpenChange(false)
             window.location.href = '/login'
         } catch (error) {
-            toast.error(getErrorMessage(error, '회원탈퇴에 실패했습니다. 잠시 후 다시 시도해주세요.'))
+            toast.error(getErrorMessage(error, t("delete-modal.error")))
         }
     }
 
@@ -57,7 +58,7 @@ export function DeleteAccountModal({ open, onOpenChange }: DeleteAccountModalPro
                     disabled={deleteAccountMutation.isPending}
                 >
                     <X className="w-4 h-4 text-muted-foreground" />
-                    <span className="sr-only">닫기</span>
+                    <span className="sr-only">{t("delete-modal.close")}</span>
                 </button>
 
                 {/* Header with gradient background */}
@@ -81,11 +82,11 @@ export function DeleteAccountModal({ open, onOpenChange }: DeleteAccountModalPro
 
                         <div className="space-y-1.5 text-center">
                             <AlertDialogTitle className="text-lg font-bold text-foreground">
-                                정말 탈퇴하시겠습니까?
+                                {t("delete-modal.title")}
                             </AlertDialogTitle>
                             <AlertDialogDescription className="text-sm leading-relaxed text-muted-foreground">
-                                회원 정보를 삭제하면 다음 데이터가<br />
-                                모두 <span className="font-semibold text-red-500 dark:text-red-400">영구적으로 삭제</span>됩니다
+                                {t("delete-modal.description.line1")}<br />
+                                {t("delete-modal.description.line2.prefix")} <span className="font-semibold text-red-500 dark:text-red-400">{t("delete-modal.description.line2.highlight")}</span>{t("delete-modal.description.line2.suffix")}
                             </AlertDialogDescription>
                         </div>
                     </AlertDialogHeader>
@@ -120,7 +121,7 @@ export function DeleteAccountModal({ open, onOpenChange }: DeleteAccountModalPro
                 >
                     <p className="text-xs font-medium text-red-600 dark:text-red-400 text-center flex items-center justify-center gap-1.5">
                         <AlertTriangle className="w-3.5 h-3.5" />
-                        이 작업은 되돌릴 수 없습니다
+                        {t("delete-modal.warning")}
                     </p>
                 </motion.div>
 
@@ -130,7 +131,7 @@ export function DeleteAccountModal({ open, onOpenChange }: DeleteAccountModalPro
                         disabled={deleteAccountMutation.isPending}
                         className="flex-1 min-w-0 h-10"
                     >
-                        취소
+                        {t("common.cancel")}
                     </AlertDialogCancel>
                     <AlertDialogAction
                         onClick={handleDeleteConfirm}
@@ -140,10 +141,10 @@ export function DeleteAccountModal({ open, onOpenChange }: DeleteAccountModalPro
                         {deleteAccountMutation.isPending ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                탈퇴 중...
+                                {t("delete-modal.pending")}
                             </>
                         ) : (
-                            '탈퇴하기'
+                            t("delete-modal.confirm")
                         )}
                     </AlertDialogAction>
                 </AlertDialogFooter>

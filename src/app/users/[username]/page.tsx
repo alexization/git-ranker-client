@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { getUser } from "@/features/user/api/user-service"
 import { UserProfileClient } from "./user-profile-client"
 
-// ISR: 1시간마다 페이지 재검증
+// ISR: revalidate every 1 hour
 export const revalidate = 3600
 
 interface Props {
@@ -22,8 +22,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     try {
         const user = await getUser(username)
 
-        const title = `${user.username} - ${user.tier} 티어 | ${user.totalScore.toLocaleString()}점`
-        const description = `${user.username}님의 개발자 전투력: ${user.tier} 티어, 총 ${user.totalScore.toLocaleString()}점, 상위 ${user.percentile.toFixed(2)}%. GitHub 활동 기반 개발자 랭킹을 확인하세요.`
+        const title = `${user.username} - ${user.tier} Tier | ${user.totalScore.toLocaleString()} points`
+        const description = `${user.username}'s developer impact: ${user.tier} tier, ${user.totalScore.toLocaleString()} points, top ${user.percentile.toFixed(2)}%. Check ranking based on GitHub activity.`
 
         // Use dynamic OG image route
         const ogImageUrl = `${BASE_URL}/users/${username}/opengraph-image`
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             description,
             openGraph: {
                 type: "profile",
-                locale: "ko_KR",
+                locale: "en_US",
                 url: `${BASE_URL}/users/${username}`,
                 title: `${user.username} | Git Ranker`,
                 description,
@@ -43,13 +43,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
                         url: ogImageUrl,
                         width: 1200,
                         height: 630,
-                        alt: `${user.username}의 Git Ranker 프로필 - ${user.tier} 티어`,
+                        alt: `${user.username}'s Git Ranker profile - ${user.tier} tier`,
                     },
                 ],
             },
             twitter: {
                 card: "summary_large_image",
-                title: `${user.username} - ${user.tier} 티어 | Git Ranker`,
+                title: `${user.username} - ${user.tier} Tier | Git Ranker`,
                 description,
                 images: [ogImageUrl],
             },
@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     } catch {
         return {
             title: `${decodedUsername} | Git Ranker`,
-            description: `${decodedUsername}님의 GitHub 활동 기반 개발자 전투력을 확인하세요.`,
+            description: `Check ${decodedUsername}'s developer impact based on GitHub activity.`,
             robots: {
                 index: false,
                 follow: true,

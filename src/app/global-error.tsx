@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import { AlertTriangle, Home, RefreshCcw } from "lucide-react"
+import { getCurrentLocale, translate } from "@/shared/i18n/translate"
 
 interface GlobalErrorProps {
   error: Error & { digest?: string }
@@ -9,6 +10,8 @@ interface GlobalErrorProps {
 }
 
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
+  const locale = getCurrentLocale()
+
   useEffect(() => {
     // Log error for debugging
     if (process.env.NODE_ENV === "development") {
@@ -29,7 +32,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   }, [error])
 
   return (
-    <html lang="ko">
+    <html lang={locale}>
       <body className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4">
         <div className="w-full max-w-lg">
           <div className="relative overflow-hidden rounded-3xl border-2 border-dashed border-red-200 dark:border-red-800/50 bg-white dark:bg-gray-900 p-10 text-center shadow-2xl">
@@ -40,11 +43,11 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
 
             {/* Text */}
             <h1 className="text-2xl font-bold mb-3 text-gray-900 dark:text-gray-100">
-              예상치 못한 오류가 발생했습니다
+              {translate("global-error.title")}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mb-2 text-[15px] leading-relaxed">
-              애플리케이션에 문제가 발생했습니다.<br />
-              새로고침하거나 메인 페이지로 이동해 주세요.
+              {translate("global-error.description.line1")}<br />
+              {translate("global-error.description.line2")}
             </p>
 
             {/* Error details (only in development) */}
@@ -68,14 +71,14 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 className="inline-flex items-center justify-center rounded-2xl h-12 px-6 font-medium border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-[0.98] transition-all"
               >
                 <RefreshCcw className="mr-2 h-4 w-4" />
-                다시 시도
+                {translate("common.retry")}
               </button>
               <a
                 href="/"
                 className="inline-flex items-center justify-center rounded-2xl h-12 px-6 font-medium bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.98] transition-all"
               >
                 <Home className="mr-2 h-4 w-4" />
-                메인으로 돌아가기
+                {translate("common.go-home")}
               </a>
             </div>
           </div>

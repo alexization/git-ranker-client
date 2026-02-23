@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next"
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: "Git Ranker - 개발자 전투력 측정",
+        name: "Git Ranker - Developer Impact Score",
         short_name: "Git Ranker",
-        description: "GitHub 활동 기반 개발자 전투력 측정 및 티어 랭킹 서비스",
+        description: "Developer impact and tier ranking service based on GitHub activity",
         start_url: "/",
         display: "standalone",
         background_color: "#09090b",
@@ -18,6 +18,6 @@ export default function manifest(): MetadataRoute.Manifest {
             },
         ],
         categories: ["developer-tools", "productivity"],
-        lang: "ko-KR",
+        lang: "en-US",
     }
 }

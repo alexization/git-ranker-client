@@ -6,6 +6,7 @@ import { Home, RefreshCcw, AlertTriangle } from "lucide-react"
 import { Button } from "@/shared/components/button"
 import { Card } from "@/shared/components/card"
 import Link from "next/link"
+import { useI18n } from "@/shared/providers/locale-provider"
 
 interface ErrorPageProps {
   error: Error & { digest?: string }
@@ -13,6 +14,8 @@ interface ErrorPageProps {
 }
 
 export default function ErrorPage({ error, reset }: ErrorPageProps) {
+  const { t } = useI18n()
+
   useEffect(() => {
     // Log error for debugging
     if (process.env.NODE_ENV === "development") {
@@ -58,11 +61,11 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
             transition={{ delay: 0.2, duration: 0.4 }}
           >
             <h1 className="text-2xl font-bold mb-3 text-foreground">
-              문제가 발생했습니다
+              {t("error-page.title")}
             </h1>
             <p className="text-muted-foreground mb-2 text-[15px] leading-relaxed">
-              페이지를 불러오는 중 오류가 발생했습니다.<br />
-              잠시 후 다시 시도해 주세요.
+              {t("error-page.description.line1")}<br />
+              {t("error-page.description.line2")}
             </p>
 
             {/* Error details (only in development) */}
@@ -93,7 +96,7 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
               className="rounded-2xl h-12 px-6 font-medium border-border hover:bg-accent/50 active:scale-[0.98] transition-all"
             >
               <RefreshCcw className="mr-2 h-4 w-4" />
-              다시 시도
+              {t("common.retry")}
             </Button>
             <Button
               asChild
@@ -101,7 +104,7 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
             >
               <Link href="/">
                 <Home className="mr-2 h-4 w-4" />
-                메인으로 돌아가기
+                {t("common.go-home")}
               </Link>
             </Button>
           </motion.div>

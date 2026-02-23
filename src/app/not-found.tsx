@@ -6,8 +6,10 @@ import { Home, Search, ArrowLeft } from "lucide-react"
 import { Button } from "@/shared/components/button"
 import { Card } from "@/shared/components/card"
 import Link from "next/link"
+import { useI18n } from "@/shared/providers/locale-provider"
 
 export default function NotFoundPage() {
+  const { t } = useI18n()
   const router = useRouter()
 
   const handleGoBack = () => {
@@ -56,11 +58,11 @@ export default function NotFoundPage() {
             transition={{ delay: 0.3, duration: 0.4 }}
           >
             <h1 className="text-2xl font-bold mb-3 text-foreground">
-              페이지를 찾을 수 없습니다
+              {t("not-found.title")}
             </h1>
             <p className="text-muted-foreground mb-8 text-[15px] leading-relaxed">
-              요청하신 페이지가 존재하지 않거나<br />
-              이동되었을 수 있습니다.
+              {t("not-found.description.line1")}<br />
+              {t("not-found.description.line2")}
             </p>
           </motion.div>
 
@@ -77,7 +79,7 @@ export default function NotFoundPage() {
               className="rounded-2xl h-12 px-6 font-medium border-border hover:bg-accent/50 active:scale-[0.98] transition-all"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              이전 페이지
+              {t("not-found.back")}
             </Button>
             <Button
               asChild
@@ -85,7 +87,7 @@ export default function NotFoundPage() {
             >
               <Link href="/">
                 <Home className="mr-2 h-4 w-4" />
-                메인으로 돌아가기
+                {t("common.go-home")}
               </Link>
             </Button>
           </motion.div>
