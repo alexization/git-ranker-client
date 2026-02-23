@@ -12,16 +12,18 @@ const PUBLIC_FILE = /\.[^/]+$/
 const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365
 
 function applySecurityHeaders(response: NextResponse, isDev: boolean): NextResponse {
+  const analyticsHosts = "https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com"
+
   const connectSrc = isDev
-    ? "'self' http://localhost:8080"
-    : "'self'"
+    ? `'self' http://localhost:8080 ${analyticsHosts}`
+    : `'self' ${analyticsHosts}`
 
   const cspDirectives = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
-    "img-src 'self' data: blob: https://avatars.githubusercontent.com https://github.com",
+    "img-src 'self' data: blob: https://avatars.githubusercontent.com https://github.com https://www.google-analytics.com",
     `connect-src ${connectSrc}`,
     "frame-ancestors 'none'",
     "base-uri 'self'",
