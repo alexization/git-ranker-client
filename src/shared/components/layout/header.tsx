@@ -8,6 +8,7 @@ import { useAuthStore, useAuthHydrated } from "@/features/auth/store/auth-store"
 import { useLogout } from "@/features/auth/api/auth-service"
 import { Button } from "@/shared/components/button"
 import { ThemeToggle } from "@/shared/components/theme-toggle"
+import { LanguageSwitcher } from "@/shared/components/language-switcher"
 import { GithubIcon } from "@/shared/components/icons/github-icon"
 import {
     DropdownMenu,
@@ -81,7 +82,7 @@ export function Header() {
                 </div>
 
                 {/* Right Actions */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5 sm:gap-3">
                     <Link
                         href="/ranking"
                         className="md:hidden p-2 text-muted-foreground hover:text-primary"
@@ -90,6 +91,7 @@ export function Header() {
                         <Flame className="h-5 w-5" />
                     </Link>
 
+                    <LanguageSwitcher />
                     <ThemeToggle />
 
                     {!hydrated ? (
