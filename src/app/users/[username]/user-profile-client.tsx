@@ -28,12 +28,14 @@ import { cn } from "@/shared/lib/utils"
 import { getErrorMessage } from "@/shared/lib/api-client"
 import { useEffect, useState } from "react"
 import { TIER_STYLES, getTierStyle } from "@/shared/constants/tier-styles"
+import { useI18n } from "@/shared/providers/locale-provider"
 
 interface UserProfileClientProps {
     username: string
 }
 
 export function UserProfileClient({ username }: UserProfileClientProps) {
+    const { t } = useI18n()
     const router = useRouter()
     const { data: user, isLoading, isError } = useUser(username)
     const refreshMutation = useRefreshUser()
@@ -55,23 +57,23 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
     const canRefresh = now > nextRefreshTime;
 
     const getTimeRemaining = () => {
-        if (canRefresh) return "지금 갱신 가능";
+        if (canRefresh) return t("profile.refresh.available-now");
         const diff = nextRefreshTime - now;
         const minutes = Math.floor(diff / 1000 / 60);
         const seconds = Math.floor((diff / 1000) % 60);
-        if (minutes < 0) return "잠시 후 가능";
-        return `${minutes}분 ${seconds}초 후 가능`;
+        if (minutes < 0) return t("profile.refresh.available-soon");
+        return t("profile.refresh.available-in", { minutes, seconds });
     }
 
     const handleRefresh = () => {
         if (!canRefresh) {
-            toast.error(`잠시 후 다시 시도해주세요. (${getTimeRemaining()})`);
+            toast.error(t("profile.refresh.retry-after", { time: getTimeRemaining() }));
             return;
         }
         toast.promise(refreshMutation.mutateAsync(username), {
-            loading: 'GitHub 데이터를 동기화 중입니다...',
-            success: '데이터가 갱신되었습니다!',
-            error: (err) => getErrorMessage(err, '데이터 갱신에 실패했습니다.'),
+            loading: t("profile.refresh.loading"),
+            success: t("profile.refresh.success"),
+            error: (err) => getErrorMessage(err, t("profile.refresh.error")),
         })
     }
 
@@ -79,7 +81,7 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
         const badgeUrl = `${process.env.NEXT_PUBLIC_API_URL || 'https://www.git-ranker.com'}/api/v1/badges/${user?.nodeId}`
         const markdown = `[![Git Ranker](${badgeUrl})](https://www.git-ranker.com)`
         navigator.clipboard.writeText(markdown)
-        toast.success("배지 마크다운이 복사되었습니다!")
+        toast.success(t("profile.badge.copied"))
     }
 
     const handleShare = async () => {
@@ -95,12 +97,12 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
                 // 사용자가 공유를 취소한 경우 무시
                 if ((err as Error).name !== 'AbortError') {
                     navigator.clipboard.writeText(shareUrl)
-                    toast.success("프로필 링크가 복사되었습니다!")
+                    toast.success(t("profile.share.copied"))
                 }
             }
         } else {
             navigator.clipboard.writeText(shareUrl)
-            toast.success("프로필 링크가 복사되었습니다!")
+            toast.success(t("profile.share.copied"))
         }
     }
 
@@ -180,11 +182,11 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
                             className="relative z-10"
                         >
                             <h2 className="text-xl font-bold mb-3 text-foreground">
-                                사용자를 찾을 수 없어요
+                                {t("profile.not-found.title")}
                             </h2>
                             <p className="text-muted-foreground text-[15px] leading-relaxed mb-8">
-                                GitHub 아이디를 다시 확인해 주세요.<br/>
-                                아직 등록하지 않으셨다면, 간단하게 등록해 보세요!
+                                {t("profile.not-found.description.line1")}<br/>
+                                {t("profile.not-found.description.line2")}
                             </p>
                         </motion.div>
 
@@ -199,14 +201,14 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
                                 className="w-full h-12 rounded-2xl font-semibold bg-[#24292F] hover:bg-[#24292F]/90 text-white dark:bg-white dark:text-[#24292F] dark:hover:bg-gray-100 shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200"
                             >
                                 <GithubIcon className="mr-2 h-5 w-5" />
-                                GitHub로 등록하기
+                                {t("profile.not-found.register")}
                             </Button>
                             <Button
                                 variant="ghost"
                                 onClick={() => router.push('/')}
                                 className="w-full h-11 rounded-2xl font-medium text-muted-foreground hover:text-foreground hover:bg-secondary active:scale-[0.98] transition-all duration-200"
                             >
-                                홈으로 돌아가기
+                                {t("profile.not-found.go-home")}
                             </Button>
                         </motion.div>
                     </Card>
@@ -223,7 +225,7 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
 
                 <div className="mb-6 lg:hidden">
                     <Button variant="ghost" size="sm" onClick={() => router.back()} className="gap-2 text-muted-foreground hover:text-foreground pl-0">
-                        <ArrowLeft className="h-4 w-4" /> 뒤로가기
+                        <ArrowLeft className="h-4 w-4" /> {t("profile.back")}
                     </Button>
                 </div>
 
@@ -250,7 +252,7 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
                                     )} />
                                     <OptimizedAvatar
                                         src={user.profileImage}
-                                        alt={`${user.username}의 프로필 이미지`}
+                                        alt={t("profile.avatar.alt", { username: user.username })}
                                         size={144}
                                         priority
                                         className={cn(
@@ -280,20 +282,20 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
                                         <button
                                             onClick={() => setScoreInfoOpen(true)}
                                             className="opacity-50 hover:opacity-100 transition-opacity"
-                                            aria-label="점수 산정 기준 보기"
+                                            aria-label={t("profile.score.info-aria")}
                                         >
                                             <HelpCircle className="w-3.5 h-3.5" />
                                         </button>
                                     </div>
                                     <div
                                         className={cn("text-5xl font-black font-mono tracking-tighter tabular-nums leading-tight", style.text)}
-                                        aria-label={`전체 점수: ${user.totalScore.toLocaleString()}점`}
+                                        aria-label={t("profile.score.aria", { score: user.totalScore.toLocaleString() })}
                                     >
                                         {user.totalScore.toLocaleString()}
                                     </div>
                                     <div className="text-sm font-medium pt-1 flex justify-center gap-2">
-                                        <span className="text-muted-foreground">상위</span>
-                                        <span className="text-foreground font-bold" aria-label={`상위 ${displayPercentile.toFixed(2)} 퍼센트`}>
+                                        <span className="text-muted-foreground">{t("profile.percentile.label")}</span>
+                                        <span className="text-foreground font-bold" aria-label={t("profile.percentile.aria", { percent: displayPercentile.toFixed(2) })}>
                                             {displayPercentile.toFixed(2)}%
                                         </span>
                                     </div>
@@ -305,11 +307,11 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
                                         className="w-full h-12 rounded-2xl text-[15px] font-bold bg-[#191919] hover:bg-black text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 shadow-md active:scale-[0.98] transition-transform"
                                     >
                                         <Share2 className="mr-2 h-4 w-4" />
-                                        프로필 공유
+                                        {t("profile.share.button")}
                                     </Button>
                                     <div className="grid grid-cols-2 gap-3">
                                         <Button onClick={handleCopyBadge} variant="secondary" className="h-11 rounded-2xl font-semibold bg-secondary/80 hover:bg-secondary active:scale-[0.98]">
-                                            <Copy className="mr-2 h-4 w-4" /> 배지 복사
+                                            <Copy className="mr-2 h-4 w-4" /> {t("profile.badge.copy-button")}
                                         </Button>
                                         <Button asChild variant="secondary" className="h-11 rounded-2xl font-semibold bg-secondary/80 hover:bg-secondary active:scale-[0.98]">
                                             <a href={`https://github.com/${user.username}`} target="_blank" rel="noreferrer">
@@ -345,7 +347,7 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
                                                 "font-semibold transition-colors",
                                                 canRefresh ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"
                                             )}>
-                                                {refreshMutation.isPending ? "동기화 중..." : "최신 데이터 불러오기"}
+                                                {refreshMutation.isPending ? t("profile.refresh.pending") : t("profile.refresh.button")}
                                             </span>
                                         </div>
                                         <span className={cn(
@@ -356,9 +358,9 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
                                                 <>
                                                     <span className="relative flex h-1.5 w-1.5">
                                                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                                                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                                                     </span>
-                                                    지금 갱신 가능
+                                                    {t("profile.refresh.available-now")}
                                                 </>
                                             ) : (
                                                 getTimeRemaining()
@@ -380,7 +382,7 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
                                         Stats Radar
                                     </CardTitle>
                                     <CardDescription className="text-[10px] sm:text-xs font-medium mt-1 ml-6 sm:ml-7">
-                                        활동 유형별 기여도 분포
+                                        {t("profile.chart.subtitle")}
                                     </CardDescription>
                                 </div>
                                 <div className="w-full h-[360px] sm:h-[420px]">

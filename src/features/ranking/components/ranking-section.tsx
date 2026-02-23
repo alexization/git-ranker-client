@@ -15,6 +15,7 @@ import { validatePageNumber } from "@/shared/lib/validations"
 import { UserDetailModal } from "@/features/user/components/user-detail-modal"
 import { Card } from "@/shared/components/card"
 import { TIER_ORDER, getTierColorClass, getTierDotColor } from "@/shared/constants/tier-styles"
+import { useI18n } from "@/shared/providers/locale-provider"
 
 const tiers = TIER_ORDER
 
@@ -34,9 +35,11 @@ interface RankingItemProps {
   user: RankingUserInfo
   onUserClick: (username: string) => void
   onPrefetch: (username: string) => void
+  getItemAriaLabel: (user: RankingUserInfo) => string
+  getAvatarAlt: (username: string) => string
 }
 
-const MobileRankingCard = memo(function MobileRankingCard({ user, onUserClick, onPrefetch }: RankingItemProps) {
+const MobileRankingCard = memo(function MobileRankingCard({ user, onUserClick, onPrefetch, getItemAriaLabel, getAvatarAlt }: RankingItemProps) {
   return (
     <motion.div
       onClick={() => onUserClick(user.username)}
@@ -50,7 +53,7 @@ const MobileRankingCard = memo(function MobileRankingCard({ user, onUserClick, o
       transition={{ duration: 0.2 }}
       role="listitem"
       tabIndex={0}
-      aria-label={`${user.username}, ${user.tier} 티어, ${user.totalScore.toLocaleString()}점, ${user.ranking}위`}
+      aria-label={getItemAriaLabel(user)}
     >
       <Card className="flex items-center px-3 py-3 gap-3 cursor-pointer transition-all duration-200 border-none bg-secondary/10 hover:bg-secondary/20">
         <div className="flex-shrink-0 w-8 flex items-center justify-center">
@@ -60,7 +63,7 @@ const MobileRankingCard = memo(function MobileRankingCard({ user, onUserClick, o
         </div>
         <div className="relative flex-shrink-0">
           <Avatar className="h-10 w-10 border border-border">
-            <AvatarImage src={user.profileImage} alt={`${user.username}의 프로필 이미지`} />
+            <AvatarImage src={user.profileImage} alt={getAvatarAlt(user.username)} />
             <AvatarFallback className="text-sm">{user.username[0].toUpperCase()}</AvatarFallback>
           </Avatar>
           <motion.div
@@ -84,7 +87,7 @@ const MobileRankingCard = memo(function MobileRankingCard({ user, onUserClick, o
 })
 
 // ✅ Memoized Desktop Ranking Row - with enhanced micro-interactions
-const DesktopRankingRow = memo(function DesktopRankingRow({ user, onUserClick, onPrefetch }: RankingItemProps) {
+const DesktopRankingRow = memo(function DesktopRankingRow({ user, onUserClick, onPrefetch, getItemAriaLabel, getAvatarAlt }: RankingItemProps) {
   return (
     <motion.tr
       className="border-b cursor-pointer group ranking-row"
@@ -102,7 +105,7 @@ const DesktopRankingRow = memo(function DesktopRankingRow({ user, onUserClick, o
       whileTap={{ scale: 0.995 }}
       transition={{ duration: 0.2 }}
       tabIndex={0}
-      aria-label={`${user.username}, ${user.tier} 티어, ${user.totalScore.toLocaleString()}점, ${user.ranking}위`}
+      aria-label={getItemAriaLabel(user)}
     >
       <td className="p-4 text-center">
         <div className="flex justify-center items-center">
@@ -113,7 +116,7 @@ const DesktopRankingRow = memo(function DesktopRankingRow({ user, onUserClick, o
         <div className="flex items-center gap-4">
           <motion.div whileHover={{ scale: 1.1 }} transition={{ type: "spring", stiffness: 400 }}>
             <Avatar className="h-10 w-10 border-2 border-background group-hover:border-primary/20 transition-colors duration-150">
-              <AvatarImage src={user.profileImage} alt={`${user.username}의 프로필 이미지`} />
+              <AvatarImage src={user.profileImage} alt={getAvatarAlt(user.username)} />
               <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
             </Avatar>
           </motion.div>
@@ -140,6 +143,7 @@ const DesktopRankingRow = memo(function DesktopRankingRow({ user, onUserClick, o
 })
 
 export function RankingSection() {
+  const { t } = useI18n()
   const [page, setPage] = useState(0)
   const [pageInput, setPageInput] = useState("")
   const [selectedTier, setSelectedTier] = useState<Tier | 'ALL'>('ALL')
@@ -209,11 +213,22 @@ export function RankingSection() {
     }
   }
 
+  const getItemAriaLabel = useCallback((item: RankingUserInfo) => {
+    return t("ranking.item.aria", {
+      username: item.username,
+      tier: item.tier,
+      score: item.totalScore.toLocaleString(),
+      rank: item.ranking,
+    })
+  }, [t])
+
+  const getAvatarAlt = useCallback((name: string) => t("ranking.avatar.alt", { username: name }), [t])
+
   if (isError) {
     return (
         <section className="container py-12 text-center text-muted-foreground">
-          <p>랭킹 데이터를 불러오는데 실패했습니다.</p>
-          <Button onClick={() => window.location.reload()} variant="link">새로고침</Button>
+          <p>{t("ranking.error.load")}</p>
+          <Button onClick={() => window.location.reload()} variant="link">{t("common.refresh")}</Button>
         </section>
     )
   }
@@ -229,9 +244,9 @@ export function RankingSection() {
           >
             <h2 className="text-4xl font-extrabold flex items-center justify-center gap-3 mb-2">
               <Flame className="h-8 w-8 text-orange-500" />
-              Global Ranking
+              {t("ranking.section.title")}
             </h2>
-            <p className="text-muted-foreground">전체 개발자들의 실시간 순위입니다.</p>
+            <p className="text-muted-foreground">{t("ranking.section.subtitle")}</p>
           </motion.div>
         </div>
 
@@ -240,7 +255,7 @@ export function RankingSection() {
           <div
               className="inline-flex gap-2 rounded-2xl bg-secondary/30 p-1.5 backdrop-blur-sm border border-white/10"
               role="tablist"
-              aria-label="티어별 필터"
+              aria-label={t("ranking.filter.aria")}
           >
             <button
                 onClick={() => handleTierChange('ALL')}
@@ -280,24 +295,24 @@ export function RankingSection() {
         {totalPages > 1 && !isLoading && rankings.length > 0 && (
           <div className="flex items-center justify-between mb-4 px-1">
             <p className="text-sm text-muted-foreground">
-              총 <span className="font-semibold text-foreground">{pageInfo?.totalElements?.toLocaleString() || 0}</span>명
+              {t("ranking.page.total")} <span className="font-semibold text-foreground">{pageInfo?.totalElements?.toLocaleString() || 0}</span>{t("ranking.page.users")}
             </p>
             <p className="text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">{page + 1}</span> / {totalPages} 페이지
+              <span className="font-semibold text-foreground">{page + 1}</span> / {totalPages} {t("ranking.page.unit")}
             </p>
           </div>
         )}
 
-        <div className="w-full" ref={listRef} id="ranking-list" role="tabpanel" aria-label="랭킹 목록">
+        <div className="w-full" ref={listRef} id="ranking-list" role="tabpanel" aria-label={t("ranking.list.aria")}>
           {/* Mobile View: Card List - Optimized for narrow screens */}
-          <div className="md:hidden space-y-2" role="list" aria-label="랭킹 목록 (모바일)">
+          <div className="md:hidden space-y-2" role="list" aria-label={t("ranking.list.mobile-aria")}>
             {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                     <Skeleton key={i} className="h-[72px] w-full rounded-2xl" />
                 ))
             ) : rankings.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground bg-secondary/20 rounded-3xl">
-                  랭킹 데이터가 없습니다.
+                  {t("ranking.empty")}
                 </div>
             ) : (
                 rankings.map((user) => (
@@ -306,6 +321,8 @@ export function RankingSection() {
                         user={user}
                         onUserClick={handleUserClick}
                         onPrefetch={prefetchUser}
+                        getItemAriaLabel={getItemAriaLabel}
+                        getAvatarAlt={getAvatarAlt}
                     />
                 ))
             )}
@@ -314,13 +331,13 @@ export function RankingSection() {
           {/* Desktop View: Table */}
           <div className="hidden md:block rounded-3xl border bg-card/80 backdrop-blur-sm shadow-sm overflow-hidden">
             <div className="relative w-full overflow-auto">
-              <table className="w-full caption-bottom text-sm" aria-label="개발자 랭킹 테이블">
+              <table className="w-full caption-bottom text-sm" aria-label={t("ranking.table.aria")}>
                 <thead>
                 <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                  <th className="h-14 px-6 text-center align-middle font-semibold text-muted-foreground w-[100px]">Rank</th>
-                  <th className="h-14 px-6 text-left align-middle font-semibold text-muted-foreground">User</th>
-                  <th className="h-14 px-6 text-center align-middle font-semibold text-muted-foreground w-[150px]">Tier</th>
-                  <th className="h-14 px-6 text-right align-middle font-semibold text-muted-foreground w-[150px]">Total Score</th>
+                  <th className="h-14 px-6 text-center align-middle font-semibold text-muted-foreground w-[100px]">{t("ranking.table.rank")}</th>
+                  <th className="h-14 px-6 text-left align-middle font-semibold text-muted-foreground">{t("ranking.table.user")}</th>
+                  <th className="h-14 px-6 text-center align-middle font-semibold text-muted-foreground w-[150px]">{t("ranking.table.tier")}</th>
+                  <th className="h-14 px-6 text-right align-middle font-semibold text-muted-foreground w-[150px]">{t("ranking.table.score")}</th>
                 </tr>
                 </thead>
                 <tbody className="[&_tr:last-child]:border-0">
@@ -339,7 +356,7 @@ export function RankingSection() {
                 ) : rankings.length === 0 ? (
                     <tr>
                       <td colSpan={4} className="h-40 text-center text-muted-foreground text-lg">
-                        랭킹 데이터가 없습니다.
+                        {t("ranking.empty")}
                       </td>
                     </tr>
                 ) : (
@@ -349,6 +366,8 @@ export function RankingSection() {
                             user={user}
                             onUserClick={handleUserClick}
                             onPrefetch={prefetchUser}
+                            getItemAriaLabel={getItemAriaLabel}
+                            getAvatarAlt={getAvatarAlt}
                         />
                     ))
                 )}
@@ -369,7 +388,7 @@ export function RankingSection() {
                   onClick={() => handlePageChange(0)}
                   disabled={page === 0 || isLoading}
                   className="rounded-xl w-9 h-9 text-muted-foreground hover:text-foreground disabled:opacity-30"
-                  title="첫 페이지"
+                  title={t("ranking.pagination.first")}
               >
                 <ChevronsLeft className="h-4 w-4" />
               </Button>
@@ -419,7 +438,7 @@ export function RankingSection() {
                   onClick={() => handlePageChange(totalPages - 1)}
                   disabled={page >= totalPages - 1 || isLoading}
                   className="rounded-xl w-9 h-9 text-muted-foreground hover:text-foreground disabled:opacity-30"
-                  title="마지막 페이지"
+                  title={t("ranking.pagination.last")}
               >
                 <ChevronsRight className="h-4 w-4" />
               </Button>

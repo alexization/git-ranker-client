@@ -10,8 +10,10 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/shared/components/avatar"
 import { Button } from "@/shared/components/button"
 import { Card } from "@/shared/components/card"
 import { Skeleton } from "@/shared/components/skeleton"
+import { useI18n } from "@/shared/providers/locale-provider"
 
 export default function SettingsPage() {
+    const { t } = useI18n()
     const router = useRouter()
     const { user, isAuthenticated } = useAuthStore()
     const hydrated = useAuthHydrated()
@@ -60,7 +62,7 @@ export default function SettingsPage() {
                         className="gap-2 text-muted-foreground hover:text-foreground pl-0 -ml-1"
                     >
                         <ArrowLeft className="h-4 w-4" />
-                        뒤로가기
+                        {t("settings.back")}
                     </Button>
                 </motion.div>
 
@@ -71,7 +73,7 @@ export default function SettingsPage() {
                     transition={{ duration: 0.4, delay: 0.1 }}
                     className="text-2xl font-bold text-foreground mb-8"
                 >
-                    설정
+                    {t("settings.title")}
                 </motion.h1>
 
                 {/* Account section */}
@@ -83,7 +85,7 @@ export default function SettingsPage() {
                 >
                     <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
                         <User className="h-4 w-4" />
-                        계정
+                        {t("settings.account.section")}
                     </h2>
                     <Card className="p-0 overflow-hidden hover:bg-white/60 dark:hover:bg-black/20">
                         <div className="p-5">
@@ -99,7 +101,7 @@ export default function SettingsPage() {
                                         {user.username}
                                     </p>
                                     <p className="text-[14px] text-muted-foreground truncate mt-0.5">
-                                        {user.email || 'GitHub 계정으로 로그인됨'}
+                                        {user.email || t("settings.account.logged-in-with-github")}
                                     </p>
                                 </div>
                             </div>
@@ -115,7 +117,7 @@ export default function SettingsPage() {
                 >
                     <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
                         <Shield className="h-4 w-4" />
-                        계정 관리
+                        {t("settings.manage.section")}
                     </h2>
                     <Card className="p-0 overflow-hidden border-red-200/50 dark:border-red-800/30 hover:border-red-300 dark:hover:border-red-700/50 transition-colors">
                         <button
@@ -127,10 +129,10 @@ export default function SettingsPage() {
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-[16px] font-semibold text-foreground group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
-                                    탈퇴하기
+                                    {t("settings.delete.title")}
                                 </p>
                                 <p className="text-[13px] text-muted-foreground mt-0.5">
-                                    계정과 모든 데이터가 영구적으로 삭제됩니다
+                                    {t("settings.delete.desc")}
                                 </p>
                             </div>
                             <ChevronRight className="h-5 w-5 text-muted-foreground/50 group-hover:text-red-400 group-hover:translate-x-0.5 transition-all" />
