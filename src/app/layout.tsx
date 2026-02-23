@@ -1,6 +1,7 @@
 import type {Metadata, Viewport} from "next";
 import localFont from "next/font/local";
 import { JetBrains_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import QueryProvider from "@/shared/providers/query-provider";
 import { ThemeProvider } from "@/shared/providers/theme-provider";
@@ -105,6 +106,18 @@ export default async function RootLayout({
             <link rel="preconnect" href="https://avatars.githubusercontent.com" />
             <link rel="dns-prefetch" href="https://avatars.githubusercontent.com" />
             <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+            <Script
+                src="https://www.googletagmanager.com/gtag/js?id=G-QKZNEY525E"
+                strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+                {`
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', 'G-QKZNEY525E');
+                `}
+            </Script>
         </head>
         <body
             className={cn(
