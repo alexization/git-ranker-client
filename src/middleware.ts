@@ -57,6 +57,19 @@ function resolveRequestLocale(request: NextRequest) {
     return normalizeLocale(localeFromCookie)
   }
 
+  const referer = request.headers.get("referer")
+  if (referer) {
+    try {
+      const refererPathname = new URL(referer).pathname
+      const localeFromRefererPath = getLocaleFromPathname(refererPathname)
+      if (localeFromRefererPath) {
+        return localeFromRefererPath
+      }
+    } catch {
+      // ignore invalid referer
+    }
+  }
+
   const localeFromHeader = request.headers.get("accept-language")
   return normalizeLocale(localeFromHeader)
 }

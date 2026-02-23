@@ -76,6 +76,8 @@ export const enMessages = {
   "ranking.pagination.last": "Last page",
   "ranking.item.aria": "{username}, {tier} tier, {score} points, rank {rank}",
   "ranking.avatar.alt": "{username} profile image",
+  "ranking.modal.view-report": "View detailed report",
+  "ranking.modal.visit-github": "Visit GitHub",
   "profile.refresh.available-now": "Available now",
   "profile.refresh.available-soon": "Available soon",
   "profile.refresh.available-in": "Available in {minutes}m {seconds}s",

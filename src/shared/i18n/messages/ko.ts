@@ -77,6 +77,8 @@ export const koMessages: Record<MessageKey, string> = {
   "ranking.pagination.last": "마지막 페이지",
   "ranking.item.aria": "{username}, {tier} 티어, {score}점, {rank}위",
   "ranking.avatar.alt": "{username}의 프로필 이미지",
+  "ranking.modal.view-report": "상세 리포트 보기",
+  "ranking.modal.visit-github": "GitHub 방문",
   "profile.refresh.available-now": "지금 갱신 가능",
   "profile.refresh.available-soon": "잠시 후 가능",
   "profile.refresh.available-in": "{minutes}분 {seconds}초 후 가능",

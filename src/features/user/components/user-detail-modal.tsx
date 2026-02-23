@@ -14,6 +14,7 @@ import { ActivityGrid } from "./activity-grid"
 import { GithubIcon } from "@/shared/components/icons/github-icon"
 import { getTierTextColor } from "@/shared/constants/tier-styles"
 import { useIsMobile } from "@/shared/hooks/use-media-query"
+import { useI18n } from "@/shared/providers/locale-provider"
 
 interface UserDetailModalProps {
   username: string | null
@@ -22,6 +23,7 @@ interface UserDetailModalProps {
 }
 
 export function UserDetailModal({ username, open, onOpenChange }: UserDetailModalProps) {
+  const { t } = useI18n()
   const { data: user, isLoading, isError } = useUser(username || "", { enabled: !!username && open })
   const isMobile = useIsMobile()
 
@@ -142,7 +144,7 @@ export function UserDetailModal({ username, open, onOpenChange }: UserDetailModa
                     >
                       <Link href={`/users/${user.username}`}>
                         <ExternalLink className="w-4 h-4 mr-2" />
-                        상세 리포트 보기
+                        {t("ranking.modal.view-report")}
                       </Link>
                     </Button>
                     <Button
@@ -152,7 +154,7 @@ export function UserDetailModal({ username, open, onOpenChange }: UserDetailModa
                     >
                       <a href={`https://github.com/${user.username}`} target="_blank" rel="noreferrer">
                         <GithubIcon className="w-4 h-4 mr-2" />
-                        GitHub 방문
+                        {t("ranking.modal.visit-github")}
                       </a>
                     </Button>
                   </div>
