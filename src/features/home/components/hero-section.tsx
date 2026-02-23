@@ -16,9 +16,10 @@ import { useReducedMotion } from "@/shared/hooks/use-reduced-motion"
 import { LiveTicker } from "@/shared/components/ui/live-ticker"
 import { toast } from "sonner"
 import { useI18n } from "@/shared/providers/locale-provider"
+import { localizePathname } from "@/shared/i18n/config"
 
 export function HeroSection() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const router = useRouter()
   const { recentSearches, addSearch, removeSearch } = useSearchStore()
   const [open, setOpen] = useState(false)
@@ -86,8 +87,8 @@ export function HeroSection() {
     setQuery("")
     setSelectedIndex(-1)
     inputRef.current?.blur()
-    router.push(`/users/${trimmedUsername}`)
-  }, [addSearch, router])
+    router.push(localizePathname(`/users/${trimmedUsername}`, locale))
+  }, [addSearch, locale, router, t])
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (!open) {
@@ -279,7 +280,7 @@ export function HeroSection() {
             <a href="https://github.com/alexization/git-ranker" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
               <BookOpen className="h-4 w-4" /> {t("home.links.guide")}
             </a>
-            <a href="/ranking" className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors">
+            <a href={localizePathname("/ranking", locale)} className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors">
               <TrendingUp className="h-4 w-4" /> {t("home.links.ranking")}
             </a>
           </motion.div>

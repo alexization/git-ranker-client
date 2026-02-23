@@ -6,6 +6,8 @@ import { Button } from "@/shared/components/button"
 import { Check, Copy, Link2, Code2, ExternalLink } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/shared/lib/utils"
+import { useI18n } from "@/shared/providers/locale-provider"
+import { localizePathname } from "@/shared/i18n/config"
 
 interface BadgeGeneratorProps {
     nodeId: string
@@ -15,10 +17,12 @@ interface BadgeGeneratorProps {
 type CopyType = "markdown" | "html" | "link" | null
 
 export function BadgeGenerator({ nodeId, username }: BadgeGeneratorProps) {
+    const { t, locale } = useI18n()
     const [copied, setCopied] = useState<CopyType>(null)
 
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://www.git-ranker.com"
     const badgeUrl = `${process.env.NEXT_PUBLIC_API_URL || 'https://www.git-ranker.com'}/api/v1/badges/${nodeId}`
-    const profileUrl = `https://www.git-ranker.com/users/${username}`
+    const profileUrl = `${baseUrl}${localizePathname(`/users/${username}`, locale)}`
 
     const markdownCode = `[![Git Ranker](${badgeUrl})](${profileUrl})`
     const htmlCode = `<a href="${profileUrl}"><img src="${badgeUrl}" alt="Git Ranker Badge" /></a>`
@@ -27,9 +31,9 @@ export function BadgeGenerator({ nodeId, username }: BadgeGeneratorProps) {
         await navigator.clipboard.writeText(text)
         setCopied(type)
         toast.success(
-            type === "markdown" ? "마크다운이 복사되었습니다!" :
-            type === "html" ? "HTML이 복사되었습니다!" :
-            "링크가 복사되었습니다!"
+            type === "markdown" ? t("profile.badge.copied.markdown") :
+            type === "html" ? t("profile.badge.copied.html") :
+            t("profile.badge.copied.link")
         )
         setTimeout(() => setCopied(null), 2000)
     }
@@ -70,10 +74,10 @@ export function BadgeGenerator({ nodeId, username }: BadgeGeneratorProps) {
                     <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5">
                         <Code2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     </div>
-                    README 배지
+                    {t("profile.badge.section.title")}
                 </CardTitle>
                 <CardDescription className="text-xs sm:text-sm mt-1.5 ml-11">
-                    GitHub 프로필에 나만의 배지를 추가해보세요
+                    {t("profile.badge.section.description")}
                 </CardDescription>
             </CardHeader>
 
@@ -91,7 +95,7 @@ export function BadgeGenerator({ nodeId, username }: BadgeGeneratorProps) {
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={badgeUrl}
-                                alt="Git Ranker Badge"
+                                alt={t("profile.badge.alt")}
                                 className="max-w-full h-auto object-contain"
                             />
                         </a>
@@ -116,7 +120,7 @@ export function BadgeGenerator({ nodeId, username }: BadgeGeneratorProps) {
                         type="link"
                         text={badgeUrl}
                         icon={Link2}
-                        label="이미지 링크"
+                        label={t("profile.badge.image-link")}
                     />
                     <Button
                         asChild
@@ -125,7 +129,7 @@ export function BadgeGenerator({ nodeId, username }: BadgeGeneratorProps) {
                     >
                         <a href={badgeUrl} target="_blank" rel="noreferrer">
                             <ExternalLink className="w-4 h-4 mr-2" />
-                            미리보기
+                            {t("profile.badge.preview")}
                         </a>
                     </Button>
                 </div>
@@ -133,8 +137,8 @@ export function BadgeGenerator({ nodeId, username }: BadgeGeneratorProps) {
                 {/* Usage Hint */}
                 <div className="p-3 sm:p-4 rounded-xl bg-amber-500/5 border border-amber-500/10">
                     <p className="text-xs sm:text-sm text-amber-700 dark:text-amber-400/90 leading-relaxed">
-                        <span className="font-semibold">💡 Tip:</span>{" "}
-                        GitHub 프로필 README.md 파일에 마크다운 코드를 붙여넣으세요!
+                        <span className="font-semibold">{t("profile.badge.tip.label")}</span>{" "}
+                        {t("profile.badge.tip.description")}
                     </p>
                 </div>
             </CardContent>

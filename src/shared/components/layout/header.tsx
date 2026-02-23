@@ -30,18 +30,22 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/avatar"
 import { useState } from "react"
 import { cn } from "@/shared/lib/utils"
 import { useI18n } from "@/shared/providers/locale-provider"
+import { localizePathname } from "@/shared/i18n/config"
 
 export function Header() {
-    const { t } = useI18n()
+    const { t, locale } = useI18n()
     const { user, isAuthenticated } = useAuthStore()
     const hydrated = useAuthHydrated()
     const logoutMutation = useLogout()
     const router = useRouter()
     const [showLogoutDialog, setShowLogoutDialog] = useState(false)
     const pathname = usePathname()
+    const homePath = localizePathname("/", locale)
+    const rankingPath = localizePathname("/ranking", locale)
+    const loginPath = localizePathname("/login", locale)
 
     const handleLogin = () => {
-        window.location.href = '/login'
+        window.location.href = loginPath
     }
 
     const handleLogoutClick = () => {
@@ -51,7 +55,7 @@ export function Header() {
     const handleLogoutConfirm = async () => {
         await logoutMutation.mutateAsync()
         setShowLogoutDialog(false)
-        router.push('/')
+        router.push(homePath)
     }
 
     return (
@@ -60,7 +64,7 @@ export function Header() {
 
                 {/* Left Side: Logo & Navigation */}
                 <div className="flex items-center gap-8">
-                    <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+                    <Link href={homePath} className="flex items-center gap-2 transition-opacity hover:opacity-80">
                         <GithubIcon className="h-6 w-6 text-foreground" />
                         <span className="text-base font-bold tracking-tight text-foreground">
               Git Ranker
@@ -69,7 +73,7 @@ export function Header() {
 
                     <nav className="hidden md:flex items-center gap-6">
                         <Link
-                            href="/ranking"
+                            href={rankingPath}
                             className={cn(
                                 "text-sm font-medium transition-colors hover:text-primary flex items-center gap-1.5",
                                 pathname.endsWith("/ranking") ? "text-foreground" : "text-muted-foreground"
@@ -84,7 +88,7 @@ export function Header() {
                 {/* Right Actions */}
                 <div className="flex items-center gap-1.5 sm:gap-3">
                     <Link
-                        href="/ranking"
+                        href={rankingPath}
                         className="md:hidden p-2 text-muted-foreground hover:text-primary"
                         aria-label={t("header.ranking.aria")}
                     >
@@ -134,7 +138,7 @@ export function Header() {
                                 {/* Menu Items */}
                                 <div className="p-2 space-y-1">
                                     <DropdownMenuItem asChild className="rounded-xl h-11 px-3 cursor-pointer transition-colors duration-150">
-                                        <Link href={`/users/${user.username}`} className="flex items-center gap-3">
+                                        <Link href={localizePathname(`/users/${user.username}`, locale)} className="flex items-center gap-3">
                                             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
                                                 <User className="h-4 w-4 text-primary" />
                                             </div>
@@ -142,7 +146,7 @@ export function Header() {
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild className="rounded-xl h-11 px-3 cursor-pointer transition-colors duration-150">
-                                        <Link href="/settings" className="flex items-center gap-3">
+                                        <Link href={localizePathname("/settings", locale)} className="flex items-center gap-3">
                                             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted">
                                                 <Settings className="h-4 w-4 text-muted-foreground" />
                                             </div>
