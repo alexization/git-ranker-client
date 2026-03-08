@@ -1,0 +1,98 @@
+name: "🐞 Frontend Bug Report"
+description: 화면, 사용자 플로우, 브라우저 동작, API 연동 문제를 제보합니다.
+title: "[Bug] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        프론트엔드 버그는 "어느 화면에서 어떤 행동을 했을 때 무엇이 보였는지"가 핵심입니다.
+        가능하면 스크린샷, 영상, 콘솔 에러, 실패한 네트워크 요청을 함께 남겨 주세요.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 문제 요약
+      placeholder: 사용자 프로필 페이지에서 배지 카드가 간헐적으로 비어 보입니다.
+    validations:
+      required: true
+
+  - type: input
+    id: route
+    attributes:
+      label: 발생 위치
+      description: 라우트, 화면, 컴포넌트 이름을 적어 주세요.
+      placeholder: "/users/[username], UserBadgeSection"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 재현 절차
+      placeholder: |
+        1. `/users/alexization` 방문
+        2. 새로고침
+        3. 배지 영역이 skeleton 이후 비어 있음
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: 기대 동작
+      placeholder: 배지 카드가 사용자 데이터와 함께 표시되어야 합니다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual_behavior
+    attributes:
+      label: 실제 동작
+      placeholder: 카드 컨테이너는 렌더링되지만 내부 데이터가 비어 있습니다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 스크린샷 / 영상 / 콘솔 / 네트워크 증거
+      placeholder: |
+        - screenshot:
+        - console error:
+        - failed request:
+        - response payload:
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 브라우저 및 환경
+      placeholder: |
+        - Browser:
+        - Device/Viewport:
+        - Environment:
+        - Branch or commit:
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 수정 후 확인해야 할 조건
+      placeholder: |
+        - [ ] 동일 경로에서 정상 렌더링된다.
+        - [ ] 콘솔 에러가 발생하지 않는다.
+        - [ ] 실패한 네트워크 요청이 없다.
+    validations:
+      required: true
+
+  - type: input
+    id: related_backend_issue
+    attributes:
+      label: 연관된 백엔드 이슈 또는 PR (선택)
+      placeholder: "alexization/git-ranker#123"
+    validations:
+      required: false
+
