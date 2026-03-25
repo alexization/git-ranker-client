@@ -1,58 +1,47 @@
 import { MetadataRoute } from "next"
+import type { ApiResponse, RankingListResponse, RankingUserInfo } from "@/shared/types/api"
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.git-ranker.com"
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://www.git-ranker.com"
 const SEO_LOCALES = ["en", "ko"] as const
 
-interface RankingUser {
-    username: string
-    tier: string
-    totalScore: number
-    profileImage: string
-}
+async function getRankingPage(page: number): Promise<RankingListResponse | null> {
+    const response = await fetch(`${API_URL}/api/v1/ranking?page=${page}&size=20`, {
+        next: { revalidate: 3600 },
+        headers: {
+            Accept: "application/json",
+        },
+    })
 
-interface ApiResponse {
-    rankings?: RankingUser[]
-    pageInfo?: {
-        totalPages: number
-        totalElements: number
+    if (!response.ok) {
+        return null
     }
+
+    const payload = await response.json() as ApiResponse<RankingListResponse>
+    if (payload.result !== "SUCCESS" || !payload.data) {
+        return null
+    }
+
+    return payload.data
 }
 
-async function getTopUsers(): Promise<RankingUser[]> {
+async function getTopUsers(): Promise<RankingUserInfo[]> {
     try {
         // First, get the first page to understand total pages
-        const firstPageResponse = await fetch(`${API_URL}/api/v1/ranking?page=0&size=20`, {
-            next: { revalidate: 3600 },
-            headers: {
-                'Accept': 'application/json',
-            }
-        })
-
-        if (!firstPageResponse.ok) {
+        const firstPageData = await getRankingPage(0)
+        if (!firstPageData) {
             return []
         }
 
-        const firstPageData: ApiResponse = await firstPageResponse.json()
-        const totalPages = Math.min(firstPageData.pageInfo?.totalPages || 1, 25) // Max 25 pages = 500 users
+        const totalPages = Math.min(firstPageData.pageInfo.totalPages || 1, 25) // Max 25 pages = 500 users
 
         // Fetch up to 500 users (25 pages x 20 users per page)
         const pages = Array.from({ length: totalPages }, (_, i) => i)
-        const responses = await Promise.all(
-            pages.map(page =>
-                fetch(`${API_URL}/api/v1/ranking?page=${page}&size=20`, {
-                    next: { revalidate: 3600 },
-                    headers: {
-                        'Accept': 'application/json',
-                    }
-                }).then(res => res.ok ? res.json() as Promise<ApiResponse> : null)
-                  .catch(() => null)
-            )
-        )
+        const responses = await Promise.all(pages.map((page) => getRankingPage(page).catch(() => null)))
 
-        const users: RankingUser[] = []
+        const users: RankingUserInfo[] = []
         for (const response of responses) {
-            if (response?.rankings) {
+            if (response) {
                 users.push(...response.rankings)
             }
         }

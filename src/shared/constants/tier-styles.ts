@@ -1,4 +1,4 @@
-import { Tier } from "@/shared/types/api"
+import { Tier, TIER_VALUES } from "@/shared/types/api"
 
 /**
  * Comprehensive tier styling system
@@ -147,10 +147,7 @@ export const TIER_TEXT_COLORS: Record<Tier | string, string> = {
 } as const
 
 // Ordered tier list (highest to lowest)
-export const TIER_ORDER: Tier[] = [
-    'CHALLENGER', 'MASTER', 'DIAMOND', 'EMERALD',
-    'PLATINUM', 'GOLD', 'SILVER', 'BRONZE', 'IRON'
-] as const
+export const TIER_ORDER: Tier[] = [...TIER_VALUES]
 
 // Helper functions
 export const getTierStyle = (tier: Tier | string) =>

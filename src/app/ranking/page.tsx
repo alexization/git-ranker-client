@@ -4,7 +4,7 @@ import { useState, Suspense, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { LazyMotion, domAnimation, m } from "framer-motion"
 import { useRankingList } from "@/features/ranking/api/ranking-service"
-import { Tier } from "@/shared/types/api"
+import { Tier, TIER_VALUES } from "@/shared/types/api"
 import { getTierBadgeStyle, getTierDotColor } from "@/shared/constants/tier-styles"
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/avatar"
 import { Skeleton } from "@/shared/components/skeleton"
@@ -15,10 +15,7 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, Crown, 
 import { cn } from "@/shared/lib/utils"
 import { useI18n } from "@/shared/providers/locale-provider"
 
-const TIERS: (Tier | 'ALL')[] = [
-    'ALL', 'CHALLENGER', 'MASTER', 'DIAMOND', 'EMERALD',
-    'PLATINUM', 'GOLD', 'SILVER', 'BRONZE', 'IRON'
-]
+const TIER_FILTERS: ReadonlyArray<Tier | 'ALL'> = ['ALL', ...TIER_VALUES]
 
 // [Component] Toolbar
 function RankingToolbar({
@@ -32,7 +29,7 @@ function RankingToolbar({
         <div className="sticky top-16 z-40 bg-background/80 backdrop-blur-xl border-b border-border/40 py-4 mb-8 transition-all">
             <div className="container max-w-5xl px-4 flex justify-center">
                 <div className="flex flex-wrap gap-2 justify-center">
-                    {TIERS.map((tier) => (
+                    {TIER_FILTERS.map((tier) => (
                         <button
                             key={tier}
                             onClick={() => onTierChange(tier)}
@@ -84,7 +81,8 @@ function RankingContent() {
     const pageParam = searchParams.get('page')
     const page = pageParam ? Math.max(0, parseInt(pageParam, 10) - 1) : 0
     const tierParam = searchParams.get('tier')
-    const selectedTier: Tier | 'ALL' = tierParam && TIERS.includes(tierParam as Tier) ? tierParam as Tier : 'ALL'
+    const selectedTier: Tier | 'ALL' =
+        tierParam && TIER_VALUES.includes(tierParam as Tier) ? (tierParam as Tier) : 'ALL'
 
 
 

@@ -39,50 +39,6 @@ const createPageNumberSchema = () =>
 
 export const pageNumberSchema = createPageNumberSchema()
 
-// Tier validation
-export const tierSchema = z.enum([
-  "CHALLENGER",
-  "MASTER",
-  "DIAMOND",
-  "PLATINUM",
-  "GOLD",
-  "SILVER",
-  "BRONZE",
-  "IRON",
-])
-
-// API Response validation schemas
-export const userResponseSchema = z.object({
-  username: z.string(),
-  tier: tierSchema,
-  totalScore: z.number(),
-  ranking: z.number(),
-  percentile: z.number(),
-  profileImage: z.string().url(),
-  nodeId: z.string(),
-  lastFullScanAt: z.string().datetime(),
-})
-
-export const rankingItemSchema = z.object({
-  username: z.string(),
-  tier: tierSchema,
-  totalScore: z.number(),
-  ranking: z.number(),
-  profileImage: z.string().url(),
-})
-
-export const pageInfoSchema = z.object({
-  totalPages: z.number(),
-  totalElements: z.number(),
-  currentPage: z.number().optional(),
-  pageSize: z.number().optional(),
-})
-
-export const rankingResponseSchema = z.object({
-  rankings: z.array(rankingItemSchema),
-  pageInfo: pageInfoSchema.optional(),
-})
-
 // Validation helper functions
 export function validateGithubUsername(username: string): {
   success: boolean
@@ -119,10 +75,3 @@ export function validatePageNumber(page: number): {
   }
   return { success: false, error: result.error.issues[0]?.message }
 }
-
-// Type exports
-export type Tier = z.infer<typeof tierSchema>
-export type User = z.infer<typeof userResponseSchema>
-export type RankingItem = z.infer<typeof rankingItemSchema>
-export type PageInfo = z.infer<typeof pageInfoSchema>
-export type RankingResponse = z.infer<typeof rankingResponseSchema>

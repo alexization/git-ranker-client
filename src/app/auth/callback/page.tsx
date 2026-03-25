@@ -13,6 +13,7 @@ import { Loader2, AlertCircle, RefreshCcw } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import { useI18n } from "@/shared/providers/locale-provider"
+import type { AuthMeResponse } from "@/shared/types/api"
 
 function RedirectHandler() {
   const { t } = useI18n()
@@ -46,7 +47,7 @@ function RedirectHandler() {
     hasCalledRef.current = true
 
     // 쿠키는 이미 Set-Cookie로 설정되어 있으므로, /auth/me로 사용자 식별 후 전체 정보 조회
-    apiClient.get<void, { username: string }>('/auth/me')
+    apiClient.get<void, AuthMeResponse>('/auth/me')
       .then(({ username }) => getUser(username))
       .then((user) => {
         login(user)
