@@ -14,6 +14,9 @@ export const TIER_VALUES = [
 export type Tier = (typeof TIER_VALUES)[number];
 export type UserRole = 'GUEST' | 'USER' | 'ADMIN';
 
+export const isTier = (value: string): value is Tier =>
+  (TIER_VALUES as readonly string[]).includes(value);
+
 export interface ApiErrorPayload {
   type: string;
   message: string;

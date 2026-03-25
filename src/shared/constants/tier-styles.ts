@@ -1,12 +1,11 @@
-import { Tier, TIER_VALUES } from "@/shared/types/api"
+import { isTier, Tier, TIER_VALUES } from "@/shared/types/api"
 
 /**
  * Comprehensive tier styling system
  * Centralized to prevent duplication and ensure consistency
  */
 
-// Full tier styles for profile pages and detailed views
-export const TIER_STYLES: Record<Tier | string, {
+type TierStyle = {
     bgGradient: string;
     border: string;
     text: string;
@@ -14,7 +13,10 @@ export const TIER_STYLES: Record<Tier | string, {
     shadow: string;
     iconColor: string;
     overlay?: string;
-}> = {
+}
+
+// Full tier styles for profile pages and detailed views
+export const TIER_STYLES: Record<Tier, TierStyle> = {
     CHALLENGER: {
         bgGradient: "from-red-500/10 via-orange-500/5 to-background",
         border: "border-red-500/30",
@@ -95,7 +97,7 @@ export const TIER_STYLES: Record<Tier | string, {
 } as const
 
 // Simplified tier color styles for badges and compact views
-export const TIER_COLOR_STYLES: Record<Tier | string, string> = {
+export const TIER_COLOR_STYLES: Record<Tier, string> = {
     CHALLENGER: "bg-red-500/10 text-red-500 border-red-500/30",
     MASTER: "bg-purple-500/10 text-purple-500 border-purple-500/30",
     DIAMOND: "bg-sky-500/10 text-sky-500 border-sky-500/30",
@@ -108,7 +110,7 @@ export const TIER_COLOR_STYLES: Record<Tier | string, string> = {
 } as const
 
 // Badge styles for ranking list (light/dark mode support)
-export const TIER_BADGE_STYLES: Record<Tier | string, string> = {
+export const TIER_BADGE_STYLES: Record<Tier, string> = {
     CHALLENGER: "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 border-red-200 dark:border-red-800",
     MASTER: "bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400 border-purple-200 dark:border-purple-800",
     DIAMOND: "bg-sky-100 text-sky-600 dark:bg-sky-900/40 dark:text-sky-400 border-sky-200 dark:border-sky-800",
@@ -121,7 +123,7 @@ export const TIER_BADGE_STYLES: Record<Tier | string, string> = {
 } as const
 
 // Tier dot colors for mobile view and indicators
-export const TIER_DOT_COLORS: Record<Tier | string, string> = {
+export const TIER_DOT_COLORS: Record<Tier, string> = {
     CHALLENGER: "bg-red-500",
     MASTER: "bg-purple-500",
     DIAMOND: "bg-sky-500",
@@ -134,7 +136,7 @@ export const TIER_DOT_COLORS: Record<Tier | string, string> = {
 } as const
 
 // Text-only tier colors for modals and simple displays
-export const TIER_TEXT_COLORS: Record<Tier | string, string> = {
+export const TIER_TEXT_COLORS: Record<Tier, string> = {
     CHALLENGER: "text-red-500",
     MASTER: "text-purple-500",
     DIAMOND: "text-blue-500",
@@ -149,18 +151,20 @@ export const TIER_TEXT_COLORS: Record<Tier | string, string> = {
 // Ordered tier list (highest to lowest)
 export const TIER_ORDER: Tier[] = [...TIER_VALUES]
 
+const normalizeTier = (tier: string): Tier => (isTier(tier) ? tier : 'IRON')
+
 // Helper functions
-export const getTierStyle = (tier: Tier | string) =>
-    TIER_STYLES[tier] || TIER_STYLES['IRON']
+export const getTierStyle = (tier: string) =>
+    TIER_STYLES[normalizeTier(tier)]
 
-export const getTierColorClass = (tier: Tier | string) =>
-    TIER_COLOR_STYLES[tier] || TIER_COLOR_STYLES['IRON']
+export const getTierColorClass = (tier: string) =>
+    TIER_COLOR_STYLES[normalizeTier(tier)]
 
-export const getTierDotColor = (tier: Tier | string) =>
-    TIER_DOT_COLORS[tier] || TIER_DOT_COLORS['IRON']
+export const getTierDotColor = (tier: string) =>
+    TIER_DOT_COLORS[normalizeTier(tier)]
 
-export const getTierTextColor = (tier: Tier | string) =>
-    TIER_TEXT_COLORS[tier] || TIER_TEXT_COLORS['IRON']
+export const getTierTextColor = (tier: string) =>
+    TIER_TEXT_COLORS[normalizeTier(tier)]
 
-export const getTierBadgeStyle = (tier: Tier | string) =>
-    TIER_BADGE_STYLES[tier] || TIER_BADGE_STYLES['IRON']
+export const getTierBadgeStyle = (tier: string) =>
+    TIER_BADGE_STYLES[normalizeTier(tier)]

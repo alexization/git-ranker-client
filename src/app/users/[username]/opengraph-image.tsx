@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og'
-import type { ApiResponse, RegisterUserResponse, Tier } from '@/shared/types/api'
+import type { ApiResponse, Tier } from '@/shared/types/api'
+import { isTier } from '@/shared/types/api'
 
 export const runtime = 'edge'
 export const alt = 'Git Ranker Profile'
@@ -18,27 +19,75 @@ const tierColors: Record<Tier, string> = {
     IRON: '#71717a',
 }
 
+type OgUserData = {
+    username: string
+    tier: Tier
+    totalScore: number
+    ranking: number
+    percentile: number
+    profileImage: string
+    commitCount: number
+    prCount: number
+    issueCount: number
+    reviewCount: number
+    mergedPrCount: number
+}
+
+const isObjectRecord = (value: unknown): value is Record<string, unknown> =>
+    typeof value === 'object' && value !== null
+
+const isOgUserData = (value: unknown): value is OgUserData =>
+    isObjectRecord(value) &&
+    typeof value.username === 'string' &&
+    typeof value.tier === 'string' &&
+    isTier(value.tier) &&
+    typeof value.totalScore === 'number' &&
+    typeof value.ranking === 'number' &&
+    typeof value.percentile === 'number' &&
+    typeof value.profileImage === 'string' &&
+    typeof value.commitCount === 'number' &&
+    typeof value.prCount === 'number' &&
+    typeof value.issueCount === 'number' &&
+    typeof value.reviewCount === 'number' &&
+    typeof value.mergedPrCount === 'number'
+
+const extractUserData = (payload: unknown): OgUserData | null => {
+    if (!isObjectRecord(payload)) {
+        return null
+    }
+
+    if ('result' in payload) {
+        return payload.result === 'SUCCESS' && isOgUserData(payload.data)
+            ? payload.data
+            : null
+    }
+
+    if ('success' in payload) {
+        return isOgUserData(payload.success) ? payload.success : null
+    }
+
+    return isOgUserData(payload) ? payload : null
+}
+
 export default async function Image({ params }: { params: Promise<{ username: string }> }) {
     const { username } = await params
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://www.git-ranker.com'
 
-    let user: RegisterUserResponse | null = null
+    let user: OgUserData | null = null
 
     try {
         const response = await fetch(`${apiUrl}/api/v1/users/${username}`, {
             next: { revalidate: 3600 }
         })
         if (response.ok) {
-            const payload = await response.json() as ApiResponse<RegisterUserResponse>
-            if (payload.result === 'SUCCESS' && payload.data) {
-                user = payload.data
-            }
+            const payload = await response.json() as ApiResponse<OgUserData> | OgUserData | { success?: OgUserData }
+            user = extractUserData(payload)
         }
     } catch {
         // Fall back to default
     }
 
-    const accent = user ? tierColors[user.tier] : '#6366f1'
+    const accent = user ? tierColors[user.tier] ?? '#6366f1' : '#6366f1'
 
     // User not found fallback
     if (!user) {

@@ -1,11 +1,58 @@
 import { MetadataRoute } from "next"
-import type { ApiResponse, RankingListResponse, RankingUserInfo } from "@/shared/types/api"
+import type { ApiResponse, RankingUserInfo } from "@/shared/types/api"
+import { isTier } from "@/shared/types/api"
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.git-ranker.com"
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://www.git-ranker.com"
 const SEO_LOCALES = ["en", "ko"] as const
 
-async function getRankingPage(page: number): Promise<RankingListResponse | null> {
+type SitemapRankingPage = {
+    rankings: RankingUserInfo[]
+    pageInfo: {
+        totalPages: number
+        totalElements: number
+    }
+}
+
+const isObjectRecord = (value: unknown): value is Record<string, unknown> =>
+    typeof value === "object" && value !== null
+
+const isRankingUserInfo = (value: unknown): value is RankingUserInfo =>
+    isObjectRecord(value) &&
+    typeof value.username === "string" &&
+    typeof value.profileImage === "string" &&
+    typeof value.ranking === "number" &&
+    typeof value.totalScore === "number" &&
+    typeof value.tier === "string" &&
+    isTier(value.tier)
+
+const isSitemapRankingPage = (value: unknown): value is SitemapRankingPage =>
+    isObjectRecord(value) &&
+    Array.isArray(value.rankings) &&
+    value.rankings.every(isRankingUserInfo) &&
+    isObjectRecord(value.pageInfo) &&
+    typeof value.pageInfo.totalPages === "number" &&
+    typeof value.pageInfo.totalElements === "number"
+
+const extractRankingPage = (payload: unknown): SitemapRankingPage | null => {
+    if (!isObjectRecord(payload)) {
+        return null
+    }
+
+    if ("result" in payload) {
+        return payload.result === "SUCCESS" && isSitemapRankingPage(payload.data)
+            ? payload.data
+            : null
+    }
+
+    if ("success" in payload) {
+        return isSitemapRankingPage(payload.success) ? payload.success : null
+    }
+
+    return isSitemapRankingPage(payload) ? payload : null
+}
+
+async function getRankingPage(page: number): Promise<SitemapRankingPage | null> {
     const response = await fetch(`${API_URL}/api/v1/ranking?page=${page}&size=20`, {
         next: { revalidate: 3600 },
         headers: {
@@ -17,12 +64,8 @@ async function getRankingPage(page: number): Promise<RankingListResponse | null>
         return null
     }
 
-    const payload = await response.json() as ApiResponse<RankingListResponse>
-    if (payload.result !== "SUCCESS" || !payload.data) {
-        return null
-    }
-
-    return payload.data
+    const payload = await response.json() as ApiResponse<SitemapRankingPage> | SitemapRankingPage | { success?: SitemapRankingPage }
+    return extractRankingPage(payload)
 }
 
 async function getTopUsers(): Promise<RankingUserInfo[]> {
@@ -36,8 +79,11 @@ async function getTopUsers(): Promise<RankingUserInfo[]> {
         const totalPages = Math.min(firstPageData.pageInfo.totalPages || 1, 25) // Max 25 pages = 500 users
 
         // Fetch up to 500 users (25 pages x 20 users per page)
-        const pages = Array.from({ length: totalPages }, (_, i) => i)
-        const responses = await Promise.all(pages.map((page) => getRankingPage(page).catch(() => null)))
+        const pages = Array.from({ length: Math.max(totalPages - 1, 0) }, (_, i) => i + 1)
+        const responses = [
+            firstPageData,
+            ...(await Promise.all(pages.map((page) => getRankingPage(page).catch(() => null)))),
+        ]
 
         const users: RankingUserInfo[] = []
         for (const response of responses) {

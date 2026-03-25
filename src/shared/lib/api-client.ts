@@ -94,6 +94,13 @@ apiClient.interceptors.response.use(
     if (response.data?.result === 'SUCCESS') {
       return response.data.data;
     }
+    if (response.data?.result === 'ERROR') {
+      throw new ApiError(
+        response.data.error?.message ?? translate('common.error'),
+        response.data.error?.type ?? 'UNKNOWN_ERROR',
+        response.status
+      );
+    }
     // Fallback: 기존 구조도 지원
     return response.data?.success ?? response.data;
   },
