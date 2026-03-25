@@ -1,26 +1,38 @@
-export type Tier = 
-  | 'CHALLENGER' | 'MASTER' | 'DIAMOND' | 'EMERALD' 
-  | 'PLATINUM' | 'GOLD' | 'SILVER' | 'BRONZE' | 'IRON';
+// Manual contract mirror of `git-ranker/docs/openapi/openapi.json` until generated types are introduced.
+export const TIER_VALUES = [
+  'CHALLENGER',
+  'MASTER',
+  'DIAMOND',
+  'EMERALD',
+  'PLATINUM',
+  'GOLD',
+  'SILVER',
+  'BRONZE',
+  'IRON',
+] as const;
 
-// 백엔드 실제 응답 구조
+export type Tier = (typeof TIER_VALUES)[number];
+export type UserRole = 'GUEST' | 'USER' | 'ADMIN';
+
+export const isTier = (value: string): value is Tier =>
+  (TIER_VALUES as readonly string[]).includes(value);
+
+export interface ApiErrorPayload {
+  type: string;
+  message: string;
+  data?: unknown;
+}
+
 export interface ApiResponse<T> {
   result: 'SUCCESS' | 'ERROR';
   data: T | null;
-  error: {
-    code: string;
-    message: string;
-  } | null;
+  error: ApiErrorPayload | null;
 }
 
-// 레거시 타입 (호환성 유지)
-export interface ApiResponseLegacy<T> {
-  resultType: 'SUCCESS' | 'ERROR';
-  error?: {
-    code: string;
-    message: string;
-    data?: unknown;
-  };
-  success?: T;
+export interface AuthMeResponse {
+  username: string;
+  profileImage: string;
+  role: UserRole;
 }
 
 export interface User {
@@ -30,7 +42,7 @@ export interface User {
   username: string;
   email: string | null;
   profileImage: string;
-  role: 'USER' | 'ADMIN';
+  role: UserRole;
   updatedAt: string;
   lastFullScanAt: string;
   totalScore: number;
@@ -50,8 +62,6 @@ export interface UserStats {
   diffPrCount: number;
   diffMergedPrCount: number;
   diffReviewCount: number;
-  // [Fix] 백엔드 응답 포맷 대응 (PascalCase fallback)
-  PrCount?: number;
 }
 
 export interface RegisterUserResponse extends User, UserStats {
@@ -79,4 +89,3 @@ export interface RankingListResponse {
   rankings: RankingUserInfo[];
   pageInfo: PageInfo;
 }
-

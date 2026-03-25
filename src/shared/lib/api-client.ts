@@ -1,18 +1,9 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { removeLocalStorage } from './storage-cache';
 import { translate } from '@/shared/i18n/translate';
+import type { ApiResponse } from '@/shared/types/api';
 
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1`;
-
-// 서버 에러 응답에서 메시지 추출
-export interface ApiErrorResponse {
-  result: 'ERROR';
-  data: null;
-  error: {
-    code: string;
-    message: string;
-  };
-}
 
 // 커스텀 에러 클래스 - 서버 에러 메시지 포함
 export class ApiError extends Error {
@@ -35,7 +26,7 @@ export const getErrorMessage = (error: unknown, fallback: string = translate('co
 
   if (axios.isAxiosError(error)) {
     // 서버 응답에서 에러 메시지 추출
-    const responseData = error.response?.data as ApiErrorResponse | undefined;
+    const responseData = error.response?.data as ApiResponse<unknown> | undefined;
     if (responseData?.error?.message) {
       return responseData.error.message;
     }
@@ -102,6 +93,13 @@ apiClient.interceptors.response.use(
     // 백엔드 응답 구조: { result: "SUCCESS", data: {...}, error: null }
     if (response.data?.result === 'SUCCESS') {
       return response.data.data;
+    }
+    if (response.data?.result === 'ERROR') {
+      throw new ApiError(
+        response.data.error?.message ?? translate('common.error'),
+        response.data.error?.type ?? 'UNKNOWN_ERROR',
+        response.status
+      );
     }
     // Fallback: 기존 구조도 지원
     return response.data?.success ?? response.data;
