@@ -9,6 +9,7 @@ import { cn } from "@/shared/lib/utils"
 import { LiveTicker, TickerUpdate } from "@/shared/components/ui/live-ticker"
 import { GithubIcon } from "@/shared/components/icons/github-icon"
 import { useI18n } from "@/shared/providers/locale-provider"
+import { githubOAuthStartUrl } from "@/shared/lib/public-env"
 
 // [Data] Action 필드 제거 (User + Tier)
 const MOCK_LIVE_UPDATES: TickerUpdate[] = [
@@ -458,7 +459,7 @@ export default function LoginPage() {
     const privacyPolicy = locale === "ko" ? PRIVACY_POLICY_KO : PRIVACY_POLICY_EN
 
     const handleGithubLogin = () => {
-        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/oauth2/authorization/github`
+        window.location.href = githubOAuthStartUrl
     }
 
     const containerVariants = {

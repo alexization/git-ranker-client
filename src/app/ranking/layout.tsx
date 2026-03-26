@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
 import { getRequestLocale } from "@/shared/i18n/server-locale"
+import { publicBaseUrl } from "@/shared/lib/public-env"
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.git-ranker.com"
+const BASE_URL = publicBaseUrl
 
 export async function generateMetadata(): Promise<Metadata> {
     const locale = await getRequestLocale()

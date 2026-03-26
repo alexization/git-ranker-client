@@ -1,9 +1,9 @@
 import { MetadataRoute } from "next"
 import type { ApiResponse, RankingUserInfo } from "@/shared/types/api"
 import { isTier } from "@/shared/types/api"
+import { getPublicApiUrl, publicBaseUrl } from "@/shared/lib/public-env"
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.git-ranker.com"
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://www.git-ranker.com"
+const BASE_URL = publicBaseUrl
 const SEO_LOCALES = ["en", "ko"] as const
 
 type SitemapRankingPage = {
@@ -53,7 +53,7 @@ const extractRankingPage = (payload: unknown): SitemapRankingPage | null => {
 }
 
 async function getRankingPage(page: number): Promise<SitemapRankingPage | null> {
-    const response = await fetch(`${API_URL}/api/v1/ranking?page=${page}&size=20`, {
+    const response = await fetch(getPublicApiUrl(`/api/v1/ranking?page=${page}&size=20`), {
         next: { revalidate: 3600 },
         headers: {
             Accept: "application/json",

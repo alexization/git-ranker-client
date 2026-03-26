@@ -29,6 +29,7 @@ import { getErrorMessage } from "@/shared/lib/api-client"
 import { useEffect, useState } from "react"
 import { TIER_STYLES } from "@/shared/constants/tier-styles"
 import { useI18n } from "@/shared/providers/locale-provider"
+import { getBadgeImageUrl, githubOAuthStartUrl } from "@/shared/lib/public-env"
 
 interface UserProfileClientProps {
     username: string
@@ -81,7 +82,11 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
     }
 
     const handleCopyBadge = () => {
-        const badgeUrl = `${process.env.NEXT_PUBLIC_API_URL || 'https://www.git-ranker.com'}/api/v1/badges/${user?.nodeId}`
+        if (!user?.nodeId) {
+            return
+        }
+
+        const badgeUrl = getBadgeImageUrl(user.nodeId)
         const markdown = `[![Git Ranker](${badgeUrl})](https://www.git-ranker.com)`
         navigator.clipboard.writeText(markdown)
         toast.success(t("profile.badge.copied"))
@@ -110,7 +115,7 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
     }
 
     const handleGithubRegister = () => {
-        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/oauth2/authorization/github`
+        window.location.href = githubOAuthStartUrl
     }
 
     if (isLoading) {

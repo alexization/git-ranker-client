@@ -1,6 +1,7 @@
 import { ImageResponse } from 'next/og'
 import type { ApiResponse, Tier } from '@/shared/types/api'
 import { isTier } from '@/shared/types/api'
+import { getPublicApiUrl } from '@/shared/lib/public-env'
 
 export const runtime = 'edge'
 export const alt = 'Git Ranker Profile'
@@ -71,12 +72,11 @@ const extractUserData = (payload: unknown): OgUserData | null => {
 
 export default async function Image({ params }: { params: Promise<{ username: string }> }) {
     const { username } = await params
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://www.git-ranker.com'
 
     let user: OgUserData | null = null
 
     try {
-        const response = await fetch(`${apiUrl}/api/v1/users/${username}`, {
+        const response = await fetch(getPublicApiUrl(`/api/v1/users/${username}`), {
             next: { revalidate: 3600 }
         })
         if (response.ok) {

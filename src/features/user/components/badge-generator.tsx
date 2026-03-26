@@ -8,6 +8,7 @@ import { toast } from "sonner"
 import { cn } from "@/shared/lib/utils"
 import { useI18n } from "@/shared/providers/locale-provider"
 import { localizePathname } from "@/shared/i18n/config"
+import { getBadgeImageUrl, publicBaseUrl } from "@/shared/lib/public-env"
 
 interface BadgeGeneratorProps {
     nodeId: string
@@ -50,8 +51,8 @@ export function BadgeGenerator({ nodeId, username }: BadgeGeneratorProps) {
     const { t, locale } = useI18n()
     const [copied, setCopied] = useState<CopyType>(null)
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://www.git-ranker.com"
-    const badgeUrl = `${process.env.NEXT_PUBLIC_API_URL || 'https://www.git-ranker.com'}/api/v1/badges/${nodeId}`
+    const baseUrl = publicBaseUrl
+    const badgeUrl = getBadgeImageUrl(nodeId)
     const profileUrl = `${baseUrl}${localizePathname(`/users/${username}`, locale)}`
 
     const markdownCode = `[![Git Ranker](${badgeUrl})](${profileUrl})`

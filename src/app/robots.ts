@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
+import { publicBaseUrl } from "@/shared/lib/public-env";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.git-ranker.com";
+const BASE_URL = publicBaseUrl;
 
 export default function robots(): MetadataRoute.Robots {
   return {
