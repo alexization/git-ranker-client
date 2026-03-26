@@ -15,13 +15,14 @@ interface BadgeGeneratorProps {
 }
 
 type CopyType = "markdown" | "html" | "link" | null
+type BadgeCopyType = Exclude<CopyType, null>
 
 interface BadgeCopyButtonProps {
     copied: CopyType
     icon: LucideIcon
     label: string
     onCopy: () => void
-    type: CopyType
+    type: BadgeCopyType
 }
 
 function BadgeCopyButton({ copied, icon: Icon, label, onCopy, type }: BadgeCopyButtonProps) {
@@ -56,7 +57,7 @@ export function BadgeGenerator({ nodeId, username }: BadgeGeneratorProps) {
     const markdownCode = `[![Git Ranker](${badgeUrl})](${profileUrl})`
     const htmlCode = `<a href="${profileUrl}"><img src="${badgeUrl}" alt="Git Ranker Badge" /></a>`
 
-    const handleCopy = async (text: string, type: CopyType) => {
+    const handleCopy = async (text: string, type: BadgeCopyType) => {
         await navigator.clipboard.writeText(text)
         setCopied(type)
         toast.success(

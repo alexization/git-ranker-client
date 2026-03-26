@@ -13,6 +13,11 @@ export function useThrottledCallback<TArgs extends unknown[]>(
 ): (...args: TArgs) => void {
     const lastCallRef = useRef<number>(0)
     const rafRef = useRef<number | null>(null)
+    const callbackRef = useRef(callback)
+
+    useEffect(() => {
+        callbackRef.current = callback
+    }, [callback])
 
     useEffect(() => {
         return () => {
@@ -27,16 +32,16 @@ export function useThrottledCallback<TArgs extends unknown[]>(
 
             if (now - lastCallRef.current >= delay) {
                 lastCallRef.current = now
-                callback(...args)
+                callbackRef.current(...args)
             } else if (!rafRef.current) {
                 // Schedule for next animation frame if we're throttling
                 rafRef.current = requestAnimationFrame(() => {
                     lastCallRef.current = performance.now()
                     rafRef.current = null
-                    callback(...args)
+                    callbackRef.current(...args)
                 })
             }
-        }, [callback, delay])
+        }, [delay])
 }
 
 /**

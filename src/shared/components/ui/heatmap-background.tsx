@@ -16,8 +16,26 @@ function subscribeToWindowResize(onStoreChange: () => void) {
         return () => {}
     }
 
-    window.addEventListener("resize", onStoreChange)
-    return () => window.removeEventListener("resize", onStoreChange)
+    let frameId: number | null = null
+    const throttledHandler = () => {
+        if (frameId !== null) {
+            return
+        }
+
+        frameId = window.requestAnimationFrame(() => {
+            frameId = null
+            onStoreChange()
+        })
+    }
+
+    window.addEventListener("resize", throttledHandler)
+    return () => {
+        window.removeEventListener("resize", throttledHandler)
+
+        if (frameId !== null) {
+            window.cancelAnimationFrame(frameId)
+        }
+    }
 }
 
 function getWindowWidth(): number {
