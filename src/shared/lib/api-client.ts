@@ -2,8 +2,9 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { removeLocalStorage } from './storage-cache';
 import { translate } from '@/shared/i18n/translate';
 import type { ApiResponse } from '@/shared/types/api';
+import { publicApiBaseUrl } from './public-env';
 
-const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1`;
+const API_BASE_URL = publicApiBaseUrl;
 
 // 커스텀 에러 클래스 - 서버 에러 메시지 포함
 export class ApiError extends Error {

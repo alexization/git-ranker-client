@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# git-ranker-client
 
-## Getting Started
+`git-ranker-client`는 Git Ranker의 Next.js 16 프런트엔드다. 랭킹 조회, 사용자 상세, 로그인 진입, SEO 메타데이터와 배지 링크를 제공한다.
 
-First, run the development server:
+## Requirements
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 20+
+- npm
+- `NEXT_PUBLIC_BASE_URL`
+- `NEXT_PUBLIC_API_URL`
+
+`NEXT_PUBLIC_BASE_URL`와 `NEXT_PUBLIC_API_URL`는 build와 runtime 모두에서 필수다. 값이 없으면 `npm run build`와 런타임 초기화가 즉시 실패한다.
+
+## Environment
+
+로컬 Next.js 실행은 `.env.local`, Docker Compose 실행은 `.env`를 사용하면 된다. 시작점으로는 [.env.example](.env.example)을 복사한다.
+
+로컬 개발 예시:
+
+```env
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:8080
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+프로덕션 예시:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+NEXT_PUBLIC_BASE_URL=https://www.git-ranker.com
+NEXT_PUBLIC_API_URL=https://www.git-ranker.com
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+선택 env:
 
-## Learn More
+- `NEXT_PUBLIC_ANALYTICS_ENDPOINT`
+- `NEXT_PUBLIC_SENTRY_DSN`
+- `SENTRY_DSN`
 
-To learn more about Next.js, take a look at the following resources:
+선택 env가 없어도 핵심 기능은 동작한다. 없으면 analytics/web vitals 전송이나 Sentry 수집만 비활성화된다.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Commands
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm install
+npm run dev
+npm run lint
+npx tsc --noEmit
+npm run build
+```
 
-## Deploy on Vercel
+## Docker Compose
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+cp .env.example .env
+docker compose up --build
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`docker-compose.yml`과 `Dockerfile`은 `NEXT_PUBLIC_BASE_URL`, `NEXT_PUBLIC_API_URL`가 비어 있으면 즉시 실패한다.
+
+## Build And Runtime Notes
+
+- `JetBrains Mono`는 공식 JetBrains Mono release v2.304에서 가져온 로컬 자산을 사용한다.
+- 폰트 라이선스는 [src/fonts/JetBrainsMono-OFL.txt](src/fonts/JetBrainsMono-OFL.txt)에 보관한다.
+- locale routing과 보안 헤더는 [src/proxy.ts](src/proxy.ts)에서 처리한다.
+- public URL 정책은 [src/shared/lib/public-env.ts](src/shared/lib/public-env.ts)에서 단일 기준으로 관리한다.

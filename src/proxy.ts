@@ -7,24 +7,43 @@ import {
   normalizeLocale,
   stripLocaleFromPathname,
 } from "@/shared/i18n/config"
+import { publicApiOrigin } from "@/shared/lib/public-env"
 
 const PUBLIC_FILE = /\.[^/]+$/
 const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365
 
-function applySecurityHeaders(response: NextResponse, isDev: boolean): NextResponse {
-  const analyticsHosts = "https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com"
+function joinCspSources(...sources: string[]): string {
+  return Array.from(new Set(sources.filter(Boolean))).join(" ")
+}
 
-  const connectSrc = isDev
-    ? `'self' http://localhost:8080 ${analyticsHosts}`
-    : `'self' ${analyticsHosts}`
+function applySecurityHeaders(response: NextResponse): NextResponse {
+  const isDev = process.env.NODE_ENV === "development"
+  const analyticsHosts = [
+    "https://www.googletagmanager.com",
+    "https://www.google-analytics.com",
+    "https://region1.google-analytics.com",
+  ]
 
   const cspDirectives = [
     "default-src 'self'",
-    `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com`,
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "font-src 'self' https://fonts.gstatic.com",
-    "img-src 'self' data: blob: https://avatars.githubusercontent.com https://github.com https://www.google-analytics.com",
-    `connect-src ${connectSrc}`,
+    `script-src ${joinCspSources(
+      "'self'",
+      "'unsafe-inline'",
+      isDev ? "'unsafe-eval'" : "",
+      "https://www.googletagmanager.com"
+    )}`,
+    `style-src ${joinCspSources("'self'", "'unsafe-inline'")}`,
+    `font-src ${joinCspSources("'self'")}`,
+    `img-src ${joinCspSources(
+      "'self'",
+      "data:",
+      "blob:",
+      publicApiOrigin,
+      "https://avatars.githubusercontent.com",
+      "https://github.com",
+      "https://www.google-analytics.com"
+    )}`,
+    `connect-src ${joinCspSources("'self'", publicApiOrigin, ...analyticsHosts)}`,
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -76,12 +95,11 @@ function resolveRequestLocale(request: NextRequest) {
   return normalizeLocale(localeFromHeader)
 }
 
-export function middleware(request: NextRequest) {
-  const isDev = process.env.NODE_ENV === "development"
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   if (shouldBypassLocaleRouting(pathname)) {
-    return applySecurityHeaders(NextResponse.next(), isDev)
+    return applySecurityHeaders(NextResponse.next())
   }
 
   const pathLocale = getLocaleFromPathname(pathname)
@@ -104,7 +122,7 @@ export function middleware(request: NextRequest) {
         maxAge: LOCALE_COOKIE_MAX_AGE,
         sameSite: "lax",
       })
-      return applySecurityHeaders(response, isDev)
+      return applySecurityHeaders(response)
     }
 
     const rewriteUrl = request.nextUrl.clone()
@@ -124,7 +142,7 @@ export function middleware(request: NextRequest) {
       sameSite: "lax",
     })
 
-    return applySecurityHeaders(response, isDev)
+    return applySecurityHeaders(response)
   }
 
   const locale = resolveRequestLocale(request)
@@ -138,7 +156,7 @@ export function middleware(request: NextRequest) {
     sameSite: "lax",
   })
 
-  return applySecurityHeaders(response, isDev)
+  return applySecurityHeaders(response)
 }
 
 export const config = {

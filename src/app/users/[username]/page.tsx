@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { getUser } from "@/features/user/api/user-service"
 import { getRequestLocale } from "@/shared/i18n/server-locale"
+import { publicBaseUrl } from "@/shared/lib/public-env"
 import { UserProfileClient } from "./user-profile-client"
 
 // ISR: revalidate every 1 hour
@@ -14,7 +15,7 @@ interface PageProps {
     params: Promise<{ username: string }>
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.git-ranker.com"
+const BASE_URL = publicBaseUrl
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { username } = await params

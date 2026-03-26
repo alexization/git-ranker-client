@@ -1,6 +1,5 @@
 import type {Metadata, Viewport} from "next";
 import localFont from "next/font/local";
-import { JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import QueryProvider from "@/shared/providers/query-provider";
@@ -12,6 +11,7 @@ import { WebVitalsReporter } from "@/shared/components/web-vitals-reporter";
 import { cn } from "@/shared/lib/utils";
 import { LocaleProvider } from "@/shared/providers/locale-provider";
 import { getRequestLocale } from "@/shared/i18n/server-locale";
+import { publicBaseUrl } from "@/shared/lib/public-env";
 
 const pretendard = localFont({
     src: "../fonts/PretendardVariable.woff2",
@@ -20,13 +20,14 @@ const pretendard = localFont({
     variable: "--font-sans",
 });
 
-const jetbrainsMono = JetBrains_Mono({
-    subsets: ["latin"],
+const jetbrainsMono = localFont({
+    src: "../fonts/JetBrainsMonoVariable.ttf",
     variable: "--font-mono",
     display: "swap",
+    weight: "100 800",
 });
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.git-ranker.com"
+const BASE_URL = publicBaseUrl
 
 export async function generateMetadata(): Promise<Metadata> {
     const locale = await getRequestLocale()
@@ -105,7 +106,6 @@ export default async function RootLayout({
             {/* Preconnect to external origins for faster resource loading */}
             <link rel="preconnect" href="https://avatars.githubusercontent.com" />
             <link rel="dns-prefetch" href="https://avatars.githubusercontent.com" />
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
             <Script
                 src="https://www.googletagmanager.com/gtag/js?id=G-QKZNEY525E"
                 strategy="afterInteractive"
