@@ -17,6 +17,7 @@ function joinCspSources(...sources: string[]): string {
 }
 
 function applySecurityHeaders(response: NextResponse): NextResponse {
+  const isDev = process.env.NODE_ENV === "development"
   const analyticsHosts = [
     "https://www.googletagmanager.com",
     "https://www.google-analytics.com",
@@ -25,7 +26,12 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
 
   const cspDirectives = [
     "default-src 'self'",
-    `script-src ${joinCspSources("'self'", "'unsafe-inline'", "'unsafe-eval'", "https://www.googletagmanager.com")}`,
+    `script-src ${joinCspSources(
+      "'self'",
+      "'unsafe-inline'",
+      isDev ? "'unsafe-eval'" : "",
+      "https://www.googletagmanager.com"
+    )}`,
     `style-src ${joinCspSources("'self'", "'unsafe-inline'")}`,
     `font-src ${joinCspSources("'self'")}`,
     `img-src ${joinCspSources(

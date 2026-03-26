@@ -29,14 +29,15 @@ import { getErrorMessage } from "@/shared/lib/api-client"
 import { useEffect, useState } from "react"
 import { TIER_STYLES } from "@/shared/constants/tier-styles"
 import { useI18n } from "@/shared/providers/locale-provider"
-import { getBadgeImageUrl, githubOAuthStartUrl } from "@/shared/lib/public-env"
+import { localizePathname } from "@/shared/i18n/config"
+import { getBadgeImageUrl, getPublicSiteUrl, githubOAuthStartUrl } from "@/shared/lib/public-env"
 
 interface UserProfileClientProps {
     username: string
 }
 
 export function UserProfileClient({ username }: UserProfileClientProps) {
-    const { t } = useI18n()
+    const { t, locale } = useI18n()
     const router = useRouter()
     const { data: user, isLoading, isError } = useUser(username)
     const refreshMutation = useRefreshUser()
@@ -87,7 +88,8 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
         }
 
         const badgeUrl = getBadgeImageUrl(user.nodeId)
-        const markdown = `[![Git Ranker](${badgeUrl})](https://www.git-ranker.com)`
+        const profileUrl = getPublicSiteUrl(localizePathname(`/users/${encodeURIComponent(user.username)}`, locale))
+        const markdown = `[![Git Ranker](${badgeUrl})](${profileUrl})`
         navigator.clipboard.writeText(markdown)
         toast.success(t("profile.badge.copied"))
     }

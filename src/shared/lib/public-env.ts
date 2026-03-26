@@ -1,5 +1,3 @@
-const trimTrailingSlash = (value: string): string => value.replace(/\/+$/, "")
-
 const publicEnv = {
   NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
   NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
@@ -16,7 +14,11 @@ const getRequiredPublicEnv = (
     )
   }
 
-  return trimTrailingSlash(value)
+  try {
+    return new URL(value).origin
+  } catch {
+    throw new Error(`[env] ${name} must be a valid absolute URL.`)
+  }
 }
 
 const buildAbsoluteUrl = (origin: string, pathname: string): string => {
@@ -32,4 +34,4 @@ export const githubOAuthStartUrl = buildAbsoluteUrl(publicApiOrigin, "/oauth2/au
 export const getPublicSiteUrl = (pathname: string): string => buildAbsoluteUrl(publicBaseUrl, pathname)
 export const getPublicApiUrl = (pathname: string): string => buildAbsoluteUrl(publicApiOrigin, pathname)
 export const getBadgeImageUrl = (nodeId: string): string =>
-  buildAbsoluteUrl(publicApiOrigin, `/api/v1/badges/${nodeId}`)
+  buildAbsoluteUrl(publicApiOrigin, `/api/v1/badges/${encodeURIComponent(nodeId)}`)
