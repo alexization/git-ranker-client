@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/card"
 import { Button } from "@/shared/components/button"
-import { Check, Copy, Link2, Code2, ExternalLink } from "lucide-react"
+import { Check, Copy, Link2, Code2, ExternalLink, type LucideIcon } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/shared/lib/utils"
 import { useI18n } from "@/shared/providers/locale-provider"
@@ -15,42 +15,20 @@ interface BadgeGeneratorProps {
 }
 
 type CopyType = "markdown" | "html" | "link" | null
+type BadgeCopyType = Exclude<CopyType, null>
 
-export function BadgeGenerator({ nodeId, username }: BadgeGeneratorProps) {
-    const { t, locale } = useI18n()
-    const [copied, setCopied] = useState<CopyType>(null)
+interface BadgeCopyButtonProps {
+    copied: CopyType
+    icon: LucideIcon
+    label: string
+    onCopy: () => void
+    type: BadgeCopyType
+}
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://www.git-ranker.com"
-    const badgeUrl = `${process.env.NEXT_PUBLIC_API_URL || 'https://www.git-ranker.com'}/api/v1/badges/${nodeId}`
-    const profileUrl = `${baseUrl}${localizePathname(`/users/${username}`, locale)}`
-
-    const markdownCode = `[![Git Ranker](${badgeUrl})](${profileUrl})`
-    const htmlCode = `<a href="${profileUrl}"><img src="${badgeUrl}" alt="Git Ranker Badge" /></a>`
-
-    const handleCopy = async (text: string, type: CopyType) => {
-        await navigator.clipboard.writeText(text)
-        setCopied(type)
-        toast.success(
-            type === "markdown" ? t("profile.badge.copied.markdown") :
-            type === "html" ? t("profile.badge.copied.html") :
-            t("profile.badge.copied.link")
-        )
-        setTimeout(() => setCopied(null), 2000)
-    }
-
-    const CopyButton = ({
-        type,
-        text,
-        icon: Icon,
-        label
-    }: {
-        type: CopyType
-        text: string
-        icon: React.ElementType
-        label: string
-    }) => (
+function BadgeCopyButton({ copied, icon: Icon, label, onCopy, type }: BadgeCopyButtonProps) {
+    return (
         <Button
-            onClick={() => handleCopy(text, type)}
+            onClick={onCopy}
             variant="ghost"
             className={cn(
                 "h-10 px-4 rounded-xl font-medium text-sm transition-all duration-200",
@@ -66,6 +44,29 @@ export function BadgeGenerator({ nodeId, username }: BadgeGeneratorProps) {
             {label}
         </Button>
     )
+}
+
+export function BadgeGenerator({ nodeId, username }: BadgeGeneratorProps) {
+    const { t, locale } = useI18n()
+    const [copied, setCopied] = useState<CopyType>(null)
+
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://www.git-ranker.com"
+    const badgeUrl = `${process.env.NEXT_PUBLIC_API_URL || 'https://www.git-ranker.com'}/api/v1/badges/${nodeId}`
+    const profileUrl = `${baseUrl}${localizePathname(`/users/${username}`, locale)}`
+
+    const markdownCode = `[![Git Ranker](${badgeUrl})](${profileUrl})`
+    const htmlCode = `<a href="${profileUrl}"><img src="${badgeUrl}" alt="Git Ranker Badge" /></a>`
+
+    const handleCopy = async (text: string, type: BadgeCopyType) => {
+        await navigator.clipboard.writeText(text)
+        setCopied(type)
+        toast.success(
+            type === "markdown" ? t("profile.badge.copied.markdown") :
+            type === "html" ? t("profile.badge.copied.html") :
+            t("profile.badge.copied.link")
+        )
+        setTimeout(() => setCopied(null), 2000)
+    }
 
     return (
         <Card className="rounded-[2rem] sm:rounded-[2.5rem] border-0 bg-white/60 dark:bg-black/20 backdrop-blur-xl shadow-sm overflow-hidden">
@@ -104,23 +105,26 @@ export function BadgeGenerator({ nodeId, username }: BadgeGeneratorProps) {
 
                 {/* Copy Buttons */}
                 <div className="flex flex-wrap gap-2">
-                    <CopyButton
+                    <BadgeCopyButton
+                        copied={copied}
                         type="markdown"
-                        text={markdownCode}
                         icon={Copy}
                         label="Markdown"
+                        onCopy={() => handleCopy(markdownCode, "markdown")}
                     />
-                    <CopyButton
+                    <BadgeCopyButton
+                        copied={copied}
                         type="html"
-                        text={htmlCode}
                         icon={Code2}
                         label="HTML"
+                        onCopy={() => handleCopy(htmlCode, "html")}
                     />
-                    <CopyButton
+                    <BadgeCopyButton
+                        copied={copied}
                         type="link"
-                        text={badgeUrl}
                         icon={Link2}
                         label={t("profile.badge.image-link")}
+                        onCopy={() => handleCopy(badgeUrl, "link")}
                     />
                     <Button
                         asChild

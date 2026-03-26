@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useEffect } from "react"
 import { AlertTriangle, Home, RefreshCcw } from "lucide-react"
 import { getCurrentLocale, translate } from "@/shared/i18n/translate"
@@ -73,13 +74,13 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 <RefreshCcw className="mr-2 h-4 w-4" />
                 {translate("common.retry")}
               </button>
-              <a
+              <Link
                 href="/"
                 className="inline-flex items-center justify-center rounded-2xl h-12 px-6 font-medium bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.98] transition-all"
               >
                 <Home className="mr-2 h-4 w-4" />
                 {translate("common.go-home")}
-              </a>
+              </Link>
             </div>
           </div>
         </div>

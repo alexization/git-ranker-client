@@ -11,7 +11,7 @@ export const getRankingList = cache(async (page: number, tier?: Tier): Promise<R
     params.append("tier", tier)
   }
 
-  return apiClient.get<any, RankingListResponse>(`/ranking?${params.toString()}`)
+  return apiClient.get<void, RankingListResponse>(`/ranking?${params.toString()}`)
 })
 
 export const useRankingList = (page: number, tier?: Tier) => {

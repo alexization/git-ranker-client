@@ -1,6 +1,6 @@
 "use client"
 
-import { useParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import {
     RefreshCcw,
@@ -22,12 +22,12 @@ import { TiltCard } from "@/shared/components/ui/tilt-card"
 import { OptimizedAvatar } from "@/shared/components/optimized-avatar"
 import { Button } from "@/shared/components/button"
 import { Skeleton } from "@/shared/components/skeleton"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/components/card"
+import { Card, CardContent, CardTitle, CardDescription } from "@/shared/components/card"
 import { toast } from "sonner"
 import { cn } from "@/shared/lib/utils"
 import { getErrorMessage } from "@/shared/lib/api-client"
 import { useEffect, useState } from "react"
-import { TIER_STYLES, getTierStyle } from "@/shared/constants/tier-styles"
+import { TIER_STYLES } from "@/shared/constants/tier-styles"
 import { useI18n } from "@/shared/providers/locale-provider"
 
 interface UserProfileClientProps {
@@ -45,8 +45,11 @@ export function UserProfileClient({ username }: UserProfileClientProps) {
 
     useEffect(() => {
         if (user) {
-            setDisplayPercentile(0)
-            setTimeout(() => setDisplayPercentile(user.percentile), 100)
+            const timeoutId = window.setTimeout(() => {
+                setDisplayPercentile(user.percentile)
+            }, 100)
+
+            return () => window.clearTimeout(timeoutId)
         }
     }, [user])
 

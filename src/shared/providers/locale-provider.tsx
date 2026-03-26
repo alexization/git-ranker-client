@@ -38,14 +38,26 @@ type LocaleProviderProps = {
 
 export function LocaleProvider({ children, initialLocale }: LocaleProviderProps) {
   const pathname = usePathname();
-  const [locale, setLocaleState] = useState<Locale>(initialLocale);
+  const [localeState, setLocaleState] = useState<Locale>(initialLocale);
+  const pathLocale = getLocaleFromPathname(pathname);
+  const locale = pathLocale ?? localeState;
 
   useEffect(() => {
-    const localeFromPath = getLocaleFromPathname(pathname);
-    if (localeFromPath && localeFromPath !== locale) {
-      setLocaleState(localeFromPath);
+    if (!pathLocale || pathLocale === localeState) {
+      return;
     }
-  }, [pathname, locale]);
+
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (!cancelled) {
+        setLocaleState(pathLocale);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pathLocale, localeState]);
 
   useEffect(() => {
     document.documentElement.lang = locale;
