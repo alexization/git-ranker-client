@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/card"
 import { Button } from "@/shared/components/button"
-import { Check, Copy, Link2, Code2, ExternalLink } from "lucide-react"
+import { Check, Copy, Link2, Code2, ExternalLink, type LucideIcon } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/shared/lib/utils"
 import { useI18n } from "@/shared/providers/locale-provider"
@@ -15,6 +15,35 @@ interface BadgeGeneratorProps {
 }
 
 type CopyType = "markdown" | "html" | "link" | null
+
+interface BadgeCopyButtonProps {
+    copied: CopyType
+    icon: LucideIcon
+    label: string
+    onCopy: () => void
+    type: CopyType
+}
+
+function BadgeCopyButton({ copied, icon: Icon, label, onCopy, type }: BadgeCopyButtonProps) {
+    return (
+        <Button
+            onClick={onCopy}
+            variant="ghost"
+            className={cn(
+                "h-10 px-4 rounded-xl font-medium text-sm transition-all duration-200",
+                "bg-secondary/50 hover:bg-secondary border border-transparent",
+                copied === type && "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+            )}
+        >
+            {copied === type ? (
+                <Check className="w-4 h-4 mr-2" />
+            ) : (
+                <Icon className="w-4 h-4 mr-2" />
+            )}
+            {label}
+        </Button>
+    )
+}
 
 export function BadgeGenerator({ nodeId, username }: BadgeGeneratorProps) {
     const { t, locale } = useI18n()
@@ -37,35 +66,6 @@ export function BadgeGenerator({ nodeId, username }: BadgeGeneratorProps) {
         )
         setTimeout(() => setCopied(null), 2000)
     }
-
-    const CopyButton = ({
-        type,
-        text,
-        icon: Icon,
-        label
-    }: {
-        type: CopyType
-        text: string
-        icon: React.ElementType
-        label: string
-    }) => (
-        <Button
-            onClick={() => handleCopy(text, type)}
-            variant="ghost"
-            className={cn(
-                "h-10 px-4 rounded-xl font-medium text-sm transition-all duration-200",
-                "bg-secondary/50 hover:bg-secondary border border-transparent",
-                copied === type && "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-            )}
-        >
-            {copied === type ? (
-                <Check className="w-4 h-4 mr-2" />
-            ) : (
-                <Icon className="w-4 h-4 mr-2" />
-            )}
-            {label}
-        </Button>
-    )
 
     return (
         <Card className="rounded-[2rem] sm:rounded-[2.5rem] border-0 bg-white/60 dark:bg-black/20 backdrop-blur-xl shadow-sm overflow-hidden">
@@ -104,23 +104,26 @@ export function BadgeGenerator({ nodeId, username }: BadgeGeneratorProps) {
 
                 {/* Copy Buttons */}
                 <div className="flex flex-wrap gap-2">
-                    <CopyButton
+                    <BadgeCopyButton
+                        copied={copied}
                         type="markdown"
-                        text={markdownCode}
                         icon={Copy}
                         label="Markdown"
+                        onCopy={() => handleCopy(markdownCode, "markdown")}
                     />
-                    <CopyButton
+                    <BadgeCopyButton
+                        copied={copied}
                         type="html"
-                        text={htmlCode}
                         icon={Code2}
                         label="HTML"
+                        onCopy={() => handleCopy(htmlCode, "html")}
                     />
-                    <CopyButton
+                    <BadgeCopyButton
+                        copied={copied}
                         type="link"
-                        text={badgeUrl}
                         icon={Link2}
                         label={t("profile.badge.image-link")}
+                        onCopy={() => handleCopy(badgeUrl, "link")}
                     />
                     <Button
                         asChild

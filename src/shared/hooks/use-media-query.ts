@@ -1,29 +1,31 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useCallback, useSyncExternalStore } from "react"
+
+function getMediaQuerySnapshot(query: string): boolean {
+    if (typeof window === "undefined") {
+        return false
+    }
+
+    return window.matchMedia(query).matches
+}
 
 export function useMediaQuery(query: string): boolean {
-    const [matches, setMatches] = useState(false)
-
-    useEffect(() => {
-        const media = window.matchMedia(query)
-
-        // Set initial value
-        setMatches(media.matches)
-
-        // Create listener
-        const listener = (event: MediaQueryListEvent) => {
-            setMatches(event.matches)
+    const subscribe = useCallback((onStoreChange: () => void) => {
+        if (typeof window === "undefined") {
+            return () => {}
         }
 
-        // Add listener
-        media.addEventListener("change", listener)
+        const media = window.matchMedia(query)
+        const listener = () => onStoreChange()
 
-        // Cleanup
+        media.addEventListener("change", listener)
         return () => media.removeEventListener("change", listener)
     }, [query])
 
-    return matches
+    const getSnapshot = useCallback(() => getMediaQuerySnapshot(query), [query])
+
+    return useSyncExternalStore(subscribe, getSnapshot, () => false)
 }
 
 // Convenience hook for mobile detection

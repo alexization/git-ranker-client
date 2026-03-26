@@ -1,35 +1,66 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/shared/lib/utils";
 
+type HeatmapBlock = {
+    colorClass: string
+    delay: number
+    duration: number
+    opacity: number
+}
+
+function subscribeToWindowResize(onStoreChange: () => void) {
+    if (typeof window === "undefined") {
+        return () => {}
+    }
+
+    window.addEventListener("resize", onStoreChange)
+    return () => window.removeEventListener("resize", onStoreChange)
+}
+
+function getWindowWidth(): number {
+    if (typeof window === "undefined") {
+        return 1200
+    }
+
+    return window.innerWidth
+}
+
+function seededValue(seed: number): number {
+    const normalized = Math.sin(seed) * 10000
+    return normalized - Math.floor(normalized)
+}
+
+function buildBlocks(width: number): HeatmapBlock[] {
+    const blockSize = width < 768 ? 30 : 40
+    const cols = Math.ceil(width / blockSize)
+    const rows = 12
+    const total = cols * rows
+
+    return Array.from({ length: total }, (_, index) => {
+        const activeSeed = seededValue(index + width)
+        const opacitySeed = seededValue(index * 1.7 + width)
+        const durationSeed = seededValue(index * 2.3 + width)
+        const delaySeed = seededValue(index * 3.1 + width)
+        const colorSeed = seededValue(index * 4.9 + width)
+        const isActive = activeSeed > 0.8
+
+        return {
+            opacity: isActive ? opacitySeed * 0.35 + 0.15 : 0.03,
+            duration: durationSeed * 2 + 2,
+            delay: delaySeed * 5,
+            colorClass: colorSeed > 0.6
+                ? "bg-primary dark:bg-blue-500"
+                : "bg-emerald-500 dark:bg-emerald-400",
+        }
+    })
+}
+
 export function HeatmapBackground() {
-    const [blocks, setBlocks] = useState<{ opacity: number; colorClass: string }[]>([]);
-
-    useEffect(() => {
-        const width = typeof window !== "undefined" ? window.innerWidth : 1200;
-        const blockSize = width < 768 ? 30 : 40;
-        const cols = Math.ceil(width / blockSize);
-        const rows = 12;
-        const total = cols * rows;
-
-        const newBlocks = Array.from({ length: total }).map(() => {
-            const isActive = Math.random() > 0.8; // 20% 활성 확률 유지
-            return {
-                // Opacity 범위: 0.15 ~ 0.5 (이 값만으로 투명도 조절)
-                opacity: isActive ? Math.random() * 0.35 + 0.15 : 0.03,
-
-                // [Fix] 다크 모드 클래스에서 불투명도(/40 등) 제거 및 더 밝은 컬러(400~500) 사용
-                // 이제 Framer Motion의 opacity 값(최소 0.15)이 그대로 적용되어 훨씬 잘 보입니다.
-                colorClass: Math.random() > 0.6
-                    ? "bg-primary dark:bg-blue-500"
-                    : "bg-emerald-500 dark:bg-emerald-400",
-            };
-        });
-
-        setBlocks(newBlocks);
-    }, []);
+    const width = useSyncExternalStore(subscribeToWindowResize, getWindowWidth, () => 1200)
+    const blocks = useMemo(() => buildBlocks(width), [width])
 
     return (
         <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
@@ -43,10 +74,10 @@ export function HeatmapBackground() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: block.opacity }}
                         transition={{
-                            duration: Math.random() * 2 + 2,
+                            duration: block.duration,
                             repeat: Infinity,
                             repeatType: "reverse",
-                            delay: Math.random() * 5,
+                            delay: block.delay,
                             ease: "easeInOut"
                         }}
                         className={cn(

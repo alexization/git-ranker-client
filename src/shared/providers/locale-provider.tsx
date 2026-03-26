@@ -38,14 +38,8 @@ type LocaleProviderProps = {
 
 export function LocaleProvider({ children, initialLocale }: LocaleProviderProps) {
   const pathname = usePathname();
-  const [locale, setLocaleState] = useState<Locale>(initialLocale);
-
-  useEffect(() => {
-    const localeFromPath = getLocaleFromPathname(pathname);
-    if (localeFromPath && localeFromPath !== locale) {
-      setLocaleState(localeFromPath);
-    }
-  }, [pathname, locale]);
+  const [localeState, setLocaleState] = useState<Locale>(initialLocale);
+  const locale = getLocaleFromPathname(pathname) ?? localeState;
 
   useEffect(() => {
     document.documentElement.lang = locale;

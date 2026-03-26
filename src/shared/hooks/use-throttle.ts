@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 /**
  * Returns a throttled version of the callback that only fires at most once per `delay` ms.
@@ -7,15 +7,22 @@ import { useCallback, useRef } from 'react'
  * @param callback - The function to throttle
  * @param delay - Minimum time between calls in ms (default: 16ms = ~60fps)
  */
-export function useThrottledCallback<T extends (...args: any[]) => void>(
-    callback: T,
+export function useThrottledCallback<TArgs extends unknown[]>(
+    callback: (...args: TArgs) => void,
     delay: number = 16
-): T {
+): (...args: TArgs) => void {
     const lastCallRef = useRef<number>(0)
     const rafRef = useRef<number | null>(null)
 
-    return useCallback(
-        ((...args: Parameters<T>) => {
+    useEffect(() => {
+        return () => {
+            if (rafRef.current !== null) {
+                cancelAnimationFrame(rafRef.current)
+            }
+        }
+    }, [])
+
+    return useCallback((...args: TArgs) => {
             const now = performance.now()
 
             if (now - lastCallRef.current >= delay) {
@@ -29,9 +36,7 @@ export function useThrottledCallback<T extends (...args: any[]) => void>(
                     callback(...args)
                 })
             }
-        }) as T,
-        [callback, delay]
-    )
+        }, [callback, delay])
 }
 
 /**

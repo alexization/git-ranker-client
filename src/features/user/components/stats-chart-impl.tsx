@@ -17,6 +17,17 @@ interface StatsChartProps {
     user: RegisterUserResponse
 }
 
+type StatsChartDatum = {
+    raw: number
+    subject: string
+    value: number
+}
+
+type StatsChartTooltipProps = {
+    active?: boolean
+    payload?: Array<{ payload: StatsChartDatum }>
+}
+
 // [Logic] 활동별 가중치 (점수 계산용)
 // 이 가중치를 곱한 값이 곧 그래프의 점수가 됩니다.
 const WEIGHTS = {
@@ -27,10 +38,40 @@ const WEIGHTS = {
     mergedPr: 8,     // 8점
 }
 
+function StatsChartTooltip({ active, payload }: StatsChartTooltipProps) {
+    const data = payload?.[0]?.payload
+
+    if (!active || !data) {
+        return null
+    }
+
+    return (
+        <div className="bg-popover border border-border px-4 py-3 rounded-xl shadow-xl text-sm min-w-[150px]">
+            <p className="font-bold text-foreground mb-2 border-b border-border/50 pb-1">
+                {data.subject}
+            </p>
+            <div className="space-y-1.5">
+                <div className="flex items-center justify-between gap-4">
+                    <span className="text-muted-foreground text-xs font-medium">Count</span>
+                    <span className="text-foreground font-mono font-semibold">
+                        {data.raw.toLocaleString()}
+                    </span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                    <span className="text-muted-foreground text-xs font-medium">Score</span>
+                    <span className="text-primary font-mono font-bold">
+                        {data.value.toLocaleString()} pts
+                    </span>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 export function StatsChartImpl({ user }: StatsChartProps) {
     const prefersReducedMotion = useReducedMotion()
 
-    const chartData = useMemo(() => {
+    const chartData = useMemo<StatsChartDatum[]>(() => {
         // [Logic] 있는 그대로의 가중치 점수 계산
         // 인위적인 Normalization 없이 (Count * Weight) 값을 그대로 사용합니다.
         return [
@@ -59,37 +100,8 @@ export function StatsChartImpl({ user }: StatsChartProps) {
                 raw: user.reviewCount,
                 value: user.reviewCount * WEIGHTS.review
             },
-        ];
-    }, [user]);
-
-    // [UX] Custom Tooltip: 디자인은 유지하되 데이터 표시는 원본 유지
-    const CustomTooltip = ({ active, payload }: any) => {
-        if (active && payload && payload.length) {
-            const data = payload[0].payload;
-            return (
-                <div className="bg-popover border border-border px-4 py-3 rounded-xl shadow-xl text-sm min-w-[150px]">
-                    <p className="font-bold text-foreground mb-2 border-b border-border/50 pb-1">
-                        {data.subject}
-                    </p>
-                    <div className="space-y-1.5">
-                        <div className="flex items-center justify-between gap-4">
-                            <span className="text-muted-foreground text-xs font-medium">Count</span>
-                            <span className="text-foreground font-mono font-semibold">
-                                {data.raw.toLocaleString()}
-                            </span>
-                        </div>
-                        <div className="flex items-center justify-between gap-4">
-                            <span className="text-muted-foreground text-xs font-medium">Score</span>
-                            <span className="text-primary font-mono font-bold">
-                                {data.value.toLocaleString()} pts
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-        return null;
-    };
+        ]
+    }, [user])
 
     return (
         <div className="w-full h-full flex items-center justify-center pt-12 sm:pt-8 pb-2 select-none outline-none focus:outline-none [&_*]:outline-none [&_svg]:focus:outline-none">
@@ -140,7 +152,7 @@ export function StatsChartImpl({ user }: StatsChartProps) {
                     />
 
                     <Tooltip
-                        content={<CustomTooltip />}
+                        content={<StatsChartTooltip />}
                         cursor={false}
                         isAnimationActive={false}
                         animationDuration={0}

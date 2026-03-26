@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useRef, useCallback } from "react"
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { Search, History, X, BookOpen, TrendingUp } from "lucide-react"
@@ -17,6 +17,7 @@ import { LiveTicker } from "@/shared/components/ui/live-ticker"
 import { toast } from "sonner"
 import { useI18n } from "@/shared/providers/locale-provider"
 import { localizePathname } from "@/shared/i18n/config"
+import { useHasMounted } from "@/shared/hooks/use-has-mounted"
 
 export function HeroSection() {
   const { t, locale } = useI18n()
@@ -25,10 +26,10 @@ export function HeroSection() {
   const [open, setOpen] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
   const [query, setQuery] = useState("")
-  const [mounted, setMounted] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const inputRef = useRef<HTMLInputElement>(null)
   const sectionRef = useRef<HTMLElement>(null)
+  const mounted = useHasMounted()
   const isMobile = useIsMobile()
   const prefersReducedMotion = useReducedMotion()
 
@@ -54,9 +55,8 @@ export function HeroSection() {
       ? t("home.search.placeholder.mobile", { example: placeholderText })
       : t("home.search.placeholder.desktop", { example: placeholderText })
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const selectedSearch = selectedIndex >= 0 ? recentSearches[selectedIndex] ?? null : null
+  const activeQuery = selectedSearch ?? query
 
   const handleFocus = useCallback(() => {
     setOpen(true)
@@ -92,7 +92,7 @@ export function HeroSection() {
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (!open) {
-      if (e.key === 'Enter') handleSearch(query)
+      if (e.key === 'Enter') handleSearch(activeQuery)
       return
     }
     switch (e.key) {
@@ -107,7 +107,7 @@ export function HeroSection() {
       case 'Enter':
         e.preventDefault()
         if (selectedIndex >= 0) handleSearch(recentSearches[selectedIndex])
-        else handleSearch(query)
+        else handleSearch(activeQuery)
         break
       case 'Escape':
         setOpen(false)
@@ -116,13 +116,7 @@ export function HeroSection() {
         inputRef.current?.blur()
         break
     }
-  }, [open, query, recentSearches, selectedIndex, handleSearch])
-
-  useEffect(() => {
-    if (selectedIndex >= 0 && recentSearches[selectedIndex]) {
-      setQuery(recentSearches[selectedIndex])
-    }
-  }, [selectedIndex, recentSearches])
+  }, [activeQuery, open, recentSearches, selectedIndex, handleSearch])
 
   return (
       <section
@@ -191,7 +185,7 @@ export function HeroSection() {
                   ref={inputRef}
                   className="h-14 sm:h-16 w-full bg-transparent px-2 text-base sm:text-lg font-medium outline-none placeholder:text-muted-foreground/40 font-sans"
                   placeholder={placeholder}
-                  value={query}
+                  value={activeQuery}
                   onChange={(e) => {
                     setQuery(e.target.value)
                     setSelectedIndex(-1)
@@ -215,7 +209,7 @@ export function HeroSection() {
                 <Button
                     size="lg"
                     className="h-10 sm:h-12 rounded-xl px-4 sm:px-6 text-sm sm:text-base font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg"
-                    onClick={() => handleSearch(query)}
+                    onClick={() => handleSearch(activeQuery)}
                 >
                   {t("home.search.submit")}
                 </Button>

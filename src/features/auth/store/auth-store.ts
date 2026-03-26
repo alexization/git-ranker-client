@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useSyncExternalStore } from 'react';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { User } from '@/shared/types/api';
@@ -24,17 +24,15 @@ export const useAuthStore = create<AuthState>()(
   )
 );
 
+const subscribeToAuthHydration = (onStoreChange: () => void) => {
+  const unsubscribe = useAuthStore.persist?.onFinishHydration?.(() => onStoreChange());
+  return () => unsubscribe?.();
+};
+
 export const useAuthHydrated = () => {
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    if (useAuthStore.persist?.hasHydrated?.()) {
-      setHydrated(true);
-      return;
-    }
-    const unsub = useAuthStore.persist?.onFinishHydration?.(() => setHydrated(true));
-    return () => unsub?.();
-  }, []);
-
-  return hydrated;
+  return useSyncExternalStore(
+    subscribeToAuthHydration,
+    () => useAuthStore.persist?.hasHydrated?.() ?? false,
+    () => false
+  );
 };
