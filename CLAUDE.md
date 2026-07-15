@@ -1,6 +1,6 @@
-# AGENTS.md
+# CLAUDE.md
 
-`git-ranker-client`는 Git Ranker의 Next.js 16 프런트엔드다. workflow repo는 orchestration만 소유하고, 프런트엔드 구현 판단의 canonical source는 이 저장소 안에 둔다.
+`git-ranker-client`는 Git Ranker의 Next.js 16 프런트엔드다. umbrella 저장소(`git-ranker-workflow`)는 cross-repo 진입점만 소유하고, 프런트엔드 구현 판단의 canonical source는 이 저장소 안에 둔다.
 
 ## Start Order
 
@@ -22,11 +22,15 @@
 
 ## Operational Rules
 
-- repo-local docs, config, code가 workflow 문서보다 우선한다.
-- root `README.md`는 overview만 맡고, concrete bootstrap과 execution guidance는 `AGENTS.md`와 named entry docs가 소유한다.
+- repo-local docs, config, code가 umbrella repo 문서보다 우선한다.
+- root `README.md`는 overview만 맡고, concrete bootstrap과 execution guidance는 `CLAUDE.md`와 named entry docs가 소유한다.
 - verification baseline은 `npm run lint`, `npm run typecheck`, `npm run build`다.
 - `.github/workflows/ci.yml`는 같은 baseline order를 그대로 실행해야 한다.
 - `npm run build`와 runtime bootstrap은 absolute URL로 설정된 `NEXT_PUBLIC_BASE_URL`, `NEXT_PUBLIC_API_URL`를 요구한다.
 - local Next.js 명령은 `.env.local`, Docker Compose는 `.env`를 사용하며 시작값은 `.env.example`에서 가져온다.
-- repo-local `.codex/skills/`는 현재 없으므로 fallback first source는 `AGENTS.md`와 nearest docs/config/code surface다.
-- verification contract나 deploy gate가 바뀌면 `docs/verification-contract.md`, `package.json`, workflow, `AGENTS.md`를 함께 갱신한다.
+- repo-local `.claude/skills/`는 현재 없으므로 first source는 `CLAUDE.md`와 nearest docs/config/code surface다.
+- verification contract나 deploy gate가 바뀌면 `docs/verification-contract.md`, `package.json`, workflow, `CLAUDE.md`를 함께 갱신한다.
+
+## Guard
+
+- `.claude/hooks/block-dangerous.sh`: Claude 세션 안에서 destructive 명령(rm -rf, force push, reset --hard 등)을 차단한다.

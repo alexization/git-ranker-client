@@ -1,6 +1,6 @@
 # Frontend Verification Contract
 
-`git-ranker-client`의 verification contract는 repo-local command surface가 소유한다. workflow repo는 상위 `frontend-change` semantics만 가리키고, concrete command와 environment precondition은 이 문서와 repo config가 canonical source다.
+`git-ranker-client`의 verification contract는 repo-local command surface가 소유한다. umbrella repo는 검증 베이스라인의 존재만 가리키고, concrete command와 environment precondition은 이 문서와 repo config가 canonical source다.
 
 ## Required Environment
 
