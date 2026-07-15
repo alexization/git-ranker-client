@@ -70,7 +70,6 @@ body:
       label: 필요한 QA 증거
       placeholder: |
         - 스크린샷:
-        - Playwright:
         - 브라우저 콘솔/네트워크 확인:
         - 반응형 확인:
     validations:

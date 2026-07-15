@@ -53,8 +53,9 @@ body:
       label: 검증 방법
       placeholder: |
         - `npm run lint`
+        - `npm run typecheck`
         - `npm run build`
-        - 스크린샷 / 브라우저 QA / Playwright
+        - 스크린샷 / 브라우저 QA
     validations:
       required: true
 
