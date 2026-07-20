@@ -44,11 +44,6 @@ export const koMessages: Record<MessageKey, string> = {
   "validation.username.pattern": "유효한 GitHub 사용자 이름을 입력해주세요.",
   "validation.username.no-consecutive-hyphen":
     "사용자 이름에 연속된 하이픈(--)을 사용할 수 없습니다.",
-  "validation.search.required": "검색어를 입력해주세요.",
-  "validation.search.max": "검색어가 너무 깁니다.",
-  "validation.page.int": "페이지 번호는 정수여야 합니다.",
-  "validation.page.min": "페이지 번호는 0 이상이어야 합니다.",
-  "validation.page.max": "페이지 번호가 너무 큽니다.",
   "common.refresh": "새로고침",
   "settings.back": "뒤로가기",
   "settings.title": "설정",

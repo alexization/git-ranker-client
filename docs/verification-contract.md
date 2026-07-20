@@ -17,6 +17,7 @@ local Next.js 명령은 `.env.local`, Docker Compose는 `.env`를 읽는다. 시
 ```bash
 npm run lint
 npm run typecheck
+npm run test
 npm run build
 ```
 
@@ -25,6 +26,9 @@ npm run build
 - `npm run typecheck`
   - `tsconfig.json` 기준으로 `tsc --noEmit`를 실행한다.
   - `strict: true`, `noEmit: true`, path alias resolution이 깨지면 실패해야 한다.
+- `npm run test`
+  - `vitest run`으로 순수 로직 단위 테스트(`src/**/*.test.ts`)를 실행한다.
+  - `environment: 'node'`이며 `vitest.config.ts`가 `@ -> ./src` alias와 required public env placeholder를 주입한다.
 - `npm run build`
   - `next build`를 실행한다.
   - production bundle, route tree, required public env contract를 함께 검증한다.
@@ -35,11 +39,13 @@ npm run build
   - ESLint rule 위반이나 React/Next static analysis regression이 생긴 상태다.
 - typecheck 실패:
   - TypeScript contract, import path, generated type surface 중 하나가 깨진 상태다.
+- test 실패:
+  - 순수 로직 계약(username 검증, tier 폴백, envelope unwrap, 401 refresh 흐름) 중 하나가 깨진 상태다.
 - build 실패:
   - Next.js production build, required public env, 또는 build-time code path 중 하나가 깨진 상태다.
 
 ## Current Notes
 
-- `.github/workflows/ci.yml`는 `npm run lint`, `npm run typecheck`, `npm run build`를 같은 baseline order로 실행한다.
+- `.github/workflows/ci.yml`는 `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build`를 같은 baseline order로 실행한다.
 - CI build 단계는 placeholder absolute URL env를 주입해 required public env contract를 함께 검증한다.
 - current repo-local baseline 기준 추가 GC follow-up risk는 없다.

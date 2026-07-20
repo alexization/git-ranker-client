@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
     output: 'standalone',
+    // React Compiler (Next.js 16 stable) - 자동 메모이제이션. 수동 memo/useCallback보다 우선.
+    reactCompiler: true,
     images: {
         remotePatterns: [
             {
@@ -23,8 +25,6 @@ const nextConfig: NextConfig = {
             "@radix-ui/react-dialog",
             "@radix-ui/react-dropdown-menu",
             "@radix-ui/react-alert-dialog",
-            "@radix-ui/react-popover",
-            "@radix-ui/react-tabs",
             "recharts",
             "sonner",
         ],

@@ -17,28 +17,6 @@ const createGithubUsernameSchema = () =>
       translate("validation.username.no-consecutive-hyphen")
     )
 
-export const githubUsernameSchema = createGithubUsernameSchema()
-
-// Search query validation
-const createSearchQuerySchema = () =>
-  z
-    .string()
-    .min(1, translate("validation.search.required"))
-    .max(100, translate("validation.search.max"))
-    .transform((val) => val.trim())
-
-export const searchQuerySchema = createSearchQuerySchema()
-
-// Page number validation
-const createPageNumberSchema = () =>
-  z
-    .number()
-    .int(translate("validation.page.int"))
-    .min(0, translate("validation.page.min"))
-    .max(10000, translate("validation.page.max"))
-
-export const pageNumberSchema = createPageNumberSchema()
-
 // Validation helper functions
 export function validateGithubUsername(username: string): {
   success: boolean
@@ -46,30 +24,6 @@ export function validateGithubUsername(username: string): {
   error?: string
 } {
   const result = createGithubUsernameSchema().safeParse(username)
-  if (result.success) {
-    return { success: true, data: result.data }
-  }
-  return { success: false, error: result.error.issues[0]?.message }
-}
-
-export function validateSearchQuery(query: string): {
-  success: boolean
-  data?: string
-  error?: string
-} {
-  const result = createSearchQuerySchema().safeParse(query)
-  if (result.success) {
-    return { success: true, data: result.data }
-  }
-  return { success: false, error: result.error.issues[0]?.message }
-}
-
-export function validatePageNumber(page: number): {
-  success: boolean
-  data?: number
-  error?: string
-} {
-  const result = createPageNumberSchema().safeParse(page)
   if (result.success) {
     return { success: true, data: result.data }
   }
