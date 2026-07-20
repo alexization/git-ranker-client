@@ -1,30 +1,46 @@
-name: "🛠️ Frontend Engineering Task"
-description: 리팩터링, 성능, 접근성, 테스트 하니스, DX 개선 작업을 기록합니다.
-title: "[Task] "
+name: "📋 작업 (Work Item)"
+description: 기능·버그·리팩토링·간단한 수정 등 모든 프론트엔드 작업을 하나의 형식으로 기록합니다.
+title: "[작업] "
 labels: ["task", "triage"]
 body:
   - type: dropdown
-    id: task_type
+    id: work_type
     attributes:
       label: 작업 유형
       options:
+        - feature
+        - bug
         - ui-refactor
+        - chore
         - performance
         - accessibility
-        - testing
-        - developer-experience
-        - dependency-upgrade
-        - documentation
+        - docs
     validations:
       required: true
-
   - type: textarea
-    id: reason
+    id: background
     attributes:
-      label: 왜 필요한가요?
+      label: 배경 / 문제
+      description: 이 작업이 필요한 이유. 버그면 증상, 기능이면 필요, 리팩토링이면 현재 구조의 문제.
     validations:
       required: true
-
+  - type: textarea
+    id: what
+    attributes:
+      label: 작업 내용 / 기대 결과
+      description: 무엇을 해야 하는지와 완료 후 기대 동작.
+    validations:
+      required: true
+  - type: textarea
+    id: bug_detail
+    attributes:
+      label: 재현 절차 / 기대 vs 실제 (버그인 경우)
+      placeholder: |
+        재현: 1) ... 2) ...
+        기대: ...
+        실제: ...
+    validations:
+      required: false
   - type: textarea
     id: scope
     attributes:
@@ -33,10 +49,8 @@ body:
         - route:
         - component:
         - hook/store:
-        - test/harness:
     validations:
       required: true
-
   - type: textarea
     id: done
     attributes:
@@ -46,7 +60,6 @@ body:
         - [ ] ...
     validations:
       required: true
-
   - type: textarea
     id: validation
     attributes:
@@ -58,15 +71,13 @@ body:
         - 스크린샷 / 브라우저 QA
     validations:
       required: true
-
   - type: textarea
-    id: risks
+    id: links
     attributes:
-      label: 리스크 및 의존성
+      label: 리스크 / 의존성 / 연관
       placeholder: |
         - 리스크:
         - 백엔드 의존성:
-        - 후속 작업:
+        - 상위 추적:
     validations:
       required: false
-
