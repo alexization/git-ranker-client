@@ -36,7 +36,7 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Runtime environment variables (can be overridden at container start)
-# These are used by middleware and server-side code
+# These are used by proxy (src/proxy.ts) and server-side code
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_BASE_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}

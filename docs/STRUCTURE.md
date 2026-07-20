@@ -13,7 +13,7 @@
 | `/users/[username]` | `users/[username]/{page,loading,opengraph-image}.tsx` + `user-profile-client.tsx` | 사용자 상세, 동적 OG 이미지 |
 | `/login` | `login/{page,layout}.tsx` | 로그인 진입 |
 | `/settings` | `settings/page.tsx` | 설정 (계정 삭제 포함) |
-| `/auth/callback`, `/oauth2/redirect` | 각 `page.tsx` | OAuth 콜백 처리 |
+| `/auth/callback` | `page.tsx` | OAuth 콜백 처리 (백엔드 `authorized-redirect-uri`) |
 | 시스템 | `error.tsx`, `global-error.tsx`, `not-found.tsx` | |
 | SEO | `manifest.ts`, `robots.ts`, `sitemap.ts` | 메타데이터 route handler |
 
@@ -27,18 +27,18 @@
 |---|---|
 | `auth/` | `api/auth-service.ts`, `store/auth-store.ts` |
 | `home/` | `components/hero-section.tsx`, `store/search-store.ts` |
-| `ranking/` | `api/ranking-service.ts`, `components/ranking-section.tsx` |
+| `ranking/` | `api/ranking-service.ts` |
 | `user/` | `api/user-service.ts` + `components/`(activity-grid, badge-generator, stats-chart, score-info-modal, user-detail-modal, delete-account-modal 등) |
 
 `api/*-service.ts`는 서버용 fetcher(React `cache()` 래핑)와 클라이언트용 react-query 훅(`use*`)을 한 파일에 콜로케이션한다. 기능 전용 훅은 service/component 파일 안에 두고, 범용 훅만 `shared/hooks`에 둔다.
 
 ## src/shared — 공용 계층
 
-- `components/`: shadcn/Radix 스타일 프리미티브(button, card, dialog...), `layout/header.tsx`, `ui/`(heatmap-background, live-ticker, tilt-card)
-- `lib/`: `api-client.ts`(axios 인스턴스 — CONVENTIONS.md 참고), `analytics.ts`, `public-env.ts`, `validations.ts`, `utils.ts`(`cn`)
+- `components/`: shadcn/Radix 스타일 프리미티브(button, card, dialog...), `layout/header.tsx`, `language-switcher.tsx`, `optimized-avatar.tsx`, `web-vitals-reporter.tsx`, `ui/`(heatmap-background, live-ticker, tilt-card)
+- `lib/`: `api-client.ts`(axios 인스턴스 — CONVENTIONS.md 참고), `storage-cache.ts`, `public-env.ts`, `validations.ts`, `utils.ts`(`cn`)
 - `providers/`: auth / locale(`useI18n`) / query / theme
 - `hooks/`: use-media-query, use-reduced-motion 등 범용 훅
-- `i18n/`: `config.ts`(en/ko, 기본 en, 쿠키 `git-ranker.locale`), `messages/{en,ko}.ts`
+- `i18n/`: `config.ts`(en/ko, 기본 en, 쿠키 `git-ranker.locale`), `translate.ts`, `server-locale.ts`, `messages/{en,ko,index}.ts`
 - `constants/tier-styles.ts`: 티어 순서·색상 헬퍼
 - `types/api.ts`: 백엔드 API 계약의 수동 TypeScript 미러 (갱신 절차는 CONVENTIONS.md)
 
@@ -48,4 +48,4 @@
 
 ## 테스트
 
-테스트 스위트는 없다. 검증 베이스라인은 `npm run lint` → `npm run typecheck` → `npm run build`이며 계약은 [verification-contract.md](verification-contract.md)가 소유한다.
+`vitest`로 순수 로직 단위 테스트를 둔다(`src/**/*.test.ts`, `environment: 'node'`, `vitest.config.ts`): `shared/lib/validations`, `shared/constants/tier-styles`, `shared/lib/api-client`. 컴포넌트(RTL)/E2E 테스트는 아직 없다. 검증 베이스라인은 `npm run lint` → `npm run typecheck` → `npm run test` → `npm run build`이며 계약은 [verification-contract.md](verification-contract.md)가 소유한다.
