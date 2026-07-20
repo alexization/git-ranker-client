@@ -31,7 +31,6 @@
     "**/*.mts"
   ],
   "exclude": [
-    "node_modules",
-    "sentry.*.config.ts"
+    "node_modules"
   ]
 }

@@ -563,10 +563,7 @@ When the project ships React Compiler, demote `rerender-*` manual memoization ru
 
 ## Related
 
-- Skills: [react-patterns](../react-patterns/SKILL.md), [react-testing](../react-testing/SKILL.md), [frontend-patterns](../frontend-patterns/SKILL.md), [accessibility](../accessibility/SKILL.md), [nextjs-turbopack](../nextjs-turbopack/SKILL.md)
-- Rules: [rules/react/](../../rules/react/)
-- Agents: `react-reviewer` enforces these rules in code review; `react-build-resolver` handles related build failures
-- Commands: `/react-review`, `/react-build`, `/react-test`
+- Skills: [react-patterns](../react-patterns/SKILL.md), [frontend-a11y](../frontend-a11y/SKILL.md), [nextjs-turbopack](../nextjs-turbopack/SKILL.md)
 
 ## Attribution
 

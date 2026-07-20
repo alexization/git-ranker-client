@@ -42,11 +42,6 @@ export const enMessages = {
   "validation.username.pattern": "Please enter a valid GitHub username.",
   "validation.username.no-consecutive-hyphen":
     "Usernames cannot contain consecutive hyphens (--).",
-  "validation.search.required": "Please enter a search term.",
-  "validation.search.max": "The search term is too long.",
-  "validation.page.int": "Page number must be an integer.",
-  "validation.page.min": "Page number must be 0 or greater.",
-  "validation.page.max": "Page number is too large.",
   "common.refresh": "Refresh",
   "settings.back": "Back",
   "settings.title": "Settings",

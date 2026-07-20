@@ -21,18 +21,6 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
     if (process.env.NODE_ENV === "development") {
       console.error("Application Error:", error)
     }
-
-    // TODO: To enable Sentry error tracking:
-    // 1. Install @sentry/nextjs: npm install @sentry/nextjs
-    // 2. Uncomment the following code:
-    // if (process.env.NODE_ENV === "production") {
-    //   import("@sentry/nextjs").then((Sentry) => {
-    //     Sentry.captureException(error, {
-    //       tags: { errorBoundary: "page" },
-    //       extra: { digest: error.digest },
-    //     })
-    //   })
-    // }
   }, [error])
 
   return (

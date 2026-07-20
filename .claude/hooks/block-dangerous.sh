@@ -12,12 +12,16 @@ except Exception:
 cmd = (data.get("tool_input") or {}).get("command") or ""
 
 BLOCKED_PATTERNS = [
-    r"rm\s+-rf",
+    # recursive rm (플래그 순서·분리·long-form 무관): -rf, -fr, -r -f, --recursive ...
+    r"rm\s+(?:\S+\s+)*(?:-[a-zA-Z]*[rR][a-zA-Z]*|--recursive)\b",
     r"git\s+reset\s+--hard",
     r"git\s+checkout\s+--",
-    r"git\s+clean\s+-fd",
+    # git clean with force: -fd, -df, -f -d, --force ...
+    r"git\s+clean\s+(?:\S+\s+)*(?:-[a-zA-Z]*f[a-zA-Z]*|--force)\b",
     r"git\s+push(?:\s+\S+)*\s+--force(?:\S+)?",
     r"git\s+push(?:\s+\S+)*\s+-[A-Za-z]*f[A-Za-z]*",
+    # force push via + refspec: git push origin +main
+    r"git\s+push(?:\s+\S+)*\s+\+\S+",
     r"DROP\s+TABLE",
     r"TRUNCATE\s+TABLE",
 ]
