@@ -101,7 +101,7 @@ export default function SettingsPage() {
                                         {user.username}
                                     </p>
                                     <p className="text-[14px] text-muted-foreground truncate mt-0.5">
-                                        {user.email || t("settings.account.logged-in-with-github")}
+                                        {t("settings.account.logged-in-with-github")}
                                     </p>
                                 </div>
                             </div>

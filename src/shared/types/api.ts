@@ -36,13 +36,9 @@ export interface AuthMeResponse {
 }
 
 export interface User {
-  userId: number;
-  githubId: number;
   nodeId: string;
   username: string;
-  email: string | null;
   profileImage: string;
-  role: UserRole;
   updatedAt: string;
   lastFullScanAt: string;
   totalScore: number;
@@ -64,9 +60,7 @@ export interface UserStats {
   diffReviewCount: number;
 }
 
-export interface RegisterUserResponse extends User, UserStats {
-  isNewUser: boolean;
-}
+export type RegisterUserResponse = User & UserStats;
 
 export interface RankingUserInfo {
   username: string;

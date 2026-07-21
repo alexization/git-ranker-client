@@ -28,9 +28,18 @@ body:
     id: what
     attributes:
       label: 작업 내용 / 기대 결과
-      description: 무엇을 해야 하는지와 완료 후 기대 동작.
+      description: 무엇을 해야 하는지와 완료 후 기대 동작. FE↔BE 공유 계약의 구체 필드는 상위 추적 이슈의 "공유 계약" 섹션을 참조(복제 금지).
     validations:
       required: true
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: 범위 밖 (Non-goals)
+      description: 이번 이슈에서 의도적으로 하지 않는 것. 스코프 크립·재검토를 막는다. 없으면 "없음".
+      placeholder: |
+        - ...는 이번 범위에서 제외 (별도 이슈)
+    validations:
+      required: false
   - type: textarea
     id: bug_detail
     attributes:
@@ -64,11 +73,12 @@ body:
     id: validation
     attributes:
       label: 검증 방법
+      description: 테스트 러너가 없으므로 브라우저 QA는 "경로 → 동작 → 기대/비기대 상태"의 구체 시나리오로 적어 체크 가능하게 만든다.
       placeholder: |
         - `npm run lint`
         - `npm run typecheck`
         - `npm run build`
-        - 스크린샷 / 브라우저 QA
+        - 브라우저 QA: <경로> 접속 → <동작> → <기대 상태 / 보이면 안 되는 것>
     validations:
       required: true
   - type: textarea
