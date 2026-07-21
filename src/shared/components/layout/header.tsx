@@ -128,9 +128,6 @@ export function Header() {
                                         </Avatar>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-[15px] font-semibold text-foreground truncate">{user.username}</p>
-                                            <p className="text-[13px] text-muted-foreground truncate mt-0.5">
-                                                {user.email}
-                                            </p>
                                         </div>
                                     </div>
                                 </div>
